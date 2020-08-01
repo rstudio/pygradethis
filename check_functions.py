@@ -16,10 +16,11 @@ def check_arguments(source_code: str):
     if there is a problem not finding variables in environment, or if arguments 
     cannot be standardized.
     """
-    # first pass: is it legal Python code?
-    # for e.g., positional args should always be before keywords args
     try:
         # 1) introduce function call in environment
+        # first pass: is it legal Python code?
+        # for e.g., positional args should always be before keywords args
+        # exec will catch these issues
         exec(source_code)
         # 2) get the ast tree
         tree = ast.parse(source_code)
@@ -38,25 +39,26 @@ def check_arguments(source_code: str):
                 # the object's name 
                 obj = c.func.value.id
                 # the live function from the environment associated with object
-                # e.g. the `df` in df.head() is 
+                # e.g. the `df` in df.head() is a pd.DataFrame so must get the
+                # `head` associated with that class.
                 live_func = getattr(envir[obj], func_name)
             else:
-                # we're calling a function not associated with an object
-                # so grab function from environment using its name
+                # if we're calling a function not associated with an object
+                # just grab function from environment using its name
                 func_name = c.func.id
                 live_func = envir[func_name]
 
-            # 4) collect the arguments passed
+            # 6) collect the arguments passed
             # construct keyword args mapping
             kwargs = {a.arg:a.value for a in c.keywords}
             
-            # 5) get the formal arguments for function
+            # 7) get the formal arguments for function
             # Note: this will raise ValueError if inspect cannot retrieve signature
             # which can happen for some builtins like `print`, where underlying C
             # code does not provide any metadata about its signature.
             sig = inspect.signature(live_func)
 
-            # 6) unpack args and kwargs and attempt to standardize argument calls
+            # 8) unpack args and kwargs and attempt to standardize argument calls
             # returns: https://docs.python.org/3.6/library/inspect.html#inspect.BoundArguments
             partial_args = sig.bind(*c.args, **kwargs)
             partial_args.apply_defaults()
