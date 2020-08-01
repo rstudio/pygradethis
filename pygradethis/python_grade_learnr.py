@@ -229,10 +229,12 @@ if __name__ == '__main__':
   # for now we don't have any additional setup
   pass
 else:
-  # TODO: somehow detect whether this is being used by R or standalone
-  # this is so that when we use `reticulate::import_from_path` to selectively
-  # expose functions, we make sure to also import `r` which normally doesn't get
-  # imported since we do not use `reticulate::source`
-  from __main__ import r
-  
-
+  # this import is for the R package `learnr` so that when we use 
+  # `reticulate::import_from_path` to selectively expose functions, we make 
+  # sure to also import `r` which normally doesn't get imported since we do 
+  # not use `reticulate::source`.
+  import importlib
+  reticulate_r = importlib.find_loader('r')
+  # only import if used with `learnr`
+  if reticulate_r is not None:
+    from __main__ import r

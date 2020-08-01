@@ -7,9 +7,9 @@ note when the two differ.
 import parser
 import ast
 # formatting
-from formatters import formatted
+from .formatters import formatted
 # misc
-from six.moves import zip_longest
+from functools import zip_longest
 from typing import Optional, Dict, Any
 
 def compare_ast(left: ast.AST, right: ast.AST, line_info: Optional[Dict[str, int]] = None) -> None:
@@ -92,12 +92,17 @@ def compare_node(left: Any, right: Any, line_counter: Dict[str, int]) -> str:
 
 def check_code(user_code, solution_code):
     """Checks user and solution code and prints a message if they differ"""
-    user = ast.parse(user_code)
-    solution = ast.parse(solution_code)
-    # TODO use token-marked ast so we can get node's source text for feedback
-    # user = asttokens.ASTTokens(user_code, parse=True)
-    # solution = asttokens.ASTTokens(solution_code, parse=True)
-    return compare_ast(user, solution)
+    try: 
+        user = ast.parse(user_code)
+        solution = ast.parse(solution_code)
+        # TODO use token-marked ast so we can get node's source text for feedback
+        # user = asttokens.ASTTokens(user_code, parse=True)
+        # solution = asttokens.ASTTokens(solution_code, parse=True)
+        compare_ast(user, solution)
+    except AssertionError as e:
+        return str(e)
+    except (SyntaxError, Exception):
+        return "There was a problem checking user or solution code."
 
 if __name__ == "__main__":
     # TODO move to testing class
@@ -130,23 +135,17 @@ if __name__ == "__main__":
     for t in test_cases:
         # print("\nuser code: {}".format(t[0]))
         # print("\nsolution code: {}\n\n".format(t[1]))
-        try:
-            message = check_code(t[0], t[1])
-        except AssertionError as e:
-            message = str(e)
-            if message != t[2]:
-                raise ValueError(
-                    "Failed test case!\nUser:{}\nSolution:{}\nExpected:{}\nGot:{}".format(
-                        t[0],
-                        t[1],
-                        t[2],
-                        message
-                    )
+        message = check_code(t[0], t[1])
+        if message != t[2]:
+            raise ValueError(
+                "Failed test case!\nUser:{}\nSolution:{}\nExpected:{}\nGot:{}".format(
+                    t[0],
+                    t[1],
+                    t[2],
+                    message
                 )
-        except ValueError as e:
-            print(e)
-        except Exception as e:
-            print("There was a problem checking code {}".format(e))
+            )
+        
     print("All tests passed! :)")
 
 
