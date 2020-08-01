@@ -3,7 +3,6 @@ This module contains functions to faciliate checking Python exercises in learnr.
 """
 
 import random
-import pandas as pd
 import parser
 
 from typing import Any, Callable, List, Tuple
@@ -80,10 +79,10 @@ class Graded(dict):
     Example:
     
     Graded(
-        message = "No solution is provided for this exercise.",
-        correct = True,
-        type = "info",
-        location = "append"
+      message = "No solution is provided for this exercise.",
+      correct = True,
+      type = "info",
+      location = "append"
     )
     """
     def __init__(self, *args, **kwargs):
@@ -196,11 +195,11 @@ def python_grade_learnr(label: str = None,
       # Note: because Python is eager evaluation, we already have introduced
       # the `r` object in the current scope when entering this function
       # evaluate check code so that expected output is ready
-      check_code_conditions = eval("".join(check_code), {}, r)
+      check_code_conditions = exec("".join(check_code), {}, r)
       # evaluate user code so that we can compare to expected
-      user_code_result = eval("".join(user_code), {}, r)
+      user_code_result = exec("".join(user_code), {}, r)
     except Exception as e:
-      # TODO somehow trickle up the specific error message
+      # TODO somehow trickle up the specific error message?
       return Graded(
         correct = False, 
         message = "Error occured while checking the submission", 

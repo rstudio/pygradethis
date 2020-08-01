@@ -94,12 +94,13 @@ def check_code(user_code, solution_code):
     """Checks user and solution code and prints a message if they differ"""
     user = ast.parse(user_code)
     solution = ast.parse(solution_code)
-    # TODO figure out if we can get back to source (to simplify can just get the line info)
+    # TODO use token-marked ast so we can get node's source text for feedback
     # user = asttokens.ASTTokens(user_code, parse=True)
     # solution = asttokens.ASTTokens(solution_code, parse=True)
     return compare_ast(user, solution)
 
 if __name__ == "__main__":
+    # TODO move to testing class
     user_code = "1 + 1"
     solution_code = "2"
     test_cases = [
@@ -120,7 +121,7 @@ if __name__ == "__main__":
         ("df.head()", "df.head(10)", "I expected 10 on line 1."),
         ("df.shape", "df.head(10)", "I did not expect 'shape' on df at line 1. I expected the function 'head'."),
         ("df.head(n=10)", "df.head()", "I did not expect the keyword argument 'n' at line 1."),
-        # TODO parameter standardization
+        # TODO use check_arguments() for argument standardization
         # ("df.head(n=10)", "df.head(10)", "I did not expect the keyword argument 'n' at line 1."),
         # expr vs something else
         ("1 + 1", "1", "I did not expect an arithmetic expression at line 1. I expected 1."),
