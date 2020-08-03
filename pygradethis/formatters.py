@@ -35,7 +35,7 @@ def formatted(node):
 @formatted.register(str)
 def _(el):
     """Formatting function for an str"""
-    return "'{}'".format(el)
+    return "\"{}\"".format(el)
 
 @formatted.register(int)
 def _(el):
@@ -50,12 +50,16 @@ def _(node):
 @formatted.register(ast.Call)
 def _(node):
     """Formatting function for an ast.Call"""
-    return "the function '{}'".format(getattr(getattr(node, "func"), "attr"))
+    if isinstance(node.func, ast.Attribute):
+        func_name = getattr(node.func, "attr") 
+    else:
+        func_name = node.func.id
+    return "the function \"{}\"".format(func_name)
 
 @formatted.register(ast.keyword)
 def _(node):
     """Formatting function for an ast.keyword"""
-    return "the keyword argument '{}'".format(getattr(node, "arg"))
+    return "the keyword argument \"{}\"".format(getattr(node, "arg"))
 
 @formatted.register(ast.BinOp)
 def _(node):
@@ -72,7 +76,7 @@ def _(node):
 @formatted.register(ast.Attribute)
 def _(node):
     """Formatting function for an ast.Attribute"""
-    return "'{}' on {}".format(getattr(node, "attr"), formatted(getattr(node, "value")))
+    return "\"{}\" on {}".format(getattr(node, "attr"), formatted(getattr(node, "value")))
 
 @formatted.register(ast.Name)
 def _(node):
@@ -87,7 +91,7 @@ def _(node):
 @formatted.register(ast.Str)
 def _(node):
     """Formatting function for an ast.Num"""
-    return "'{}'".format(getattr(node, "s"))
+    return "\"{}\"".format(getattr(node, "s"))
 
 @formatted.register(ast.NameConstant)
 def _(node):
