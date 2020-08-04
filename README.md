@@ -33,7 +33,7 @@ python_grade_result(
 )
 ```
 
-Internally, these `python_pass_if(output, ` or `python_fail_if` will be checked sequentially in
+Internally, these `python_pass_if(output, message)` or `python_fail_if(output, message)` will be checked sequentially in
 the order of arguments and return on first condition we match. The `None` here can be used
 if you simply want to execute a condition if none of the other conditions matched.
 
