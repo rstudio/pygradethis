@@ -17,92 +17,128 @@ from typing import Optional, Dict, Any
 # verbose mode includes the expression for the problematic node in feedback
 VERBOSE = False
 
-def compare_ast(left: ast.AST, right: ast.AST, line_info: Optional[Dict[str, int]] = None) -> None:
+def new_parent_source(atok, tree, last_parent):
+    """
+    Given the token-marked ast, the current tree, and the last parent source,
+    return a new last parent source for facilitating feedback on problematic
+    node.
+    """
+    # attempt to get a new parent source text for feedback
+    parent_source = atok.get_text(tree)
+    # only set the `last_parent` if:
+    # - it is a compound ast, and
+    # - we can get a source text
+    if isinstance(tree, ast.AST) and len(tree._fields) > 1 and parent_source != "":
+        last_parent = parent_source
+    return last_parent
+
+def compare_ast(atok: asttokens.ASTTokens,
+                left: ast.AST, 
+                right: ast.AST, 
+                line_info: Optional[Dict[str, int]] = None,
+                last_parent: str = "") -> None:
     """
     Compare two abstract syntax trees. Raise an exception as soon as they differ.
     """
     # to hold line information like line number, and original source
     line_info = {} if line_info is None else line_info
-    left_tree = getattr(left, "tree", left)
-    right_tree = getattr(right, "tree", right)
 
     # check types first
-    compare_node_type(left_tree, right_tree, line_info)
+    compare_node_type(left, right, line_info, last_parent)
 
-    # check AST, list of Expr, or a core data type
-    if isinstance(left_tree, ast.AST):
+    # the check AST, list of Expr, or a core data type
+    if isinstance(left, ast.AST):
         # store line number for feedback
         line_info["left"] = getattr(
-            left_tree, "lineno", line_info.get("left", 1)
+            left, "lineno", line_info.get("left", 1)
         )
-        # store away the problematic node source text for verbose feedback
-        if isinstance(left, asttokens.ASTTokens) and len(left.tree._fields) >= 1:
-            line_info["left_source"] = left.get_text(left_tree)
-
         line_info["right"] = getattr(
-            right_tree, "lineno", line_info.get("right", 1)
+            right, "lineno", line_info.get("right", 1)
         )
-        # iterate through the fields of both ASTs
-        left_fields = ast.iter_fields(left_tree)
-        right_fields = ast.iter_fields(right_tree)
+        # iterate through the children of both ASTs
+        left_fields = ast.iter_fields(left)
+        right_fields = ast.iter_fields(right)
         for left_field, right_field in zip_longest(left_fields, right_fields, fillvalue=""):
             left_name, left_values = left_field
             right_name, right_values = right_field
+            # attempt to get a new parent source text for feedback
+            last_parent = new_parent_source(atok, left_values, last_parent)
             # check that the name of the AST nodes match
-            compare_node(left_name, right_name, line_info)
+            compare_node(left_name, right_name, line_info, last_parent)
             # recurse on values
-            compare_ast(left_values, right_values, line_info)
-    elif isinstance(left_tree, list):
-        for left_child, right_child in zip_longest(left_tree, right_tree, fillvalue=""):
-            compare_ast(left_child, right_child, line_info)
+            compare_ast(atok, left_values, right_values, line_info, last_parent)
+    elif isinstance(left, list):
+        for left_child, right_child in zip_longest(left, right, fillvalue=""):
+            # recurse on [Expr, ...]
+            # attempt to get a new parent source text for feedback
+            last_parent = new_parent_source(atok, left_child, last_parent)
+            compare_ast(atok, left_child, right_child, line_info, last_parent)
     else:
-        compare_node(left_tree, right_tree, line_info)
+        compare_node(left, right, line_info, last_parent)
 
-def compare_node_type(left: Any, right: Any, line_info: Dict[str, int]) -> None:
+def compare_node_type(left: Any, 
+                      right: Any, 
+                      line_info: Dict[str, int],
+                      last_parent: str) -> None:
     """
-    Compare two objects. Return "" if equal, and raise an exception with 
-    the line number otherwise.
+    Compare two ASTs' types and raise an exception with the line number if different.
     """
     # TODO find a more maintaible way to handle the string setup for feedback here
     # str stands for "empty", so if user code is missing something, present 
     # a message about missing expectation  
     if isinstance(left, str) and not isinstance(right, str):
-        msg = "I expected {} on line {}."
+        msg = "I expected {} at line {}."
         msg_args = (
             formatted(right), 
             line_info.get("left")
         )
-    # otherwise, present a message about not expected
-    elif not isinstance(left, str) and not isinstance(right, str):
-        msg = "I did not expect {} at line {}. I expected {}."
-        msg_args = (
-            formatted(left), 
-            line_info.get("left"),
-            formatted(right)
-        )
-        if "left_source" in line_info and VERBOSE:
-            msg = "I did not expect {} in `{}` at line {}."
+        if VERBOSE:
+            msg = "I expected {} in `{}` at line {}."
             msg_args = (
-                formatted(left), 
-                line_info.get("left_source"),
+                formatted(right), 
+                last_parent,
                 line_info.get("left")
             )
-    elif not isinstance(left, str) and isinstance(right, str):
-        msg = "I did not expect {} at line {}."
-        msg_args = (
-            formatted(left), 
-            line_info.get("left")
-        )
-        if "left_source" in line_info and VERBOSE:
-            msg = "I did not expect {} in `{}` at line {}."
+    # otherwise, present a message about unexpected user's AST
+    elif not isinstance(left, str):
+        # if we do expect a certain AST, point out that expectation
+        if not isinstance(right, str):
+            msg = "I did not expect {} at line {}. I expected {}."
             msg_args = (
                 formatted(left), 
-                line_info.get("left_source"),
+                line_info.get("left"),
+                formatted(right)
+            )
+            # if we want to include expression in feedback, grab the source text
+            if VERBOSE:
+                msg = "I did not expect {} in `{}` at line {}. I expected {}."
+                msg_args = (
+                    formatted(left),
+                    last_parent,
+                    line_info.get("left"),
+                    formatted(right)
+                )
+        # otherwise, just state what was not expected
+        else:
+            msg = "I did not expect {} at line {}."
+            msg_args = (
+                formatted(left), 
                 line_info.get("left")
             )
+            if VERBOSE:
+                msg = "I did not expect {} in `{}` at line {}."
+                msg_args = (
+                    formatted(left), 
+                    last_parent,
+                    line_info.get("left")
+                )
+    
     assert type(left) == type(right), msg.format(*msg_args)
 
-def compare_node(left: Any, right: Any, line_info: Dict[str, int]) -> str:
+def compare_node(left: Any, 
+                 right: Any, 
+                 line_info: Dict[str, int],
+                 last_parent: str) -> str:
     """
     Compare two objects of the same type and raise an exception with feedback if nodes differ.
     """
@@ -112,12 +148,12 @@ def compare_node(left: Any, right: Any, line_info: Dict[str, int]) -> str:
         formatted(left),
         line_info.get("left"),
     )
-    if "left_source" in line_info and VERBOSE:
+    if VERBOSE:
         msg = "I expected {}, but you wrote {} in `{}` at line {}."
         msg_args = (
             formatted(right),
             formatted(left),
-            line_info.get("left_source", ""),
+            last_parent,
             line_info.get("left"),
         )
     assert left == right, msg.format(*msg_args)
@@ -125,10 +161,15 @@ def compare_node(left: Any, right: Any, line_info: Dict[str, int]) -> str:
 def check_code(user_code, solution_code):
     """Checks user and solution code and prints a message if they differ"""
     try:
-        # TODO use token-marked ast so we can get node's source text for feedback
+        # TODO: make parser more pluggable for 3.8 ast parser or other potential parsers like antlr
+        # with the contract being it needs a similar `get_text` for getting
+        # source node back
         user = asttokens.ASTTokens(user_code, parse=True)
         solution = asttokens.ASTTokens(solution_code, parse=True)
-        compare_ast(user, solution)
+        # set parent node of child nodes for better feedback
+        atok = user
+        last_parent = atok.get_text(next(n for n in ast.walk(atok.tree)))
+        compare_ast(atok, user.tree, solution.tree, last_parent = last_parent)
     except AssertionError as e:
         return str(e)
     except Exception as e:
@@ -136,6 +177,7 @@ def check_code(user_code, solution_code):
 
 if __name__ == "__main__":
     # TODO move to testing class
+    VERBOSE = False
     # these are the non-verbose cases
     test_cases = [
         # different core types
@@ -149,11 +191,11 @@ if __name__ == "__main__":
         # list vs list
         ("[2]", "[]", "I did not expect 2 at line 1."),
         ("[1,2]", "[1]", "I did not expect 2 at line 1."),
-        ("[1]", "[1,2]", "I expected 2 on line 1."),
+        ("[1]", "[1,2]", "I expected 2 at line 1."),
         # func vs func
         ("len([1,2,3])", "sum([1,2,3])", "I expected \"sum\", but you wrote \"len\" at line 1."),
-        ("sum([1,2])", "sum([1,2,3])", "I expected 3 on line 1."),
-        ("df.head()", "df.head(10)", "I expected 10 on line 1."),
+        ("sum([1,2])", "sum([1,2,3])", "I expected 3 at line 1."),
+        ("df.head()", "df.head(10)", "I expected 10 at line 1."),
         ("df.shape", "df.head(10)", "I did not expect \"shape\" on df at line 1. I expected the function \"head\"."),
         ("df.head(n=10)", "df.head()", "I did not expect the keyword argument \"n\" at line 1."),
         # TODO use check_arguments() for argument standardization; make these 2 pass
@@ -164,9 +206,10 @@ if __name__ == "__main__":
         ("-1", "1", "I did not expect an unary operator at line 1. I expected 1."),
     ]
     for t in test_cases:
-        # print("\nuser code: {}".format(t[0]))
-        # print("\nsolution code: {}\n\n".format(t[1]))
+        # print("user code: {}".format(t[0]))
+        # print("solution code: {}\n".format(t[1]))
         message = check_code(t[0], t[1])
+        # print(message)
         if message != t[2]:
             raise ValueError(
                 "Failed test case!\nUser:{}\nSolution:{}\nExpected:{}\nGot:{}".format(
@@ -176,8 +219,30 @@ if __name__ == "__main__":
                     message
                 )
             )
-    print("All tests passed! :)")
-
-
-
-
+    print("All tests passed for non-verbose messages! :)")
+    # also test verbose cases
+    VERBOSE = True
+    # TODO add more cases for verbose message style
+    # TODO decided whether we should stick with verbose mode by default or not
+    test_cases_verbose = [
+        ("1", "\"1\"", "I did not expect 1 in `1` at line 1. I expected \"1\"."),
+        ("[1]", "\"1\"", "I did not expect list in `[1]` at line 1. I expected \"1\"."),
+        ("[1,2]\n2", "[1]", "I did not expect 2 in `[1,2]` at line 1."),
+        ("2 + sum([1,2])", "2 + sum([1,1])", "I expected 1, but you wrote 2 in `[1,2]` at line 1."),
+        ("sqrt(log(2))", "sqrt(log(1))", "I expected 1, but you wrote 2 in `log` at line 1."),
+    ]
+    for t in test_cases_verbose:
+        # print("user code: {}".format(t[0]))
+        # print("solution code: {}\n".format(t[1]))
+        message = check_code(t[0], t[1])
+        # print(message)
+        if message != t[2]:
+            raise ValueError(
+                "Failed test case!\nUser:{}\nSolution:{}\nExpected:{}\nGot:{}".format(
+                    t[0],
+                    t[1],
+                    t[2],
+                    message
+                )
+            )
+    print("All tests passed for verbose messages! :)")
