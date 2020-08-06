@@ -37,17 +37,20 @@ Internally, these `python_pass_if(output, message)` or `python_fail_if(output, m
 the order of arguments and return on first condition we match. The `None` here can be used
 if you simply want to execute a condition if none of the other conditions matched.
 
-If we match a `python_pass_if`, we will present a feedback message wrapped in a convenient `Grader`
-class:
+If we match a `python_pass_if` or `python_fail_if`, we will present a feedback message wrapped in a convenient `dict`:
 
 ```python
-Graded(
-    message = "a feedback message for success|error|warning events", 
-    correct = True|False, 
-    type = "success|error|warning", 
-    location = "append"
-  )
+dict(
+    message = str,
+    correct = True|False,
+    type = "auto|success|info|warning|error|custom",
+    location = "append|prepend|replace"
+)
 ```
+
+The `message` is the feedback, the `correct` is whether or not the student's solution is correct, `type` is the type of feedback. When 
+used with `learnr` the `location` field here is useful for where the message is situated in the tutorial. However, for those using 
+this package as a standalone the `location` is not an important field and it can be ignored. More on the flags [here](https://rstudio.github.io/learnr/exercises.html#Exercise_Checking).
 
 Internally, a random praise/encouragement message will be appended before any custom message supplied. 
 
@@ -56,9 +59,6 @@ Internally, a random praise/encouragement message will be appended before any cu
 
 `python_fail_if(None, "")`:
 > Try it again. You get better each time.
-
-When used with `learnr` the `location` field here is useful for where the message is situated in the tutorial.
-However, for those using this package as a standalone the `location` is not an important field and it can be ignored.
 
 ## Code checks
 
