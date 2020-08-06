@@ -1,9 +1,5 @@
-from .utils import *
-from .feedback import *
-from .conditions import *
-from .formatters import *
-from .grade_code import *
-from .grade_result import *
-from .check_functions import *
-from .python_grade_learnr import *
-from .python_grader import *
+try:
+    # attempt to import if used with R's `learnr` package
+    from __main__ import r
+except:
+    pass

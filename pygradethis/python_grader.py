@@ -3,96 +3,109 @@ This module contains functions to faciliate checking Python code or output.
 """
 
 import parser
-from typing import Any, Union, Callable, List, Tuple
+from typing import Any, Callable, List, Tuple
+
+from .conditions import GraderCondition
+from .feedback import praise, encourage
+from .grade_result import python_grade_result
+from .utils import parse_code
 
 # TODO refactor for Python standalone
-def grade(user_code: str = None, 
-          solution_code: str = None, 
-          checking: Union[str, GraderCondition] = None) -> Graded:
+def grade(*check_code: GraderCondition,
+          user_code: str = None, 
+          solution_code: str = None) -> dict:
   """Python standalone verson of `python_grade_learnr`.
 
   Parameters
   ----------
+  check_code: *GraderCondition
+      a variable number of GraderCondition objects
   user_code : str, optional
-      the user source text, by default None
+      user source code, by default None
   solution_code : str, optional
-      the solution source text, by default None
-  checking : GraderCondition, optional
-      checking code represented, by default None
+      solution source code, by default None
 
   Returns
   -------
-  Graded
-      a convenience class to represent graded code / output
+  dict
+      a feedback dict:
+      {
+        message: str,
+        correct=True|False,
+        type="auto|success|info|warning|error|custom",
+        location="append|prepend|replace"
+      }
   """
   # check if there is user_code
   if user_code and "".join(user_code) == "":
-    return Graded(
+    return dict(
       message = "I didn't receive your code. Did you write any?",
       correct = False,
-      type = "error",
-      location = "append"
+      type = "error"
     )
   # if there is check code and solution code, check if there is a solution code
   if (check_code and solution_code) and "".join(solution_code) == "":
-    return Graded(
+    return dict(
       message = "No solution is provided for this exercise.",
       correct = True,
-      type = "info",
-      location = "append"
+      type = "info"
     )
   
   # TODO `grade_code(user_code, solution_code)` if solution code is provided
-  
-  check_code_source = "".join(check_code)
-  user_code_source = "\n".join(user_code)
 
-  # TODO we won't need to use r anywhere
+
   # evaluate exercise
   try:
     # TODO input scrubbing for malicious code
-    # Note: because Python is eager evaluation, we already have introduced
-    # the `r` object in the current scope when entering this function
-    # evaluate check code so that expected output is ready
-    check_code_conditions = exec(check_code_source, {}, r)
-    # for e.g. did knitr already execute result and it's somewhere in the `r`?
+    # attempt to parse and format code
+    user_code_source = parse_code(user_code)
     # evaluate user code so that we can compare to expected
-    user_result = exec(user_code_source, {}, r)
+    user_result = eval(user_code_source)
   except Exception as e:
     # TODO somehow trickle up the specific error message?
-    return Graded(
+    return dict(
       correct = False, 
       message = f"Error occured while checking the submission {e}", 
-      type = "warning", 
-      location = "append",
-      check_code = f"{check_code_source}",
-      user_code = f"{user_code_source}",
+      type = "warning"
     )
 
-  # TODO fix when we don't get a tuple back
+  # print(check_code, type(check_code))
   # grade python_pass_if/fail_if conditions against user's code output
-  result, condition = python_grade_result(check_code_conditions, user_result)
-  # return a list representing a graded condition for learnr to process for feedback
-  if result and condition:
-    return Graded(
-      message = f"{praise()} {condition['message']}", 
-      correct = condition['correct'], 
-      type = "success", 
-      location = "append"
+  result, condition = python_grade_result(*check_code, user_result = user_result)
+  # return a list representing a dict condition for learnr to process for feedback
+  if (result and condition):
+    # correct
+    if condition['correct']:
+      return dict(
+        message = f"{praise()} {condition['message']}", 
+        correct = True,
+        type = "success"
+      )
+    # incorrect
+    return dict(
+      message = f"{encourage()} {condition['message']}",
+      correct = False,
+      type = "error"
     )
+  # if there was none of the conditions matched, return error by default
   elif not result and not condition:
-    return Graded(
+    return dict(
       message = f"{encourage()}", 
       correct = False, 
-      type = "success", 
-      location = "append"
+      type = "error"
+    )
+  # if there were fail_ifs and none matched, return success by default
+  elif result and not condition:
+    return dict(
+      message = f"{praise()}",
+      correct = True,
+      type = "success"
     )
   else:
-    return Graded(
+    return dict(
       message = f"{encourage()} {condition['message']}", 
       correct = condition['correct'], 
-      type = "error", 
-      location = "append"
+      type = "error"
     )
   
 

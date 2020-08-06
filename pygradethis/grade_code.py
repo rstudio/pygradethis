@@ -8,7 +8,7 @@ import parser
 import ast
 import asttokens
 # formatting
-from formatters import formatted
+from .formatters import formatted
 # misc
 from itertools import zip_longest
 from typing import Optional, Dict, Any
