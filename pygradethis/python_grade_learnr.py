@@ -1,164 +1,10 @@
 """
-This module contains functions to faciliate checking Python exercises in learnr.
+This is the `learnr` version of `python_grader` module and contains 
+the `python_grade_learnr` function called by the `gradethispython` R wrapper
+package
 """
-
-import random
 import parser
-
-from typing import Any, Callable, List, Tuple
-
-def praise() -> str:
-  """Returns a random praise message"""
-  return random.choice([
-      "Absolutely fabulous!",
-      "Amazing!",
-      "Awesome!",
-      "Beautiful!",
-      "Bravo!",
-      "Cool job!",
-      "Delightful!",
-      "Excellent!",
-      "Fantastic!",
-      "Great work!",
-      "I couldn't have done it better myself.",
-      "Impressive work!",
-      "Lovely job!",
-      "Magnificent!",
-      "Nice job!",
-      "Out of this world!",
-      "Resplendent!",
-      "Smashing!",
-      "Someone knows what they're doing :)",
-      "Spectacular job!",
-      "Splendid!",
-      "Success!",
-      "Super job!",
-      "Superb work!",
-      "Swell job!",
-      "Terrific!",
-      "That's a first-class answer!",
-      "That's glorious!",
-      "That's marvelous!",
-      "Very good!",
-      "Well done!",
-      "What first-rate work!",
-      "Wicked smaht!",
-      "Wonderful!",
-      "You aced it!",
-      "You rock!",
-      "You should be proud.",
-      ":)"
-    ]
-  )
-
-def encourage() -> str:
-  """Returns a random encouragement message"""
-  return random.choice([
-      "Please try again.",
-      "Give it another try.",
-      "Let's try it again.",
-      "Try it again; next time's the charm!",
-      "Don't give up now, try it one more time.",
-      "But no need to fret, try it again.",
-      "Try it again. I have a good feeling about this.",
-      "Try it again. You get better each time.",
-      "Try it again. Perseverence is the key to success.",
-      "That's okay: you learn more from mistakes than successes. Let's do it one more time."
-    ]
-  )
-
-class Graded(dict):
-    """Convience class to represent the graded result for an exercise.
-    
-    Note: subclassing a dict allows us to take advantage of checking
-    instance class of objects `isinstance(x, Graded)` and have the
-    object represent a dict which `reticulate` can easily translate.
-    
-    Returned `dict` is equivalent to the `list` returned in `gradethis::grade_learnr`
-    
-    Example:
-    
-    Graded(
-      message = "No solution is provided for this exercise.",
-      correct = True,
-      type = "info",
-      location = "append"
-    )
-    """
-    def __init__(self, *args, **kwargs):
-      super(Graded, self).__init__(kwargs)
-
-class GraderCondition(dict):
-    """Convience class to represent the a grader condition for an exercise.
-    
-    Note: we subclass a `dict` for the same reason as `Graded`
-    
-    Returned `dict` is equivalent to the `list` returned in `gradethis::condition`
-    
-    Example:
-    
-    GraderCondition(
-      x = x,
-      message = message,
-      correct = correct,
-      type = type
-    )
-    """
-    def __init__(self, *args, **kwargs):
-      super(GraderCondition, self).__init__(kwargs)
-
-def python_condition(x: Any, message: str, correct: bool, type: str = "value") -> dict:
-  """Return the proper structure for a particular type of condition."""
-  # Note: we don't use the type field from `gradethis::condition` yet, so assumes value
-  # TODO think about whether we allow passing of a function (lambda or regular)
-  return GraderCondition(x = x, message = message, correct = correct, type = type)
-
-def python_pass_if(x: Any, message = "") -> dict:
-  """Return a pass condition."""
-  return python_condition(x, message, correct = True)
-
-def python_fail_if(x: Any, message = "") -> dict:
-  """Return a fail condition."""
-  return python_condition(x, message, correct = False)
-  
-def python_compare_output(user_output: Any, expected_output: Any) -> bool:
-  """Return whether the user output and expected output match"""
-  if type(user_output) != type(expected_output):
-    return False
-  elif isinstance(user_output, pd.DataFrame) and isinstance(expected_output, pd.DataFrame):
-      return user_output.equals(expected_output)
-  else:
-    return user_output == expected_output
-  
-def python_grade_conditions(conditions: List[Any], user_code_result: Any) -> Tuple[bool, dict]:
-  """
-  Goes through all conditions (python_pass_if, python_fail_if) and
-  returns the first condition that comes True.
-  """
-  # TODO handle the case where you might only have fail_ifs but they don't match (issue #4)
-  result = False
-  condition = None
-  for cond in conditions:
-    condition = cond
-    result = python_compare_output(cond['x'], user_code_result)
-    if result:
-      return result, condition
-  return False, condition
-
-# TODO add the other kwargs for this:
-# glue_correct = getOption("gradethis_glue_correct"),
-# glue_incorrect = getOption("gradethis_glue_incorrect")
-def python_grade_result(*args, **kwargs) -> Graded:
-  """
-  This function mirrors the `grade_result` function from {gradethis} package so that
-  we can check Python exercises.
-  
-  For now, all it does is to get all of the python_pass_if/fail_if conditions and 
-  returning it.
-  """
-  if args == None or len([a for a in args if isinstance(a, GraderCondition)]) == 0:
-    raise Exception("At least one condition object (e.g., `python_pass_if()`, `python_fail_if()`, `python_condition()`) must be provided to `python_grade_result()`")
-  return args
+from typing import Any, Union, Callable, List, Tuple
 
 def python_grade_learnr(label: str = None,
                         solution_code: str = None, 
@@ -175,7 +21,7 @@ def python_grade_learnr(label: str = None,
     """
     # check if there is user_code
     if user_code and "".join(user_code) == "":
-      return Graded(
+      return dict(
         message = "I didn't receive your code. Did you write any?",
         correct = False,
         type = "error",
@@ -183,58 +29,68 @@ def python_grade_learnr(label: str = None,
       )
     # if there is check code and solution code, check if there is a solution code
     if (check_code and solution_code) and "".join(solution_code) == "":
-      return Graded(
+      return dict(
         message = "No solution is provided for this exercise.",
         correct = True,
         type = "info",
         location = "append"
       )
     
+    # TODO `grade_code(user_code, solution_code)` if solution code is provided
+    
     # evaluate exercise
     try:
+      # TODO input scrubbing for malicious code
+      check_code_source = parse_code(check_code)
+      user_code_source = parse_code(user_code)
       # Note: because Python is eager evaluation, we already have introduced
       # the `r` object in the current scope when entering this function
       # evaluate check code so that expected output is ready
-      check_code_conditions = exec("".join(check_code), {}, r)
+      check_code_conditions = eval(check_code_source, {}, r)
+      # for e.g. did knitr already execute result and it's somewhere in the `r`?
       # evaluate user code so that we can compare to expected
-      user_code_result = exec("".join(user_code), {}, r)
+      user_result = eval(user_code_source, {}, r)
+      # grade python_pass_if/fail_if conditions against user's code output
+      # print(python_grade_result(check_code_conditions, user_result))
+      result, condition = python_grade_result(check_code_conditions, user_result)
     except Exception as e:
       # TODO somehow trickle up the specific error message?
-      return Graded(
+      return dict(
+        message = f"Error occured while checking the submission: {e}", 
         correct = False, 
-        message = "Error occured while checking the submission", 
         type = "warning", 
         location = "append"
-      )
-
-    # grade python_pass_if/fail_if conditions against user's code output
-    result, condition = python_grade_conditions(check_code_conditions, user_code_result)
-    # return a list representing a graded condition for learnr to process for feedback
-    if result:
-      return Graded(
+      )s
+    # return a list representing a dict condition for learnr to process for feedback
+    if result and condition:
+      return dict(
         message = f"{praise()} {condition['message']}", 
         correct = condition['correct'], 
         type = "success", 
         location = "append"
       )
+    elif not result and not condition:
+      return dict(
+        message = f"{encourage()}", 
+        correct = False, 
+        type = "success", 
+        location = "append"
+      )
     else:
-      return Graded(
+      return dict(
         message = f"{encourage()} {condition['message']}", 
         correct = condition['correct'], 
         type = "error", 
         location = "append"
       )
-
+  
 if __name__ == '__main__':
   # for now we don't have any additional setup
   pass
 else:
-  # this import is for the R package `learnr` so that when we use 
-  # `reticulate::import_from_path` to selectively expose functions, we make 
-  # sure to also import `r` which normally doesn't get imported since we do 
+  # this import is for the R package `learnr` so that when we use
+  # `reticulate::import_from_path` to selectively expose functions, we make
+  # sure to also import `r` which normally doesn't get imported since we do
   # not use `reticulate::source`.
-  import importlib
-  reticulate_r = importlib.find_loader('r')
-  # only import if used with `learnr`
-  if reticulate_r is not None:
-    from __main__ import r
+  from __main__ import r
+

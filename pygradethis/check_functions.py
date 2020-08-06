@@ -21,6 +21,7 @@ def check_arguments(source_code: str):
         # first pass: is it legal Python code?
         # for e.g., positional args should always be before keywords args
         # exec will catch these issues
+        # TODO re: check if we really have to exec the user code or not 
         exec(source_code)
         # 2) get the ast tree
         tree = ast.parse(source_code)

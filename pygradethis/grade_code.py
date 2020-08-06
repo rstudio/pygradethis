@@ -17,11 +17,24 @@ from typing import Optional, Dict, Any
 # verbose mode includes the expression for the problematic node in feedback
 VERBOSE = False
 
-def new_parent_source(atok, tree, last_parent):
-    """
-    Given the token-marked ast, the current tree, and the last parent source,
+def new_parent_source(atok: asttokens.ASTTokens, tree: Any, last_parent: str):
+    """Given the token-marked ast, the current tree, and the last parent source,
     return a new last parent source for facilitating feedback on problematic
     node.
+
+    Parameters
+    ----------
+    atok : asttokens.ASTTokens
+        the token-marked AST
+    tree : Any
+        the node we want to extract the source text for
+    last_parent : str
+        the nearest parent that can be converted to source text
+
+    Returns
+    -------
+    str
+        the new last_parent or the same
     """
     # attempt to get a new parent source text for feedback
     parent_source = atok.get_text(tree)
@@ -37,8 +50,20 @@ def compare_ast(atok: asttokens.ASTTokens,
                 right: ast.AST, 
                 line_info: Optional[Dict[str, int]] = None,
                 last_parent: str = "") -> None:
-    """
-    Compare two abstract syntax trees. Raise an exception as soon as they differ.
+    """Compare two abstract syntax trees. Raise AssertionError as soon as they differ.
+
+    Parameters
+    ----------
+    atok : asttokens.ASTTokens
+        the token-marked AST for the student code
+    left : ast.AST
+        the student code
+    right : ast.AST
+        the solution code
+    line_info :  Optional[Dict[str, int]], optional
+        holds line information about a particular node, by default None
+    last_parent : str, optional
+        the nearest parent that can be converted to source text, by default ""
     """
     # to hold line information like line number, and original source
     line_info = {} if line_info is None else line_info
@@ -55,10 +80,9 @@ def compare_ast(atok: asttokens.ASTTokens,
         line_info["right"] = getattr(
             right, "lineno", line_info.get("right", 1)
         )
+        lf, rf = ast.iter_fields(left), ast.iter_fields(right)
         # iterate through the children of both ASTs
-        left_fields = ast.iter_fields(left)
-        right_fields = ast.iter_fields(right)
-        for left_field, right_field in zip_longest(left_fields, right_fields, fillvalue=""):
+        for left_field, right_field in zip_longest(lf, rf, fillvalue=""):
             left_name, left_values = left_field
             right_name, right_values = right_field
             # attempt to get a new parent source text for feedback
@@ -76,12 +100,24 @@ def compare_ast(atok: asttokens.ASTTokens,
     else:
         compare_node(left, right, line_info, last_parent)
 
-def compare_node_type(left: Any, 
-                      right: Any, 
-                      line_info: Dict[str, int],
-                      last_parent: str) -> None:
-    """
-    Compare two ASTs' types and raise an exception with the line number if different.
+def compare_node_type(
+        left: Any, 
+        right: Any, 
+        line_info: Dict[str, int],
+        last_parent: str
+    ) -> None:
+    """Compare two ASTs' types and raise an exception with the line number if different.
+
+    Parameters
+    ----------
+    lleft : Any
+        an ast.Node, a custom type, or a python data type
+    right : Any
+        an ast.Node, a custom type, or a python data type
+    line_info : Dict[str, int]
+        holds line information about a particular node
+    last_parent : str
+        the nearest parent that can be converted to source text
     """
     # TODO find a more maintaible way to handle the string setup for feedback here
     # str stands for "empty", so if user code is missing something, present 
@@ -135,12 +171,24 @@ def compare_node_type(left: Any,
     
     assert type(left) == type(right), msg.format(*msg_args)
 
-def compare_node(left: Any, 
-                 right: Any, 
-                 line_info: Dict[str, int],
-                 last_parent: str) -> str:
-    """
-    Compare two objects of the same type and raise an exception with feedback if nodes differ.
+def compare_node(
+        left: Any, 
+        right: Any, 
+        line_info: Dict[str, int],
+        last_parent: str
+    ):
+    """Compare two objects of the same type and raise an exception with feedback if nodes differ.
+
+    Parameters
+    ----------
+    left : Any
+        an ast.Node, a custom type, or a python data type
+    right : Any
+        an ast.Node, a custom type, or a python data type
+    line_info : Dict[str, int]
+        holds line information about a particular node
+    last_parent : str
+        the nearest parent that can be converted to source text
     """
     msg = "I expected {}, but you wrote {} at line {}."
     msg_args = (
@@ -158,18 +206,34 @@ def compare_node(left: Any,
         )
     assert left == right, msg.format(*msg_args)
 
-def check_code(user_code, solution_code):
-    """Checks user and solution code and prints a message if they differ"""
+
+def grade_code(student_code: str, solution_code: str):
+    """Checks user and solution code and prints a message if they differ
+
+    Parameters
+    ----------
+    student_code : str
+        the user source code
+    solution_code : str
+        the solution source code
+
+    Returns
+    -------
+    None
+        If there are no issues
+    str
+        If user code differs from solution
+    """
     try:
         # TODO: make parser more pluggable for 3.8 ast parser or other potential parsers like antlr
         # with the contract being it needs a similar `get_text` for getting
         # source node back
-        user = asttokens.ASTTokens(user_code, parse=True)
+        student = asttokens.ASTTokens(student_code, parse=True)
         solution = asttokens.ASTTokens(solution_code, parse=True)
         # set parent node of child nodes for better feedback
-        atok = user
+        atok = student
         last_parent = atok.get_text(next(n for n in ast.walk(atok.tree)))
-        compare_ast(atok, user.tree, solution.tree, last_parent = last_parent)
+        compare_ast(atok, student.tree, solution.tree, last_parent = last_parent)
     except AssertionError as e:
         return str(e)
     except Exception as e:
@@ -206,9 +270,10 @@ if __name__ == "__main__":
         ("-1", "1", "I did not expect an unary operator at line 1. I expected 1."),
     ]
     for t in test_cases:
-        # print("user code: {}".format(t[0]))
-        # print("solution code: {}\n".format(t[1]))
-        message = check_code(t[0], t[1])
+        print("~~~")
+        print("user code:\n{}\n".format(t[0]))
+        print("solution code:\n{}\n".format(t[1]))
+        message = grade_code(t[0], t[1])
         # print(message)
         if message != t[2]:
             raise ValueError(
@@ -232,10 +297,11 @@ if __name__ == "__main__":
         ("sqrt(log(2))", "sqrt(log(1))", "I expected 1, but you wrote 2 in `log` at line 1."),
     ]
     for t in test_cases_verbose:
-        # print("user code: {}".format(t[0]))
-        # print("solution code: {}\n".format(t[1]))
-        message = check_code(t[0], t[1])
-        # print(message)
+        print("~~~")
+        print("student code:\n{}\n".format(t[0]))
+        print("solution code:\n{}\n".format(t[1]))
+        message = grade_code(t[0], t[1])
+        print(message)
         if message != t[2]:
             raise ValueError(
                 "Failed test case!\nUser:{}\nSolution:{}\nExpected:{}\nGot:{}".format(
