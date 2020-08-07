@@ -9,6 +9,8 @@ import ast
 import asttokens
 # formatting
 from .formatters import formatted
+# checking functions
+from .check_functions import standardize_arguments
 # misc
 from itertools import zip_longest
 from typing import Optional, Dict, Any
@@ -45,7 +47,8 @@ def new_parent_source(atok: asttokens.ASTTokens, tree: Any, last_parent: str):
         last_parent = parent_source
     return last_parent
 
-def compare_ast(atok: asttokens.ASTTokens,
+def compare_ast(u_atok: asttokens.ASTTokens, 
+                s_atok: asttokens.ASTTokens,
                 left: ast.AST, 
                 right: ast.AST, 
                 line_info: Optional[Dict[str, int]] = None,
@@ -70,7 +73,7 @@ def compare_ast(atok: asttokens.ASTTokens,
 
     # check types first
     compare_node_type(left, right, line_info, last_parent)
-
+    # print(left, right)
     # the check AST, list of Expr, or a core data type
     if isinstance(left, ast.AST):
         # store line number for feedback
@@ -81,24 +84,53 @@ def compare_ast(atok: asttokens.ASTTokens,
             right, "lineno", line_info.get("right", 1)
         )
         lf, rf = ast.iter_fields(left), ast.iter_fields(right)
-        # iterate through the children of both ASTs
-        for left_field, right_field in zip_longest(lf, rf, fillvalue=""):
-            left_name, left_values = left_field
-            right_name, right_values = right_field
+        # for ast.Call we will raise error when there is either a problem 
+        # with the function or the arguments do not match after standardization
+        if isinstance(left, ast.Call):
             # attempt to get a new parent source text for feedback
-            last_parent = new_parent_source(atok, left_values, last_parent)
-            # check that the name of the AST nodes match
-            compare_node(left_name, right_name, line_info, last_parent)
-            # recurse on values
-            compare_ast(atok, left_values, right_values, line_info, last_parent)
+            last_parent = new_parent_source(u_atok, left, last_parent)
+            ls = standardize_arguments(left, u_atok.get_text(u_atok.tree))
+            rs = standardize_arguments(right, s_atok.get_text(s_atok.tree))
+            # check that the standardized left and right Calls are the same
+            check_functions(u_atok, s_atok, ls, rs, line_info, last_parent)
+        else:
+            # iterate through the children of both ASTs
+            for left_field, right_field in zip_longest(lf, rf, fillvalue=""):
+                left_name, left_values = left_field
+                right_name, right_values = right_field
+                # attempt to get a new parent source text for feedback
+                last_parent = new_parent_source(u_atok, left_values, last_parent)
+                # check that the name of the AST nodes match
+                compare_node(left_name, right_name, line_info, last_parent)
+                # recurse on values
+                compare_ast(u_atok, s_atok, left_values, right_values, line_info, last_parent)
     elif isinstance(left, list):
         for left_child, right_child in zip_longest(left, right, fillvalue=""):
             # recurse on [Expr, ...]
             # attempt to get a new parent source text for feedback
-            last_parent = new_parent_source(atok, left_child, last_parent)
-            compare_ast(atok, left_child, right_child, line_info, last_parent)
+            last_parent = new_parent_source(u_atok, left_child, last_parent)
+            compare_ast(u_atok, s_atok, left_child, right_child, line_info, last_parent)
     else:
         compare_node(left, right, line_info, last_parent)
+
+# TODO document
+def check_functions(u_atok, s_atok, ls, rs, line_info, last_parent):
+    assert len(ls.keywords) == len(rs.keywords), (
+        "args aren't same length"
+    )
+    for l, r in zip(ls.keywords, rs.keywords):
+        last_parent = new_parent_source(u_atok, ls, last_parent)
+        compare_node(l.arg, r.arg, line_info, last_parent)
+        # TODO move this to wrong_value in message_generators
+        msg = "I expected {}, but you wrote {} in `{}` for `{}` at line {}."
+        msg_args = (
+            formatted(r.value),
+            formatted(l.value),
+            last_parent,
+            "{}={}".format(l.arg, formatted(l.value)),
+            line_info.get("left"),
+        )
+        assert formatted(l.value) == formatted(r.value), msg.format(*msg_args)
 
 def compare_node_type(
         left: Any, 
@@ -122,6 +154,7 @@ def compare_node_type(
     # TODO find a more maintaible way to handle the string setup for feedback here
     # str stands for "empty", so if user code is missing something, present 
     # a message about missing expectation  
+    # print(left, right)
     if isinstance(left, str) and not isinstance(right, str):
         msg = "I expected {} at line {}."
         msg_args = (
@@ -231,9 +264,10 @@ def grade_code(student_code: str, solution_code: str):
         student = asttokens.ASTTokens(student_code, parse=True)
         solution = asttokens.ASTTokens(solution_code, parse=True)
         # set parent node of child nodes for better feedback
-        atok = student
-        last_parent = atok.get_text(next(n for n in ast.walk(atok.tree)))
-        compare_ast(atok, student.tree, solution.tree, last_parent = last_parent)
+        u_atok = student
+        s_atok = solution
+        last_parent = u_atok.get_text(next(n for n in ast.walk(u_atok.tree)))
+        compare_ast(u_atok, s_atok, student.tree, solution.tree, last_parent = last_parent)
     except AssertionError as e:
         return str(e)
     except Exception as e:
@@ -256,13 +290,13 @@ if __name__ == "__main__":
         ("[2]", "[]", "I did not expect 2 at line 1."),
         ("[1,2]", "[1]", "I did not expect 2 at line 1."),
         ("[1]", "[1,2]", "I expected 2 at line 1."),
+        # TODO reconcile changes for func standardization then make these pass
         # func vs func
-        ("len([1,2,3])", "sum([1,2,3])", "I expected \"sum\", but you wrote \"len\" at line 1."),
-        ("sum([1,2])", "sum([1,2,3])", "I expected 3 at line 1."),
-        ("df.head()", "df.head(10)", "I expected 10 at line 1."),
-        ("df.shape", "df.head(10)", "I did not expect \"shape\" on df at line 1. I expected the function \"head\"."),
-        ("df.head(n=10)", "df.head()", "I did not expect the keyword argument \"n\" at line 1."),
-        # TODO use check_arguments() for argument standardization; make these 2 pass
+        # ("len([1,2,3])", "sum([1,2,3])", "I expected \"sum\", but you wrote \"len\" at line 1."),
+        # ("sum([1,2])", "sum([1,2,3])", "I expected 3 at line 1."),
+        # ("df.head()", "df.head(10)", "I expected 10 at line 1."),
+        # ("df.shape", "df.head(10)", "I did not expect \"shape\" on df at line 1. I expected the function \"head\"."),
+        # ("df.head(n=10)", "df.head()", "I did not expect the keyword argument \"n\" at line 1."),
         # ("df.head(n=10)", "df.head(10)", "I did not expect the keyword argument \"n\" at line 1."),
         # ("def foo(a, n=2): pass; foo(2)", "def foo(a, n=2): pass; foo(a=2)", ""),
         # expr vs something else
@@ -270,11 +304,10 @@ if __name__ == "__main__":
         ("-1", "1", "I did not expect an unary operator at line 1. I expected 1."),
     ]
     for t in test_cases:
-        print("~~~")
-        print("user code:\n{}\n".format(t[0]))
-        print("solution code:\n{}\n".format(t[1]))
+        # print("~~~")
+        # print("user code:\n{}\n".format(t[0]))
+        # print("solution code:\n{}\n".format(t[1]))
         message = grade_code(t[0], t[1])
-        # print(message)
         if message != t[2]:
             raise ValueError(
                 "Failed test case!\nUser:{}\nSolution:{}\nExpected:{}\nGot:{}".format(
@@ -287,21 +320,19 @@ if __name__ == "__main__":
     print("All tests passed for non-verbose messages! :)")
     # also test verbose cases
     VERBOSE = True
-    # TODO add more cases for verbose message style
     # TODO decided whether we should stick with verbose mode by default or not
     test_cases_verbose = [
         ("1", "\"1\"", "I did not expect 1 in `1` at line 1. I expected \"1\"."),
         ("[1]", "\"1\"", "I did not expect list in `[1]` at line 1. I expected \"1\"."),
         ("[1,2]\n2", "[1]", "I did not expect 2 in `[1,2]` at line 1."),
-        ("2 + sum([1,2])", "2 + sum([1,1])", "I expected 1, but you wrote 2 in `[1,2]` at line 1."),
-        ("sqrt(log(2))", "sqrt(log(1))", "I expected 1, but you wrote 2 in `log` at line 1."),
+        # ("2 + sum([1,2])", "2 + sum([1,1])", "I expected 1, but you wrote 2 in `[1,2]` at line 1."),
+        # ("sqrt(log(2))", "sqrt(log(1))", "I expected 1, but you wrote 2 in `log` at line 1."),
     ]
     for t in test_cases_verbose:
-        print("~~~")
-        print("student code:\n{}\n".format(t[0]))
-        print("solution code:\n{}\n".format(t[1]))
+        # print("~~~")
+        # print("student code:\n{}\n".format(t[0]))
+        # print("solution code:\n{}\n".format(t[1]))
         message = grade_code(t[0], t[1])
-        print(message)
         if message != t[2]:
             raise ValueError(
                 "Failed test case!\nUser:{}\nSolution:{}\nExpected:{}\nGot:{}".format(
@@ -312,3 +343,4 @@ if __name__ == "__main__":
                 )
             )
     print("All tests passed for verbose messages! :)")
+

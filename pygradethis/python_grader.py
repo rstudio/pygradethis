@@ -65,46 +65,46 @@ def grade(*check_code: GraderCondition,
     # TODO somehow trickle up the specific error message?
     return dict(
       correct = False, 
-      message = f"Error occured while checking the submission {e}", 
+      message="Error occured while checking the submission. {e}".format(e),
       type = "warning"
     )
 
   # print(check_code, type(check_code))
   # grade python_pass_if/fail_if conditions against user's code output
   result, condition = python_grade_result(*check_code, user_result = user_result)
-  # return a list representing a dict condition for learnr to process for feedback
+  # return a dict for feedback
   if (result and condition):
     # correct
     if condition['correct']:
       return dict(
-        message = f"{praise()} {condition['message']}", 
+        message = "{} {}".format(praise(), condition['message']), 
         correct = True,
         type = "success"
       )
     # incorrect
     return dict(
-      message = f"{encourage()} {condition['message']}",
+      message = "{} {}".format(encourage(), condition['message']),
       correct = False,
       type = "error"
     )
-  # if there was none of the conditions matched, return error by default
+  # if none of the conditions matched, return incorrect by default
   elif not result and not condition:
     return dict(
-      message = f"{encourage()}", 
+      message = "{}".format(encourage()), 
       correct = False, 
       type = "error"
     )
   # if there were fail_ifs and none matched, return success by default
   elif result and not condition:
     return dict(
-      message = f"{praise()}",
+      message = "{}".format(praise()),
       correct = True,
       type = "success"
     )
   else:
     return dict(
-      message = f"{encourage()} {condition['message']}", 
-      correct = condition['correct'], 
+      message = "{} {}".format(encourage(), condition['message']), 
+      correct = False, 
       type = "error"
     )
   

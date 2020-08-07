@@ -88,24 +88,24 @@ def python_grade_learnr(label: str = None,
   except Exception as e:
     # TODO somehow trickle up the specific error message?
     return dict(
-      message=f"Error occured while checking the submission: {e}",
+      message="Error occured while checking the submission. {e}".format(e),
       correct=False,
       type="warning",
       location="append"
     )
-  # return a list representing a dict condition for learnr to process for feedback
+  # return a dict for learnr to process for feedback
   if (result and condition):
     # correct
     if condition['correct']:
       return dict(
-        message = f"{praise()} {condition['message']}", 
+        message = "{} {}".format(praise(), condition['message']), 
         correct = True,
         type = "success", 
         location = "append"
       )
     # incorrect
     return dict(
-      message = f"{encourage()} {condition['message']}",
+      message = "{} {}".format(encourage(), condition['message']),
       correct = False,
       type = "error", 
       location = "append"
@@ -113,7 +113,7 @@ def python_grade_learnr(label: str = None,
   # if there was none of the conditions matched, return error by default
   elif not result and not condition:
     return dict(
-      message = f"{encourage()}", 
+      message = "{}".format(encourage()), 
       correct = False, 
       type = "error", 
       location = "append"
@@ -121,14 +121,14 @@ def python_grade_learnr(label: str = None,
   # if there were fail_ifs and none matched, return success by default
   elif result and not condition:
     return dict(
-      message = f"{praise()}",
+      message = "{}".format(praise()),
       correct = True,
       type = "success", 
       location = "append"
     )
   else:
     return dict(
-      message = f"{encourage()} {condition['message']}", 
+      message = "{} {}".format(encourage(), condition['message']), 
       correct = False, 
       type = "error", 
       location = "append"

@@ -40,7 +40,7 @@ def _(el):
 @formatted.register(int)
 def _(el):
     """Formatting function for an int"""
-    return "{}".format(el)
+    return el
 
 @formatted.register(ast.Expr)
 def _(node):
@@ -96,7 +96,7 @@ def _(node):
 @formatted.register(ast.NameConstant)
 def _(node):
     """Formatting function for True/False"""
-    return "{}".format(getattr(node, "value"))
+    return getattr(node, "value")
 
 def format_node(node_type, string_format):
     """Registers a format function for a give node type
