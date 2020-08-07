@@ -64,14 +64,14 @@ Internally, a random praise/encouragement message will be appended before any cu
 
 For static code checking, we follow a similar cadence for `gradethis::grade_code`. 
 
-When there is a solution code being supplied, `check_code(user_code, solution_code)` can be used to check the AST of
+When there is a solution code being supplied, `grade_code(user_code, solution_code)` can be used to check the AST of
 the user and solution code, making sure to standardize function calls and producing a helpful message for the student
 to diagnose their issue.
 
 Example 1:
 
 ```python
-check_code("2 + sum([1,2])", "2 + sum([1,1])")
+grade_code("2 + sum([1,2])", "2 + sum([1,1])")
 ```
 Feedback:
 > I expected 1, but you wrote 2 in `[1,2]` at line 1.
@@ -82,7 +82,7 @@ within the list is incorrect not the left operand of the binary operation.
 Example 2:
 
 ```python
-check_code("sqrt(log(2))", "sqrt(log(1))")
+grade_code("sqrt(log(2))", "sqrt(log(1))")
 ```
 Feedback:
 > I expected 1, but you wrote 2 in `log` at line 1.
