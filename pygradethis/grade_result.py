@@ -41,10 +41,11 @@ def python_grade_conditions(*conditions: GraderCondition, user_result: Any = Non
     if result:
       return result, condition
   # If there is at least one pass_if() condition, then default to an incorrect grade;
-  # otherwise, we default to a correct grade https://github.com/rstudio-education/gradethis/issues/118
   if len([c for c in conditions if c['correct']]) != 0:
     return False, None
-  else:
+  # otherwise if we only have fail_ifs, we default to a correct grade 
+  # see https://github.com/rstudio-education/gradethis/issues/118
+  elif len([c for c in conditions if not c['correct']]) != 0:
     return True, None
   return False, None
 

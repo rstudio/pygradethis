@@ -23,10 +23,11 @@ def parse_code(input: Union[str, List[str]]) -> str:
     SyntaxError
         if there are any parsing issues
     """
+    if input is None:
+        return input
     try:
         simple = "".join(input)
         ast.parse(simple)
-        # parser(simple)
         return simple
     except SyntaxError as e:
         if "EOF" in str(e):

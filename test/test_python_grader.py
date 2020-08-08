@@ -6,6 +6,8 @@ from pygradethis.python_grader import *
 
 class PythonGraderTest(unittest.TestCase):
 
+    # Grade result -------------------------------------
+
     def test_pass_if_correct(self):
         result = grade(
             python_pass_if(2, "Woah, nice!"),
@@ -41,8 +43,6 @@ class PythonGraderTest(unittest.TestCase):
         )
         self.assertFalse(result['correct'])
         self.assertEqual(result['type'], "error")
-
-    # TODO add the rest
 
     def test_pass_if_fail_if_correct(self):
         result = grade(
@@ -99,6 +99,10 @@ class PythonGraderTest(unittest.TestCase):
         )
         self.assertFalse(result['correct'])
         self.assertEqual(result['type'], "error")
+    
+    # Grade code -------------------------------------
+    # TODO add static code check examples
+    
 
 if __name__ == "__main__":
     unittest.main()

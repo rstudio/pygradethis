@@ -4,11 +4,54 @@ the `python_grade_learnr` function called by the `gradethispython` R wrapper
 package
 """
 import parser
-from typing import Any, Union, Callable, List, Tuple
+from typing import Any, Union, List, Tuple
 
-from .utils import parse_code
+from .grade_result import python_grade_result
+from .grade_code import grade_code
+from .conditions import GraderCondition
 from .feedback import praise, encourage
-from .grade_result import python_compare_output, python_grade_result
+from .utils import parse_code
+
+def graded_learnr(result: Union[str, dict], condition: GraderCondition):
+  if (result and condition):
+    # correct
+    if condition['correct']:
+      return dict(
+        message = "{} {}".format(praise(), condition['message']), 
+        correct = True,
+        type = "success", 
+        location = "append"
+      )
+    # incorrect
+    return dict(
+      message = "{} {}".format(encourage(), condition['message']),
+      correct = False,
+      type = "error", 
+      location = "append"
+    )
+  # if there was none of the conditions matched, return error by default
+  elif not result and not condition:
+    return dict(
+      message = "{}".format(encourage()), 
+      correct = False, 
+      type = "error", 
+      location = "append"
+    )
+  # if there were fail_ifs and none matched, return success by default
+  elif result and not condition:
+    return dict(
+      message = "{}".format(praise()),
+      correct = True,
+      type = "success", 
+      location = "append"
+    )
+  else:
+    return dict(
+      message = "{} {}".format(encourage(), condition['message']), 
+      correct = False, 
+      type = "error", 
+      location = "append"
+    )
 
 def python_grade_learnr(label: str = None,
                         solution_code: str = None,
@@ -20,7 +63,10 @@ def python_grade_learnr(label: str = None,
                         last_value: Any = None,
                         **kwargs) -> dict:
   """This function mirrors the `grade_learnr` function from {gradethis} package so that
-  we can check Python exercises.
+  we can check Python exercises. This function does two things:
+  - Do static code grading (AST) if both user and solution code is provided
+    before the result grading.
+  - Do result grading based on code output and GraderCondition(s)
 
   Parameters
   ----------
@@ -69,13 +115,24 @@ def python_grade_learnr(label: str = None,
       location="append"
     )
 
-  # TODO `grade_code(user_code, solution_code)` if solution code is provided
+  # TODO input scrubbing for malicious code
+  # parse user, check and solution code
+  solution_code = parse_code(solution_code)
+  check_code_source = parse_code(check_code)
+  user_code_source = parse_code(user_code)
 
-  # evaluate exercise
+  # do static checks on code if the solution code is provided
+  graded_code = grade_code(user_code_source, solution_code)
+  if graded_code is not None:
+    return dict(
+      message = "{}".format(graded_code),
+      correct = False,
+      type = "error", 
+      location = "append"
+    )
+
+  # evaluate exercise and check code output
   try:
-    # TODO input scrubbing for malicious code
-    check_code_source = parse_code(check_code)
-    user_code_source = parse_code(user_code)
     # Note: because Python is eager evaluation, we already have introduced
     # the `r` object in the current scope when entering this function
     # evaluate check code so that expected output is ready
@@ -94,42 +151,4 @@ def python_grade_learnr(label: str = None,
       location="append"
     )
   # return a dict for learnr to process for feedback
-  if (result and condition):
-    # correct
-    if condition['correct']:
-      return dict(
-        message = "{} {}".format(praise(), condition['message']), 
-        correct = True,
-        type = "success", 
-        location = "append"
-      )
-    # incorrect
-    return dict(
-      message = "{} {}".format(encourage(), condition['message']),
-      correct = False,
-      type = "error", 
-      location = "append"
-    )
-  # if there was none of the conditions matched, return error by default
-  elif not result and not condition:
-    return dict(
-      message = "{}".format(encourage()), 
-      correct = False, 
-      type = "error", 
-      location = "append"
-    )
-  # if there were fail_ifs and none matched, return success by default
-  elif result and not condition:
-    return dict(
-      message = "{}".format(praise()),
-      correct = True,
-      type = "success", 
-      location = "append"
-    )
-  else:
-    return dict(
-      message = "{} {}".format(encourage(), condition['message']), 
-      correct = False, 
-      type = "error", 
-      location = "append"
-    )
+  return graded_learnr(result, condition)

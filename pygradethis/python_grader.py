@@ -1,20 +1,60 @@
 """
 This module contains functions to faciliate checking Python code or output.
 """
+from typing import Union
 
-import parser
-from typing import Any, Callable, List, Tuple
-
+from .grade_result import python_grade_result
+from .grade_code import grade_code
 from .conditions import GraderCondition
 from .feedback import praise, encourage
-from .grade_result import python_grade_result
 from .utils import parse_code
 
-# TODO refactor for Python standalone
+def graded(result: Union[str, dict], condition: GraderCondition):
+  # return a dict for feedback
+  if (result and condition):
+    # correct
+    if condition['correct']:
+      return dict(
+        message = "{} {}".format(praise(), condition['message']), 
+        correct = True,
+        type = "success"
+      )
+    # incorrect
+    return dict(
+      message = "{} {}".format(encourage(), condition['message']),
+      correct = False,
+      type = "error"
+    )
+  # if none of the conditions matched, return incorrect by default
+  elif not result and not condition:
+    return dict(
+      message = "{}".format(encourage()), 
+      correct = False, 
+      type = "error"
+    )
+  # if there were fail_ifs and none matched, return success by default
+  elif result and not condition:
+    return dict(
+      message = "{}".format(praise()),
+      correct = True,
+      type = "success"
+    )
+  else:
+    return dict(
+      message = "{} {}".format(encourage(), condition['message']), 
+      correct = False, 
+      type = "error"
+    )
+
+
 def grade(*check_code: GraderCondition,
           user_code: str = None, 
           solution_code: str = None) -> dict:
-  """Python standalone verson of `python_grade_learnr`.
+  """Python standalone verson of `python_grade_learnr`. This function does
+  two things:
+  - Do static code grading (AST) if both user and solution code is provided
+    before the result grading.
+  - Do result grading based on code output and GraderCondition(s)
 
   Parameters
   ----------
@@ -51,61 +91,37 @@ def grade(*check_code: GraderCondition,
       type = "info"
     )
   
-  # TODO `grade_code(user_code, solution_code)` if solution code is provided
+  # TODO input scrubbing for malicious code
+  # parse user, and solution code
+  solution_code = parse_code(solution_code)
+  user_code_source = parse_code(user_code)
 
+  # print('user_code_source', user_code_source)
+  # print('solution_code', solution_code)
+  if solution_code is not None:
+    # do static checks on code if the solution code is provided
+    graded_code = grade_code(user_code_source, solution_code)
+    if graded_code is not None:
+      return dict(
+        message = "{}".format(graded_code),
+        correct = False,
+        type = "error", 
+      )
 
-  # evaluate exercise
+  # evaluate exercise and check code output
   try:
-    # TODO input scrubbing for malicious code
-    # attempt to parse and format code
-    user_code_source = parse_code(user_code)
     # evaluate user code so that we can compare to expected
     user_result = eval(user_code_source)
   except Exception as e:
     # TODO somehow trickle up the specific error message?
     return dict(
-      correct = False, 
       message="Error occured while checking the submission. {e}".format(e),
+      correct = False, 
       type = "warning"
     )
 
-  # print(check_code, type(check_code))
   # grade python_pass_if/fail_if conditions against user's code output
   result, condition = python_grade_result(*check_code, user_result = user_result)
-  # return a dict for feedback
-  if (result and condition):
-    # correct
-    if condition['correct']:
-      return dict(
-        message = "{} {}".format(praise(), condition['message']), 
-        correct = True,
-        type = "success"
-      )
-    # incorrect
-    return dict(
-      message = "{} {}".format(encourage(), condition['message']),
-      correct = False,
-      type = "error"
-    )
-  # if none of the conditions matched, return incorrect by default
-  elif not result and not condition:
-    return dict(
-      message = "{}".format(encourage()), 
-      correct = False, 
-      type = "error"
-    )
-  # if there were fail_ifs and none matched, return success by default
-  elif result and not condition:
-    return dict(
-      message = "{}".format(praise()),
-      correct = True,
-      type = "success"
-    )
-  else:
-    return dict(
-      message = "{} {}".format(encourage(), condition['message']), 
-      correct = False, 
-      type = "error"
-    )
-  
+  # return a graded dict
+  return graded(result, condition)
 

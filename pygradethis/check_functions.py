@@ -2,10 +2,13 @@
 This module contains functions to check function calls, standardize arguments,
 and return standardized call.
 """
-import inspect
 import ast
 import asttokens
+import inspect
 import builtins
+
+from itertools import zip_longest
+from .formatters import formatted
 
 def standardize_arguments(call: ast.Call, source_code: str) -> ast.Call:
     """This will standardize the function calls for a function Call and return
@@ -47,12 +50,10 @@ def standardize_arguments(call: ast.Call, source_code: str) -> ast.Call:
         # for e.g., positional args should always be before keywords args
         # exec will catch these issues
         exec(source_code)
-        # 2) get the ast tree
-        tree = ast.parse(source_code)
-        # 3) construct a environment containing encompassing both global and locals, 
+        # 2) construct a environment containing encompassing both global and locals, 
         # overwriting the globals with locals, and builtins.
         envir = dict(globals(), **locals(), **builtins.__dict__)
-        # 4) grab the live function from the environment
+        # 3) grab the live function from the environment
         # if we're calling a function on an object, the function info has
         # to be extracted from an ast.Attribute
         if isinstance(call.func, ast.Attribute):
@@ -69,23 +70,24 @@ def standardize_arguments(call: ast.Call, source_code: str) -> ast.Call:
             func_name = call.func.id
             live_func = envir[func_name]
 
-        # 5) collect the arguments passed
+        # 4) collect the arguments passed
         # construct keyword args mapping
         kwargs = {a.arg:a.value for a in call.keywords}
         
-        # 6) get the formal arguments for function
+        # 5) get the formal arguments for function
         # Note: this will raise ValueError if inspect cannot retrieve signature
         # which can happen for some builtins like `print`, where underlying C
         # code does not provide any metadata about its signature.
         sig = inspect.signature(live_func)
 
-        # 7) unpack args and kwargs and attempt to standardize argument calls
+        # 6) unpack args and kwargs and attempt to standardize argument calls
         # returns: https://docs.python.org/3.6/library/inspect.html#inspect.BoundArguments
         partial_args = sig.bind(*call.args, **kwargs)
         partial_args.apply_defaults()
 
-        # 8) return a modified AST representing the standardized call
+        # 7) return a modified AST representing the standardized call
         # we do this by updating Call.keywords and reset the args
+        # TODO handle functions where you don't have keywords: import math; math.sqrt(math.log(1))
         new_keywords = []
         for k, v in partial_args.arguments.items():
             new_keywords.append(ast.keyword(arg=k, value=v))
