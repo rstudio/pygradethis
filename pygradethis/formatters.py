@@ -122,6 +122,24 @@ def _(node):
     """Formatting function for an ast.Expr"""
     return "an expression"
 
+@formatted.register(ast.arg)
+def _(node):
+    return node.arg
+
+@formatted.register(ast.arguments)
+def _(node):
+    defaults = [formatted(d) for d in node.defaults]
+    len_defaults = len(defaults)
+    args = [formatted(a) for a in node.args[:len_defaults-1]]
+    rem_args = [formatted(a) for a in node.args[len_defaults-1:]]
+    map_args_defaults = ["{}={}".format(a, d) for a, d in zip(rem_args, defaults)]
+    return  ", ".join(args + map_args_defaults)
+
+@formatted.register(ast.Lambda)
+def _(node):
+    args = formatted(getattr(node, 'args'))
+    return "lambda {}: {}".format(args, formatted(node.body))
+
 @formatted.register(ast.Call)
 def _(node):
     """Formatting function for an ast.Call"""
@@ -130,17 +148,10 @@ def _(node):
     else:
         func_name = node.func.id
     # grab args and keywords
-    args = ""
-    for i, a in enumerate(node.args):
-        args += str(formatted(a))
-        if i + 1 < len(node.args):
-            args += ", "
-    for j, k in enumerate(node.keywords):
-        args += "{}={}".format(k.arg, formatted(k.value))
-        if j + 1 < len(node.keywords):
-            args += ", "
+    args = [str(formatted(a)) for a in node.args]
+    keywords = ["{}={}".format(k.arg, formatted(k.value)) for k in node.keywords]
     # return call like it would appear
-    return "{}({})".format(func_name, args)
+    return "{}({})".format(func_name, ", ".join(args + keywords))
 
 @formatted.register(ast.keyword)
 def _(node):
@@ -150,13 +161,11 @@ def _(node):
 @formatted.register(ast.BinOp)
 def _(node):
     """Formatting function for an ast.BinOp"""
-    # for now, just punt to a generic string
     return "{} {} {}".format(formatted(node.left), formatted(node.op), formatted(node.right))
 
 @formatted.register(ast.UnaryOp)
 def _(node):
     """Formatting function for an ast.UnaryOp"""
-    # for now, just punt to a generic string
     return "{}{}".format(formatted(node.op), formatted(node.operand))
 
 @formatted.register(ast.Attribute)
@@ -183,3 +192,6 @@ def _(node):
 def _(node):
     """Formatting function for True/False"""
     return getattr(node, "value")
+
+def test_format(node):
+    print(formatted(node))

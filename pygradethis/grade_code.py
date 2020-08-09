@@ -328,6 +328,7 @@ if __name__ == "__main__":
         # print("student code:\n{}\n".format(t[0]))
         # print("solution code:\n{}\n".format(t[1]))
         message = grade_code(t[0], t[1])
+        # print(message)
         if message != t[2]:
             raise ValueError(
                 "Failed test case!\nUser:{}\nSolution:{}\nExpected:{}\nGot:{}".format(
