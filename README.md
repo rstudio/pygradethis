@@ -58,10 +58,16 @@ this package as a standalone the `location` is not an important field and it can
 
 Internally, a random praise/encouragement message will be appended before any custom message supplied. 
 
-`python_pass_if(mpg, "You also got the mpg dataframe!")`:
+```python
+python_pass_if(mpg, "You also got the mpg dataframe!")
+```
+Feedback:
 > Bravo! You also got the mpg dataframe!
 
-`python_fail_if(None, "")`:
+```python
+python_fail_if(None, "")
+```
+Feedback:
 > Try it again. You get better each time.
 
 ## Code checks
@@ -72,32 +78,64 @@ When there is a solution code being supplied, `grade_code(user_code, solution_co
 the user and solution code, making sure to standardize function calls and producing a helpful message for the student
 to diagnose their issue.
 
-Example 1:
+Example:
 
 ```python
-grade_code("2 + sum([1,2])", "2 + sum([1,1])")
+grade_code("2 + sqrt(log(2))", "2 + sqrt(log(1))")
 ```
 Feedback:
-> I expected 1, but you wrote 2 in `[1,2]` at line 1.
+> I expected 1, but you wrote 2 in log(2) at line 1.
 
-Note how the expression in which the problem occurs (`[1,2]`) is pointed out so that the student is aware that the `2`
-within the list is incorrect not the left operand of the binary operation.
-
-Example 2:
-
-```python
-grade_code("sqrt(log(2))", "sqrt(log(1))")
-```
-Feedback:
-> I expected 1, but you wrote 2 in `log` at line 1.
+Note how the expression in which the problem occurs (`log(2)`) is pointed out so that the 
+student is aware that the `2` within the `log` is incorrect not the `2` on the left operand of 
+the addition.
 
 Similarly, here the feedback points out that the 2 within the `log` function is incorrect, similar to the 
 `gradethis` [example](https://rstudio-education.github.io/gradethis/reference/grade_code.html).
 
-Currently, standardizing implementation is in progress but the idea is to take user's function call code
-and map positional arguments to proper parameter names and set defaults if not supplied.
+### Call Standardization
+`pygradethis` also knows how to take user's function call code and map positional arguments 
+to proper parameter names and set defaults if not supplied. This is so that you don't penalize
+a student's code just because they did not explicitly spell out positional argument names, or
+write the default arguments out.
 
-For e.g. `head(10)` => `head(n=10)`.
+For e.g. suppose a student is calling the following silly function `foo`:
 
+```python
+def foo(a, b=1): 
+  pass
+```
 
+Grading the code with
 
+```python
+grade_code(
+  student_code="foo(1)", 
+  solution_code="foo(1)"
+)
+```
+
+means that `foo(1)` turns into `foo(a=1, b=1)` before grading. In the example above,
+the `grade_code` doesn't give us a feedback message since they are equivalent expressions.
+
+However, if the student supplies `foo(2)`
+
+```python
+grade_code(
+  student_code="foo(2)", 
+  solution_code="foo(1)"
+)
+```
+
+we get back this feedback:
+> I expected foo(a=1, b=1), but what you wrote was interpreted as foo(a=2, b=1) at line 1.
+
+Note how the arguments are filled in according to formal parameters, `a` and `b`, which can
+help students be aware of how Python actually interprets their function calls.
+
+**Note:** For call standardizing to work, the function definitions corresponding to function 
+calls must be defined  and 'live' in the environment, whether that is the `globals()`/`locals()`,
+`builtins`, or custom module imports `pandas`. Currently, common modules like `math` is imported 
+for grading within `grade_code.py`, but more modules will be included to serve data science 
+grading as well, such as `pandas` or `numpy` in the future. We plan to make the code more 
+extensible for the instructor to add them as dependencies.

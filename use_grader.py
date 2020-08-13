@@ -49,7 +49,27 @@ print(grade_code("1 + 1", "2"))
 
 ### Expression vs expression, incorrect values
 print(grade_code("2 + len([1,2])", "2 + len([1,1])"))
-print(grade_code("sqrt(log(2))", "sqrt(log(1))"))
+# I expected len(obj=[1, 1]), but what you wrote was interpreted as len(obj=[1, 2]) at line 1.
+print(grade_code("sum([1,2])", "sum([1,1])"))
+# I expected sum(iterable=[1, 1], start=0), but what you wrote was interpreted as sum(iterable=[1, 2], start=0) at line 1.
+print(grade_code("2 + sqrt(log(2))", "2 + sqrt(log(1))"))
+# I expected 1, but you wrote 2 in log(2) at line 1.
+
+### Function calls are standardized as well
+# so that this will not return any feedback because they are equivalent calls
+print(grade_code(
+        student_code="def foo(a, b=1): pass; foo(1)", 
+        solution_code="def foo(a, b=1): pass; foo(1)"
+    )
+)
+# None
+# but, this will return a feedback message because the arguments are now different
+print(grade_code(
+        student_code="def foo(a, b=1): pass; foo(2)", 
+        solution_code="def foo(a, b=1): pass; foo(1)"
+    )
+)
+# I expected foo(a=1, b=1), but what you wrote was interpreted as foo(a=2, b=1) at line 1.
 
 # AST + Output checking
 
