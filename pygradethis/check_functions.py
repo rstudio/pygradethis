@@ -7,8 +7,10 @@ import asttokens
 import inspect
 import builtins
 
-from itertools import zip_longest
 from .formatters import formatted
+from math import sqrt, log
+
+from itertools import zip_longest
 
 def standardize_arguments(call: ast.Call, source_code: str) -> ast.Call:
     """This will standardize the function calls for a function Call and return
@@ -34,15 +36,12 @@ def standardize_arguments(call: ast.Call, source_code: str) -> ast.Call:
 
     Raises
     ------
-    ValueError
-        when signature can't be retrieved, silently ignore for now
     TypeError
         when call itself is invalid (e.g. wrong argument name)
     NameError
         when for e.g. the function name doesn't exist in environment
-    AssertionError
-        when either TypeError or NameError occurs, ripple up AssertionError
-        to `grade_code` in `compare_ast`
+    Exception
+        when other Exceptions occur, silently ignore for now
     """
     try:
         # 1) introduce function call in environment
@@ -75,10 +74,15 @@ def standardize_arguments(call: ast.Call, source_code: str) -> ast.Call:
         kwargs = {a.arg:a.value for a in call.keywords}
         
         # 5) get the formal arguments for function
-        # Note: this will raise ValueError if inspect cannot retrieve signature
-        # which can happen for some builtins like `print`, where underlying C
-        # code does not provide any metadata about its signature.
-        sig = inspect.signature(live_func)
+        try:
+            # Note: this will raise ValueError if inspect cannot retrieve signature
+            # which can happen for some builtins like `print`, where underlying C
+            # code does not provide any metadata about its signature.
+            sig = inspect.signature(live_func)
+        except ValueError: 
+            # if we can't get a signature just return call for normal Call
+            # checking flow
+            return call
 
         # 6) unpack args and kwargs and attempt to standardize argument calls
         # returns: https://docs.python.org/3.6/library/inspect.html#inspect.BoundArguments
@@ -98,5 +102,5 @@ def standardize_arguments(call: ast.Call, source_code: str) -> ast.Call:
         raise AssertionError(str(e).capitalize())
     except NameError as e:
         raise AssertionError(str(e).capitalize())
-    except ValueError as e:
+    except Exception as e:
         pass
