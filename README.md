@@ -27,10 +27,6 @@ can do away with this dependency in the future.
 - Simple output checking based on pass / fail conditions with feedback
 - Simple static code checking (AST), with feedback on how student's code differs from solution
 
-Since this package can't be installed via `pip` yet, please place package in the directory you want to use it. To go 
-through how to use this as a module, refer to [use_grader.py](./use_grader.py) file in the root directory. Below, we
-go over its output / AST checking functions.
-
 ## Output checks
 
 `pygradethis` mimics the cadence to `gradethis::grade_result`. For e.g., we can
