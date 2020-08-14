@@ -25,4 +25,5 @@ MANIFEST
 # misc
 .DS_Store
 .vscode
+.mypy_cache
 

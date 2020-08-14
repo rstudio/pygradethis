@@ -68,7 +68,6 @@ def check_children(u_atok: asttokens.ASTTokens,
     last_parent : str, optional
         the nearest parent that can be converted to source text, by default ""
     """
-    # compare_node(left, right, line_info, last_parent)
     lf, rf = ast.iter_fields(left), ast.iter_fields(right)
     # iterate through the children of both ASTs
     for left_field, right_field in zip_longest(lf, rf, fillvalue=""):
@@ -115,7 +114,6 @@ def compare_ast(u_atok: asttokens.ASTTokens,
         line_info["right"] = getattr(
             right, "lineno", line_info.get("right", 1)
         )
-        lf, rf = ast.iter_fields(left), ast.iter_fields(right)
         # for ast.Call we will raise error when there is either a problem 
         # with the function or the arguments do not match after standardization
         if isinstance(left, ast.Call):

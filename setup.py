@@ -13,11 +13,17 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     keywords='autograder education',
     url="https://github.com/nischalshrestha/pygradethis",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=("tests")),
+    install_requires=[
+        "asttokens==2.0.4", 
+        "numpy>=1.17.4",
+        "pandas>=1.0.3", 
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
+        "Topic :: Education",
     ],
     python_requires='>=3.6',
 )

@@ -7,6 +7,10 @@ use in educational settings.
 
 **Note**: This package is in early development and will undergo rapid changes.
 
+## Install
+
+`pip install pygradethis`
+
 ## Dependencies
 
 - Python 3.6
