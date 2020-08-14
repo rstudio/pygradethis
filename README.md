@@ -9,7 +9,9 @@ use in educational settings.
 
 ## Install
 
-`pip install pygradethis`
+```
+pip install pygradethis
+```
 
 ## Dependencies
 
