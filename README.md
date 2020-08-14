@@ -139,7 +139,9 @@ help students be aware of how Python actually interprets their function calls.
 
 **Note:** For call standardizing to work, the function definitions corresponding to function 
 calls must be defined  and 'live' in the environment, whether that is the `globals()`/`locals()`,
-`builtins`, or custom module imports `pandas`. Currently, common modules like `math` is imported 
-for grading within `grade_code.py`, but more modules will be included to serve data science 
-grading as well, such as `pandas` or `numpy` in the future. We plan to make the code more 
-extensible for the instructor to add them as dependencies.
+`builtins`, or custom module imports `pandas`. This works if the student/solution source code also 
+includes the definition (like `foo` above) in their own source code or it's included by instructor. 
+
+Currently, common modules like `math` is imported for grading within `check_functions.py`, but more modules 
+will be included to serve data science grading as well, such as `pandas` or `numpy` in the future. 
+We plan to make the code more extensible for the instructor to add them as dependencies.
