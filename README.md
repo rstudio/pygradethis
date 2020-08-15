@@ -64,13 +64,13 @@ this package as a standalone the `location` is not an important field and it can
 Internally, a random praise/encouragement message will be appended before any custom message supplied. 
 
 ```python
-python_pass_if(mpg, "You also got the mpg dataframe!")
+python_pass_if(x = mpg, message = "You also got the mpg dataframe!")
 ```
 Feedback:
 > Bravo! You also got the mpg dataframe!
 
 ```python
-python_fail_if(None, "")
+python_fail_if(x = None, message = "")
 ```
 Feedback:
 > Try it again. You get better each time.
@@ -86,7 +86,11 @@ to diagnose their issue.
 Example:
 
 ```python
-grade_code("2 + sqrt(log(2))", "2 + sqrt(log(1))")
+grade_code(
+  student_code="2 + sqrt(log(2))", 
+  solution_code="2 + sqrt(log(1))"
+)
+
 ```
 Feedback:
 > I expected 1, but you wrote 2 in log(2) at line 1.
