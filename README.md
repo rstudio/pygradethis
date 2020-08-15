@@ -1,7 +1,7 @@
 # pygradethis
 
 [![PyPI version](https://badge.fury.io/py/pygradethis.svg)](https://badge.fury.io/py/pygradethis)
-![PyPI - License](https://img.shields.io/pypi/l/pygradethis)
+[![PyPI - License](https://img.shields.io/pypi/l/pygradethis)](LICENSE)
 
 A Python package to facilitate checking code output or static code checking
 using AST analysis. It can either be used with R using the [`learnr`](https://rstudio.github.io/learnr/) package, as 
