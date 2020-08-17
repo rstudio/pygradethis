@@ -1,5 +1,8 @@
 # pygradethis
 
+[![PyPI version](https://badge.fury.io/py/pygradethis.svg)](https://badge.fury.io/py/pygradethis)
+[![PyPI - License](https://img.shields.io/pypi/l/pygradethis)](LICENSE)
+
 A Python package to facilitate checking code output or static code checking
 using AST analysis. It can either be used with R using the [`learnr`](https://rstudio.github.io/learnr/) package, as 
 a mirror of [`gradethis`](https://rstudio-education.github.io/gradethis/index.html) package, or as a standalone package for general Python 
@@ -26,10 +29,6 @@ can do away with this dependency in the future.
 
 - Simple output checking based on pass / fail conditions with feedback
 - Simple static code checking (AST), with feedback on how student's code differs from solution
-
-Since this package can't be installed via `pip` yet, please place package in the directory you want to use it. To go 
-through how to use this as a module, refer to [use_grader.py](./use_grader.py) file in the root directory. Below, we
-go over its output / AST checking functions.
 
 ## Output checks
 
@@ -65,13 +64,13 @@ this package as a standalone the `location` is not an important field and it can
 Internally, a random praise/encouragement message will be appended before any custom message supplied. 
 
 ```python
-python_pass_if(mpg, "You also got the mpg dataframe!")
+python_pass_if(x = mpg, message = "You also got the mpg dataframe!")
 ```
 Feedback:
 > Bravo! You also got the mpg dataframe!
 
 ```python
-python_fail_if(None, "")
+python_fail_if(x = None, message = "")
 ```
 Feedback:
 > Try it again. You get better each time.
@@ -87,7 +86,11 @@ to diagnose their issue.
 Example:
 
 ```python
-grade_code("2 + sqrt(log(2))", "2 + sqrt(log(1))")
+grade_code(
+  student_code="2 + sqrt(log(2))", 
+  solution_code="2 + sqrt(log(1))"
+)
+
 ```
 Feedback:
 > I expected 1, but you wrote 2 in log(2) at line 1.
