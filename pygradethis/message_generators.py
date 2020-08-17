@@ -3,19 +3,94 @@ This module holds functions for common mistakes and generating messages for
 feedback to the student.
 """
 
-# TODO: use these from `python_grader`, `python_grade_learnr`, and `grade_code`
+import ast
+from typing import Dict, Any
+from .formatters import formatted
 
-def wrong_value(this, that):
+def missing(
+        left: Any,
+        right: Any,
+        line_info: Dict[str, int]):
+    """Generates message when user is missing a node or element in code.
 
-    # def foo(a, b=1): pass
-    
-    # foo(1)
-    # foo(2)
+    Parameters
+    ----------
+    left : Any
+        an ast.Node, a custom type, or a python data type
+    right : Any
+        an ast.Node, a custom type, or a python data type
+    line_info : Dict[str, int]
+        holds line information about a particular node
+    """
+    msg = "I expected {} at line {}."
+    msg_args = (
+        formatted(right), 
+        line_info.get("left")
+    )
+    assert type(left) == type(right), msg.format(*msg_args)
 
-    # "h(1), I expected 2 where you wrote 1."
-    # "I expected {that} where you wrote {this}."
-    pass
+def not_expected(
+        left: Any,
+        right: Any,
+        line_info: Dict[str, int]):
+    """Generates message when user supplies an extra node or element in code.
 
+    Parameters
+    ----------
+    left : Any
+        an ast.Node, a custom type, or a python data type
+    right : Any
+        an ast.Node, a custom type, or a python data type
+    line_info : Dict[str, int]
+        holds line information about a particular node
+    """
+    msg = "I did not expect {} at line {}."
+    msg_args = (
+        formatted(left), 
+        line_info.get("left")
+    )
+    assert type(left) == type(right), msg.format(*msg_args)
+
+def wrong_value(left: Any, 
+        right: Any, 
+        line_info: Dict[str, int],
+        last_parent: str,
+        condition: bool):
+    """Generates message when user's code contains in an incorrect value.
+
+    Parameters
+    ----------
+    left : Any
+        an ast.Node, a custom type, or a python data type
+    right : Any
+        an ast.Node, a custom type, or a python data type
+    line_info : Dict[str, int]
+        holds line information about a particular node
+    last_parent : str
+        the nearest parent that can be converted to source text
+    condition : bool
+        the condition we want to check regarding equality between left and right
+        ast nodes or values
+    """
+    msg = "I expected {}, but what you wrote was interpreted as {} at line {}."
+    msg_args = (
+        formatted(right),
+        formatted(left),
+        line_info.get("left"),
+    )
+    if (formatted(left) != last_parent 
+        and not isinstance(left, ast.AST)
+        and not isinstance(left, ast.Call)):
+        msg = "I expected {}, but what you wrote was interpreted as {} in {} at line {}."
+        msg_args = (
+            formatted(right),
+            formatted(left),
+            last_parent,
+            line_info.get("left"),
+        )
+    assert condition, msg.format(*msg_args)
+
+# Call related -------------------------------
 
 def duplicate_name(this_call, this_name):
 
@@ -55,7 +130,6 @@ def missing_argument(this, that_name):
     # "You may have misspelled an argument name, ",
     # "or left out an important argument."
     pass
-
 
 def surplus_argument(this, this_arg):
 
