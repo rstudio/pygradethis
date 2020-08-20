@@ -32,6 +32,7 @@ from functools import singledispatch
 def formatted(node: ast.AST) -> str:
     """Generic function to return a formatted representation of an AST node"""
     try:
+        # astunparse adds \n to left/right so we strip it
         return astunparse.unparse(node).strip()
     except SyntaxError:
         return "{}".format(type(node).__name__.lower())
@@ -91,29 +92,32 @@ def uunparse(node: ast.AST) -> str:
     str
         unparsed node
     """
+    # astunparse adds \n to left/right so we strip it
     unparsed = astunparse.unparse(node).strip() 
     return unparsed[1:-1]
 
-# core types
-@formatted.register(ast.BoolOp)
-def _(node: ast.AST) -> str:
-    return uunparse(node)
-
-@formatted.register(ast.Compare)
-def _(node: ast.AST) -> str:
-    return uunparse(node)
+# core types ------------------------------------------
 
 @formatted.register(ast.Lambda)
-def _(node: ast.AST) -> str:
-    args = formatted(getattr(node, 'args'))
-    return "lambda {}: {}".format(args, formatted(node.body))
-
-@formatted.register(ast.keyword)
-def _(node: ast.AST) -> str:
-    """Formatting function for an ast.keyword"""
-    return getattr(node, "arg")
-
+@formatted.register(ast.Compare)
+@formatted.register(ast.BoolOp)
 @formatted.register(ast.BinOp)
 def _(node: ast.AST) -> str:
-    """Formatting function for an ast.BinOp"""
+    """Formatting function for:
+    
+    ast.Lambda
+    ast.Compare
+    ast.BoolOp
+    ast.BinOp
+
+    Parameters
+    ----------
+    node : ast.AST
+        the ast node
+
+    Returns
+    -------
+    str
+        unparsed node
+    """
     return uunparse(node)
