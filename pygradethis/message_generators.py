@@ -7,10 +7,7 @@ import ast
 from typing import Dict, Any
 from .formatters import formatted
 
-def missing(
-        left: Any,
-        right: Any,
-        line_info: Dict[str, int]):
+def missing(left: Any, right: Any, line_info: Dict[str, int]):
     """Generates message when user is missing a node or element in code.
 
     Parameters
@@ -29,10 +26,7 @@ def missing(
     )
     assert type(left) == type(right), msg.format(*msg_args)
 
-def not_expected(
-        left: Any,
-        right: Any,
-        line_info: Dict[str, int]):
+def not_expected(left: Any, right: Any, line_info: Dict[str, int]):
     """Generates message when user supplies an extra node or element in code.
 
     Parameters
@@ -51,7 +45,8 @@ def not_expected(
     )
     assert type(left) == type(right), msg.format(*msg_args)
 
-def wrong_value(left: Any, 
+def wrong_value(
+        left: Any, 
         right: Any, 
         line_info: Dict[str, int],
         last_parent: str,
