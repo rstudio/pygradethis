@@ -34,8 +34,8 @@ def formatted(node: ast.AST) -> str:
     try:
         # astunparse adds \n to left/right so we strip it
         return astunparse.unparse(node).strip()
-    except SyntaxError:
-        return "{}".format(type(node).__name__.lower())
+    except AttributeError:
+        return "{}".format(type(node).__name__)
 
 def format_node(node_type, string_format):
     """Registers a format function for a give node type
@@ -49,6 +49,18 @@ def format_node(node_type, string_format):
             return string_format(node)
         else:
             return string_format
+
+def uunparse(node: ast.AST) -> str:
+    """Return a unparsed representation of an AST with added parens removed.
+
+    Returns
+    -------
+    str
+        unparsed node
+    """
+    # astunparse adds \n to left/right so we strip it
+    unparsed = astunparse.unparse(node).strip() 
+    return unparsed[1:-1]
 
 # binary operators
 format_node(ast.Add, "+")
@@ -84,19 +96,30 @@ format_node(ast.IsNot, "is not")
 format_node(ast.In, "in")
 format_node(ast.NotIn, "not in")
 
-def uunparse(node: ast.AST) -> str:
-    """Return a unparsed representation of an AST with added parens removed.
-
-    Returns
-    -------
-    str
-        unparsed node
-    """
-    # astunparse adds \n to left/right so we strip it
-    unparsed = astunparse.unparse(node).strip() 
-    return unparsed[1:-1]
-
 # core types ------------------------------------------
+
+format_node(int, lambda x: x)
+format_node(str, lambda x: "\"{}\"".format(x))
+format_node(ast.Str, lambda x: "\"{}\"".format(x.s))
+
+@formatted.register(list)
+def _(node: ast.AST) -> str:
+    return "{}".format(", ".join(formatted(e) for e in node))
+
+@formatted.register(ast.keyword)
+def _(node: ast.AST) -> str:
+    return "{}={}".format(node.arg, formatted(node.value))
+
+@formatted.register(ast.Call)
+def _(node: ast.AST) -> str:
+    return "{}({})".format(
+        formatted(node.func), 
+        ", ".join(filter(None, [formatted(node.args), formatted(node.keywords)]))
+    )
+
+@formatted.register(ast.UnaryOp)
+def _(node: ast.AST) -> str:
+    return "{}{}".format(formatted(node.op), formatted(node.operand))
 
 @formatted.register(ast.Lambda)
 @formatted.register(ast.Compare)
@@ -110,6 +133,9 @@ def _(node: ast.AST) -> str:
     ast.BoolOp
     ast.BinOp
 
+    All of these ASTs will have extra parens attached by asttunparse so we are
+    removing those.
+
     Parameters
     ----------
     node : ast.AST
@@ -121,3 +147,26 @@ def _(node: ast.AST) -> str:
         unparsed node
     """
     return uunparse(node)
+
+@formatted.register(ast.Module)
+def _(node: ast.AST) -> str:
+    """Formatting function for:
+    
+    ast.Module
+
+    Parameters
+    ----------
+    node : ast.AST
+        the ast node
+
+    Returns
+    -------
+    str
+        unparsed node
+    """
+    for b in node.body: 
+        if hasattr(b, 'value'):
+            return formatted(b.value)
+        else:
+            return formatted(b)
+    return ""

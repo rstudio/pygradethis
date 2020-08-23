@@ -15,10 +15,9 @@ setuptools.setup(
     url="https://github.com/nischalshrestha/pygradethis",
     packages=setuptools.find_packages(exclude=("tests")),
     install_requires=[
-        "asttokens==2.0.4",
         "astunparse==1.6.3",
         "numpy==1.17.4",
-        "pandas==1.0.3", 
+        "pandas==1.0.3",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

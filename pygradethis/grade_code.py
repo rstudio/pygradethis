@@ -6,7 +6,7 @@ note when the two differ.
 # parsing
 import parser
 import ast
-import asttokens
+import astunparse
 
 # formatting
 from .formatters import formatted
@@ -22,15 +22,13 @@ from math import *
 from itertools import zip_longest
 from typing import Optional, Dict, Any
 
-def new_parent_source(atok: asttokens.ASTTokens, tree: Any, last_parent: str) -> str:
-    """Given the token-marked ast, the current tree, and the last parent source,
+def new_parent_source(tree: Any, last_parent: str) -> str:
+    """Given an ast, the current tree, and the last parent source,
     return a new last parent source for facilitating feedback on problematic
     node.
 
     Parameters
     ----------
-    atok : asttokens.ASTTokens
-        the token-marked AST
     tree : Any
         the node we want to extract the source text for
     last_parent : str
@@ -42,30 +40,27 @@ def new_parent_source(atok: asttokens.ASTTokens, tree: Any, last_parent: str) ->
         the new last_parent or the same
     """
     # attempt to get a new parent source text for feedback
-    parent_source = atok.get_text(tree)
+    try:
+        parent_source = formatted(tree)
+    except:
+        pass
     # only set the last_parent if:
     # - it is a compound ast, and
     # - we can get a source text
     if isinstance(tree, ast.AST) and len(tree._fields) > 1 and parent_source != "":
         last_parent = parent_source
-        # if isinstance(tree, ast.Call):
-        #     return last_parent
     return last_parent
 
-def check_children(u_atok: asttokens.ASTTokens, 
-                   s_atok: asttokens.ASTTokens,
-                   left: ast.AST, 
+def check_children(left: ast.AST, 
                    right: ast.AST, 
                    line_info: Optional[Dict[str, int]] = None,
-                   last_parent: str = ""):
+                   last_parent: str = "",
+                   left_source: str = "", 
+                   right_source: str = ""):
     """Checks children of two asts by iterating their fields
 
     Parameters
     ----------
-    u_atok : asttokens.ASTTokens
-        the token-marked AST for the student code
-    s_atok : asttokens.ASTTokens
-        the token-marked AST for the solution code
     left : ast.AST
         the student code
     right : ast.AST
@@ -74,6 +69,10 @@ def check_children(u_atok: asttokens.ASTTokens,
         holds line information about a particular node, by default None
     last_parent : str, optional
         the nearest parent that can be converted to source text, by default ""
+    left_source : str
+        the source text for user code
+    right_source : asttokens.ASTTokens
+        the source text for the solution code
     """
     lf, rf = ast.iter_fields(left), ast.iter_fields(right)
     # iterate through the children of both ASTs
@@ -84,20 +83,18 @@ def check_children(u_atok: asttokens.ASTTokens,
         # check that the name of the AST nodes match
         compare_node(left_name, right_name, line_info, last_parent)
         # recurse on values
-        compare_ast(u_atok, s_atok, left_values, right_values, line_info, last_parent)
+        compare_ast(left_values, right_values, line_info, last_parent, left_source, right_source,)
 
-def compare_ast(u_atok: asttokens.ASTTokens, 
-                s_atok: asttokens.ASTTokens,
-                left: ast.AST, 
+def compare_ast(left: ast.AST, 
                 right: ast.AST, 
                 line_info: Optional[Dict[str, int]] = None,
-                last_parent: str = "") -> None:
+                last_parent: str = "",
+                left_source: str = "", 
+                right_source: str = "") -> None:
     """Compare two abstract syntax trees. Raise AssertionError as soon as they differ.
 
     Parameters
     ----------
-    atok : asttokens.ASTTokens
-        the token-marked AST for the student code
     left : ast.AST
         the student code
     right : ast.AST
@@ -106,6 +103,10 @@ def compare_ast(u_atok: asttokens.ASTTokens,
         holds line information about a particular node, by default None
     last_parent : str, optional
         the nearest parent that can be converted to source text, by default ""
+    left_source : str
+        the source text for user code
+    right_source : asttokens.ASTTokens
+        the source text for the solution code
     """
     # to hold line information like line number, and original source
     line_info = {} if line_info is None else line_info
@@ -122,38 +123,34 @@ def compare_ast(u_atok: asttokens.ASTTokens,
             right, "lineno", line_info.get("right", 1)
         )
         # attempt to get a new parent source text for feedback
-        last_parent = new_parent_source(u_atok, left, last_parent)
+        last_parent = new_parent_source(left, last_parent)
         # for ast.Call we will raise error when there is either a problem 
         # with the function or the arguments do not match after standardization
         if isinstance(left, ast.Call):
             # check that the standardized left and right Calls are the same
-            check_functions(u_atok, s_atok, left, right, line_info, last_parent)
+            check_functions(left, right, line_info, last_parent, left_source, right_source)
         else:
-            check_children(u_atok, s_atok, left, right, line_info, last_parent)
+            check_children(left, right, line_info, last_parent, left_source, right_source)
     elif isinstance(left, list):
         for left_child, right_child in zip_longest(left, right, fillvalue=""):
             # recurse on [Expr, ...]
             # attempt to get a new parent source text for feedback
-            last_parent = new_parent_source(u_atok, left_child, last_parent)
-            compare_ast(u_atok, s_atok, left_child, right_child, line_info, last_parent)
+            last_parent = new_parent_source(left_child, last_parent)
+            compare_ast(left_child, right_child, line_info, last_parent, left_source, right_source)
     else:
         compare_node(left, right, line_info, last_parent)
 
 # TODO document
-def check_functions(u_atok: asttokens.ASTTokens, 
-                   s_atok: asttokens.ASTTokens,
-                   left_call: ast.AST, 
+def check_functions(left_call: ast.AST, 
                    right_call: ast.AST, 
                    line_info: Optional[Dict[str, int]] = None,
-                   last_parent: str = ""):
+                   last_parent: str = "",
+                   left_source: str = "", 
+                   right_source: str = ""):
     """Standardizes and compares two ast.Calls. Raise AssertionError as soon as they differ.
 
     Parameters
     ----------
-    u_atok : asttokens.ASTTokens
-        the token-marked AST for the student code
-    s_atok : asttokens.ASTTokens
-        the token-marked AST for the solution code
     left_call : ast.AST
         the user function call
     right_call : ast.AST
@@ -162,15 +159,18 @@ def check_functions(u_atok: asttokens.ASTTokens,
         holds line information about a particular node, by default None
     last_parent : str, optional
         the nearest parent that can be converted to source text, by default ""
+    left_source : str
+        the source text for user code
+    right_source : asttokens.ASTTokens
+        the source text for the solution code
     """
     # standardize the left and right tree
-    ls = standardize_arguments(left_call, u_atok.get_text(u_atok.tree))
-    rs = standardize_arguments(right_call, s_atok.get_text(s_atok.tree))
+    ls = standardize_arguments(left_call, left_source)
+    rs = standardize_arguments(right_call, right_source)
     # if we don't have any arguments simply compare the two nodes
     if len(ls.keywords) == 0:
-        check_children(u_atok, s_atok, left_call, right_call, line_info, last_parent)
+        check_children(left_call, right_call, line_info, last_parent, left_source, right_source,)
     for l, r in zip_longest(ls.keywords, rs.keywords, fillvalue=""):
-        # TODO move this to wrong_value in message_generators
         wrong_value(ls, rs, line_info, last_parent, formatted(l.value) == formatted(r.value))
     
 def compare_node_type(
@@ -205,12 +205,7 @@ def compare_node_type(
         else:
             not_expected(left, right, line_info)
 
-def compare_node(
-        left: Any, 
-        right: Any, 
-        line_info: Dict[str, int],
-        last_parent: str
-    ):
+def compare_node(left: Any, right: Any, line_info: Dict[str, int], last_parent: str):
     """Compare two objects of the same type and raise an exception with feedback if nodes differ.
 
     Parameters
@@ -244,16 +239,12 @@ def grade_code(student_code: str, solution_code: str):
         If user code differs from solution
     """
     try:
-        # TODO: make parser more pluggable for 3.8 ast parser or other potential parsers like antlr
-        # with the contract being it needs a similar get_text for getting
         # source node back
-        student = asttokens.ASTTokens(student_code, parse=True)
-        solution = asttokens.ASTTokens(solution_code, parse=True)
+        student = ast.parse(student_code)
+        solution = ast.parse(solution_code)
         # set parent node of child nodes for better feedback
-        u_atok = student
-        s_atok = solution
-        last_parent = u_atok.get_text(next(n for n in ast.walk(u_atok.tree)))
-        compare_ast(u_atok, s_atok, student.tree, solution.tree, last_parent = last_parent)
+        last_parent = formatted(next(n for n in ast.walk(student)))
+        compare_ast(student, solution, last_parent = last_parent, left_source=student_code, right_source=solution_code)
     except AssertionError as e:
         return str(e) # back to either the python_grader or python_grade_learnr
     except Exception as e:
