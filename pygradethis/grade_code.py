@@ -30,7 +30,7 @@ def new_parent_source(tree: Any, last_parent: str) -> str:
     Parameters
     ----------
     tree : Any
-        the node we want to extract the source text for
+        the ast.AST or a Python type we want to extract the source text for
     last_parent : str
         the nearest parent that can be converted to source text
 
@@ -70,9 +70,9 @@ def check_children(left: ast.AST,
     last_parent : str, optional
         the nearest parent that can be converted to source text, by default ""
     left_source : str
-        the source text for user code
-    right_source : asttokens.ASTTokens
-        the source text for the solution code
+        the source text for user code, by default ""
+    right_source : str
+        the source text for the solution code, by default ""
     """
     lf, rf = ast.iter_fields(left), ast.iter_fields(right)
     # iterate through the children of both ASTs
@@ -104,9 +104,9 @@ def compare_ast(left: ast.AST,
     last_parent : str, optional
         the nearest parent that can be converted to source text, by default ""
     left_source : str
-        the source text for user code
-    right_source : asttokens.ASTTokens
-        the source text for the solution code
+        the source text for user code, by default ""
+    right_source : str
+        the source text for the solution code, by default ""
     """
     # to hold line information like line number, and original source
     line_info = {} if line_info is None else line_info
@@ -160,9 +160,9 @@ def check_functions(left_call: ast.AST,
     last_parent : str, optional
         the nearest parent that can be converted to source text, by default ""
     left_source : str
-        the source text for user code
-    right_source : asttokens.ASTTokens
-        the source text for the solution code
+        the source text for user code, by default ""
+    right_source : str
+        the source text for the solution code, by default ""
     """
     # standardize the left and right tree
     ls = standardize_arguments(left_call, left_source)
@@ -170,6 +170,8 @@ def check_functions(left_call: ast.AST,
     # if we don't have any arguments simply compare the two nodes
     if len(ls.keywords) == 0:
         check_children(left_call, right_call, line_info, last_parent, left_source, right_source,)
+    # else, check all of the arguments which are all in keywords after running
+    # `standardize_arguments` to simplify checking
     for l, r in zip_longest(ls.keywords, rs.keywords, fillvalue=""):
         wrong_value(ls, rs, line_info, last_parent, formatted(l.value) == formatted(r.value))
     
@@ -249,50 +251,3 @@ def grade_code(student_code: str, solution_code: str):
         return str(e) # back to either the python_grader or python_grade_learnr
     except Exception as e:
         return "There was a problem checking user or solution code: {}".format(e)
-
-if __name__ == "__main__":
-    # TODO move to testing class
-    # these are the non-verbose cases
-    test_cases = [
-        # different core types
-        ("\"1\"", "1", "I expected 1, but what you wrote was interpreted as \"1\" at line 1."),
-        ("1", "\"1\"", "I expected \"1\", but what you wrote was interpreted as 1 at line 1."),
-        ("[1]", "\"1\"", "I expected \"1\", but what you wrote was interpreted as [1] at line 1."),
-        ("True", "\"1\"", "I expected \"1\", but what you wrote was interpreted as True at line 1."),
-        ("False", "\"1\"", "I expected \"1\", but what you wrote was interpreted as False at line 1."),
-        # str vs str
-        ("\"not hello\"", "\"hello\"", "I expected \"hello\", but what you wrote was interpreted as \"not hello\" at line 1."),
-        # list vs list
-        ("[2]", "[]", "I did not expect 2 at line 1."),
-        ("[1,2]", "[1]", "I did not expect 2 at line 1."),
-        ("[1]", "[1,2]", "I expected 2 at line 1."),
-        # expr vs something else
-        ("1 + 1", "1", "I expected 1, but what you wrote was interpreted as 1 + 1 at line 1."),
-        ("1 + (2 + 2)", "1 + (2 + 3)", "I expected 3, but what you wrote was interpreted as 2 in 2 + 2 at line 1."),
-        ("-1", "1", "I expected 1, but what you wrote was interpreted as -1 at line 1."),
-        # functions
-        # TODO this is an odd one, maybe we could just revert to original source text for these?
-        ("2 + sum([1,2])", "2 + sum([1,1])", "I expected sum(iterable=[1, 1], start=0), but what you wrote was interpreted as sum(iterable=[1, 2], start=0) at line 1."),
-        ("sqrt(log(2))", "sqrt(log(1))", "I expected 1, but what you wrote was interpreted as 2 in log(2) at line 1."),
-        ("def foo(a, b=1): pass; foo(2)", "def foo(a, b=1): pass; foo(1)", "I expected foo(a=1, b=1), but what you wrote was interpreted as foo(a=2, b=1) at line 1."),
-        ("def foo(a, b=1): pass; foo(a=2)", "def foo(a, b=1): pass; foo(1)", "I expected foo(a=1, b=1), but what you wrote was interpreted as foo(a=2, b=1) at line 1."),
-        ("def foo(a, b=1): pass; foo(a=[2])", "def foo(a, b=1): pass; foo(2, 2)", "I expected foo(a=2, b=2), but what you wrote was interpreted as foo(a=[2], b=1) at line 1."),
-        ("def foo(a, b=1): pass; foo(a=\"2\", b=2)", "def foo(a, b=1): pass; foo(2, 2)", "I expected foo(a=2, b=2), but what you wrote was interpreted as foo(a=\"2\", b=2) at line 1."),
-        ("def head(n=5): pass; head(12)", "def head(n=5): pass; head(n=10)", "I expected head(n=10), but what you wrote was interpreted as head(n=12) at line 1."),
-    ]
-    for t in test_cases:
-        print("~~~")
-        print("user code:\n{}\n".format(t[0]))
-        print("solution code:\n{}\n".format(t[1]))
-        message = grade_code(t[0], t[1])
-        print(message)
-        if message != t[2]:
-            raise ValueError(
-                "Failed test case!\nUser:{}\nSolution:{}\nExpected:{}\nGot:{}".format(
-                    t[0],
-                    t[1],
-                    t[2],
-                    message
-                )
-            )
-    print("All tests passed! :)")

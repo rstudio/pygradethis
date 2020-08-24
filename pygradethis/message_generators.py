@@ -45,12 +45,7 @@ def not_expected(left: Any, right: Any, line_info: Dict[str, int]):
     )
     assert type(left) == type(right), msg.format(*msg_args)
 
-def wrong_value(
-        left: Any, 
-        right: Any, 
-        line_info: Dict[str, int],
-        last_parent: str,
-        condition: bool):
+def wrong_value(left: Any, right: Any, line_info: Dict[str, int],last_parent: str, condition: bool):
     """Generates message when user's code contains in an incorrect value.
 
     Parameters
