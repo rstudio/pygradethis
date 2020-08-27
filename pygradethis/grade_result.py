@@ -3,7 +3,9 @@ This module is used to check python code output.
 """
 
 from typing import Any, Union, List, Tuple
-import pandas as pd
+
+# for trying to import packages for checkers
+from importlib import import_module
 
 from .conditions import GraderCondition
 
@@ -11,9 +13,18 @@ def python_compare_output(user_output: Any, expected_output: Any) -> bool:
   """Return whether the user output and expected output match"""
   if type(user_output) != type(expected_output):
     return False
-  elif isinstance(user_output, pd.DataFrame) and isinstance(expected_output, pd.DataFrame):
+  # TODO: add more pandas + numpy DS
+  # TODO this is okay for now and doesn't break existing functionality
+  # but we will likely change this after refactoring checks to use asserts
+  elif user_output.__class__.__name__ == "DataFrame" and expected_output.__class__.__name__ == "DataFrame":
+    try:
+      import_module("pandas")
       return user_output.equals(expected_output)
-  else:
+    except:
+      # we will want to properly handle this case in the future by raising Exception
+      # when refactoring to the assertEqual approach this will become easier
+      return False 
+  
     return user_output == expected_output
   
 def python_grade_conditions(*conditions: GraderCondition, user_result: Any = None) -> Tuple[bool, GraderCondition]:
