@@ -82,8 +82,38 @@ def wrong_value(left: Any, right: Any, line_info: Dict[str, int],last_parent: st
 
 # Call related -------------------------------
 
-def duplicate_name(this_call, this_name):
+def missing_argument(left_call, right_call, right_source, e):
+    # def foo(a, b=1): pass
+    # foo() missing 1 required positional argument: 'a'
 
+    # "Your call to {this} should include {that_name} ",
+    # "You may have misspelled an argument name, ",
+    # "or left out an important argument."
+    msg = "I expected {} but what you wrote was interpreted as {}, which I can't execute because I'm {}."
+    msg_args = (
+        right_source, 
+        formatted(left_call), 
+        str(e).lower()
+    )
+    raise AssertionError(msg.format(*msg_args))
+
+def unexpected_argument(left_call, right_call, right_source, e):
+    # def foo(a, b=1): pass
+    # foo(x=1)
+
+    # TypeError: foo() got an unexpected keyword argument 'x'
+
+    # {this} got an unexpected keyword argument {this_name}
+    msg = "I expected {} but what you wrote was interpreted as {}, which I can't execute because I {}."
+    msg_args = (
+        right_source, 
+        formatted(left_call), 
+        str(e).lower()
+    )
+    raise AssertionError(msg.format(*msg_args))
+
+
+def repeated_argument(e):
     # def foo(a, b=1): pass
 
     # foo(a=1, a=2)
@@ -91,7 +121,7 @@ def duplicate_name(this_call, this_name):
 
     # "You passed multiple arguments named {this_name} to {this_call}, which will cause "
     # "an error. Check your spelling, or remove one of the arguments."
-    pass
+    return "You passed a keyword argument multiple times."
 
 def wrong_call(this, that):
     # def foo(a, b=1): pass
@@ -102,24 +132,7 @@ def wrong_call(this, that):
     # "I expected you to call {that} where you called {this}."
     pass
 
-def bad_argument_name(this, this_name):
-    # def foo(a, b=1): pass
-    # foo(x=1)
 
-    # TypeError: foo() got an unexpected keyword argument 'x'
-
-    # {this} got an unexpected keyword argument {this_name}
-    pass
-
-
-def missing_argument(this, that_name):
-    # def foo(a, b=1): pass
-    # foo() missing 1 required positional argument: 'a'
-
-    # "Your call to {this} should include {that_name} ",
-    # "You may have misspelled an argument name, ",
-    # "or left out an important argument."
-    pass
 
 def surplus_argument(this, this_arg):
 

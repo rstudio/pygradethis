@@ -6,12 +6,20 @@ import ast
 import inspect
 import builtins
 
+from .message_generators import missing_argument, unexpected_argument
 from .formatters import formatted
+
 from math import sqrt, log
 
 from itertools import zip_longest
 
-def standardize_arguments(call: ast.Call, source_code: str) -> ast.Call:
+def standardize_arguments(
+        left_call: ast.Call, 
+        right_call: ast.Call = None, 
+        left_source: str = "",
+        right_source: str = ""
+    ) -> ast.Call:
+    # TODO update the doc
     """This will standardize the function calls for a function Call and return
     the modified Call.
     
@@ -25,7 +33,7 @@ def standardize_arguments(call: ast.Call, source_code: str) -> ast.Call:
     ----------
     call : ast.Call
         the call to standardize arguments
-    source_code : str
+    left_source : str
         the source code in which the call belongs to
 
     Returns
@@ -47,17 +55,17 @@ def standardize_arguments(call: ast.Call, source_code: str) -> ast.Call:
         # first pass: is it legal Python code?
         # for e.g., positional args should always be before keywords args
         # exec will catch these issues
-        exec(source_code)
+        exec(left_source)
         # 2) construct a environment containing encompassing both global and locals, 
         # overwriting the globals with locals, and builtins.
         envir = dict(globals(), **locals(), **builtins.__dict__)
         # 3) grab the live function from the environment
         # if we're calling a function on an object, the function info has
         # to be extracted from an ast.Attribute
-        if isinstance(call.func, ast.Attribute):
-            func_name = getattr(call.func, "attr") 
+        if isinstance(left_call.func, ast.Attribute):
+            func_name = getattr(left_call.func, "attr") 
             # the object's name 
-            obj = call.func.value.id
+            obj = left_call.func.value.id
             # the live function from the environment associated with object
             # e.g. the `df` in df.head() is a pd.DataFrame so must get the
             # `head` associated with that class.
@@ -65,12 +73,12 @@ def standardize_arguments(call: ast.Call, source_code: str) -> ast.Call:
         else:
             # if we're calling a function not associated with an object
             # just grab function from environment using its name
-            func_name = call.func.id
+            func_name = left_call.func.id
             live_func = envir[func_name]
 
         # 4) collect the arguments passed
         # construct keyword args mapping
-        kwargs = {a.arg:a.value for a in call.keywords}
+        kwargs = {a.arg:a.value for a in left_call.keywords}
         
         # 5) get the formal arguments for function
         try:
@@ -81,11 +89,11 @@ def standardize_arguments(call: ast.Call, source_code: str) -> ast.Call:
         except ValueError: 
             # if we can't get a signature just return call for normal Call
             # checking flow
-            return call
+            return left_call
 
         # 6) unpack args and kwargs and attempt to standardize argument calls
         # returns: https://docs.python.org/3.6/library/inspect.html#inspect.BoundArguments
-        partial_args = sig.bind(*call.args, **kwargs)
+        partial_args = sig.bind(*left_call.args, **kwargs)
         partial_args.apply_defaults()
 
         # 7) return a modified AST representing the standardized call
@@ -94,12 +102,28 @@ def standardize_arguments(call: ast.Call, source_code: str) -> ast.Call:
         new_keywords = []
         for k, v in partial_args.arguments.items():
             new_keywords.append(ast.keyword(arg=k, value=v))
-        call.args = []
-        call.keywords = new_keywords
-        return call
+        left_call.args = []
+        left_call.keywords = new_keywords
+        return left_call
     except TypeError as e:
-        raise AssertionError(str(e).capitalize())
+        error = str(e)
+        if "missing" in error:
+            missing_argument(
+                left_call, 
+                right_call, 
+                formatted(standardize_arguments(right_call, left_source=right_source)), 
+                error
+            )
+        if "unexpected" in error:
+            unexpected_argument(
+                left_call, 
+                right_call, 
+                formatted(standardize_arguments(right_call, left_source=right_source)), 
+                error
+            )
     except NameError as e:
+        print("NameError: {}".format(e))
         raise AssertionError(str(e).capitalize())
     except Exception as e:
+        print("Exception: {}".format(e))
         pass
