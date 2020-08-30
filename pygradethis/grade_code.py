@@ -166,7 +166,8 @@ def check_functions(left_call: ast.AST,
     """
     # standardize the left and right tree
     ls = standardize_arguments(left_call, right_call, left_source, right_source)
-    rs = standardize_arguments(right_call, right_source)
+    # TODO the argument naming for this function is confusing, perhaps refactor it.
+    rs = standardize_arguments(left_call=right_call, left_source=right_source)
     # if we don't have any arguments simply compare the two nodes
     if len(ls.keywords) == 0:
         check_children(left_call, right_call, line_info, last_parent, left_source, right_source,)
@@ -252,6 +253,7 @@ def grade_code(student_code: str, solution_code: str):
         # TODO figure out why we're getting unknown for diagnosis of argument
         if "repeated" in message:
             return repeated_argument(e)
+        pass
     except AssertionError as e:
         return str(e) # back to either the python_grader or python_grade_learnr
     except Exception as e:
