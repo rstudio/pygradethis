@@ -13,7 +13,9 @@ from .formatters import formatted
 # checking functions
 from .check_functions import standardize_arguments
 # feedback
-from .message_generators import missing, not_expected, wrong_value, repeated_argument
+from .message_generators import (
+    missing, not_expected, wrong_value, repeated_argument
+)
 
 # add any libraries you might need
 from math import *
@@ -253,7 +255,6 @@ def grade_code(student_code: str, solution_code: str):
         # TODO figure out why we're getting unknown for diagnosis of argument
         if "repeated" in message:
             return repeated_argument(e)
-        pass
     except AssertionError as e:
         return str(e) # back to either the python_grader or python_grade_learnr
     except Exception as e:

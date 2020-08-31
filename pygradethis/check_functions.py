@@ -6,7 +6,9 @@ import ast
 import inspect
 import builtins
 
-from .message_generators import missing_argument, unexpected_argument
+from .message_generators import (
+    missing_argument, unexpected_argument, surplus_argument
+)
 from .formatters import formatted
 
 from math import sqrt, log
@@ -109,16 +111,23 @@ def standardize_arguments(
         error = str(e)
         if "missing" in error:
             missing_argument(
-                left_call, 
-                right_call, 
-                formatted(standardize_arguments(right_call, left_source=right_source)), 
+                left_call,
+                right_call,
+                formatted(standardize_arguments(left_call=right_call, left_source=right_source)),
                 error
             )
         if "unexpected" in error:
             unexpected_argument(
-                left_call, 
-                right_call, 
-                formatted(standardize_arguments(right_call, left_source=right_source)), 
+                left_call,
+                right_call,
+                formatted(standardize_arguments(left_call=right_call, left_source=right_source)),
+                error
+            )
+        if "too many" in error:
+            surplus_argument(
+                left_call,
+                right_call,
+                formatted(standardize_arguments(left_call=right_call, left_source=right_source)),
                 error
             )
     except NameError as e:

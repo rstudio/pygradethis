@@ -7,7 +7,7 @@ import ast
 from typing import Dict, Any
 from .formatters import formatted
 
-def missing(left: Any, right: Any, line_info: Dict[str, int]):
+def missing(left: Any, right: Any, line_info: Dict[str, int]) -> str:
     """Generates message when user is missing a node or element in code.
 
     Parameters
@@ -18,6 +18,11 @@ def missing(left: Any, right: Any, line_info: Dict[str, int]):
         an ast.Node, a custom type, or a python data type
     line_info : Dict[str, int]
         holds line information about a particular node
+
+    Returns
+    -------
+    str
+        feedback message
     """
     msg = "I expected {} at line {}."
     msg_args = (
@@ -26,7 +31,7 @@ def missing(left: Any, right: Any, line_info: Dict[str, int]):
     )
     assert type(left) == type(right), msg.format(*msg_args)
 
-def not_expected(left: Any, right: Any, line_info: Dict[str, int]):
+def not_expected(left: Any, right: Any, line_info: Dict[str, int]) -> str:
     """Generates message when user supplies an extra node or element in code.
 
     Parameters
@@ -37,6 +42,11 @@ def not_expected(left: Any, right: Any, line_info: Dict[str, int]):
         an ast.Node, a custom type, or a python data type
     line_info : Dict[str, int]
         holds line information about a particular node
+
+    Returns
+    -------
+    str
+        feedback message
     """
     msg = "I did not expect {} at line {}."
     msg_args = (
@@ -45,7 +55,7 @@ def not_expected(left: Any, right: Any, line_info: Dict[str, int]):
     )
     assert type(left) == type(right), msg.format(*msg_args)
 
-def wrong_value(left: Any, right: Any, line_info: Dict[str, int],last_parent: str, condition: bool):
+def wrong_value(left: Any, right: Any, line_info: Dict[str, int], last_parent: str, condition: bool) -> str:
     """Generates message when user's code contains in an incorrect value.
 
     Parameters
@@ -61,6 +71,11 @@ def wrong_value(left: Any, right: Any, line_info: Dict[str, int],last_parent: st
     condition : bool
         the condition we want to check regarding equality between left and right
         ast nodes or values
+    
+    Returns
+    -------
+    str
+        feedback message
     """
     msg = "I expected {}, but what you wrote was interpreted as {} at line {}."
     msg_args = (
@@ -82,13 +97,41 @@ def wrong_value(left: Any, right: Any, line_info: Dict[str, int],last_parent: st
 
 # Call related -------------------------------
 
-def missing_argument(left_call, right_call, right_source, e):
-    # def foo(a, b=1): pass
-    # foo() missing 1 required positional argument: 'a'
+def repeated_argument(e: SyntaxError) -> str:
+    """Generates a feedback for a repeated keyword argument error.
 
-    # "Your call to {this} should include {that_name} ",
-    # "You may have misspelled an argument name, ",
-    # "or left out an important argument."
+    Parameters
+    ----------
+    e : SyntaxError
+        the error object
+
+    Returns
+    -------
+    str
+        feedback message
+    """
+    msg = "I couldn't parse your function call because I got a repeated keyword argument."
+    return msg.format(str(e).lower())
+
+def missing_argument(left_call: ast.AST, right_call: ast.AST, right_source: str, e: TypeError):
+    """Generates a feedback when there is a missing argument for a function call.
+
+    Parameters
+    ----------
+    left_call : ast.AST
+        student's function call
+    right_call : ast.AST
+        solution function call
+    right_source : str
+        solution source text
+    e : TypeError
+        the error object
+
+    Raises
+    ------
+    AssertionError
+        to ripple up back to grade_code
+    """
     msg = "I expected {} but what you wrote was interpreted as {}, which I can't execute because I'm {}."
     msg_args = (
         right_source, 
@@ -97,13 +140,25 @@ def missing_argument(left_call, right_call, right_source, e):
     )
     raise AssertionError(msg.format(*msg_args))
 
-def unexpected_argument(left_call, right_call, right_source, e):
-    # def foo(a, b=1): pass
-    # foo(x=1)
+def unexpected_argument(left_call: ast.AST, right_call: ast.AST, right_source: str, e: TypeError):
+    """Generates a feedback when there is an unexpected argument for a function call.
 
-    # TypeError: foo() got an unexpected keyword argument 'x'
-
-    # {this} got an unexpected keyword argument {this_name}
+    Parameters
+    ----------
+    left_call : ast.AST
+        student's function call
+    right_call : ast.AST
+        solution function call
+    right_source : str
+        solution source text
+    e : TypeError
+        the error object
+    
+    Raises
+    ------
+    AssertionError
+        to ripple up back to grade_code
+    """
     msg = "I expected {} but what you wrote was interpreted as {}, which I can't execute because I {}."
     msg_args = (
         right_source, 
@@ -112,36 +167,29 @@ def unexpected_argument(left_call, right_call, right_source, e):
     )
     raise AssertionError(msg.format(*msg_args))
 
+def surplus_argument(left_call: ast.AST, right_call: ast.AST, right_source: str, e: TypeError):
+    """Generates a feedback when there extra arguments for a function call.
 
-def repeated_argument(e):
-    # def foo(a, b=1): pass
-
-    # foo(a=1, a=2)
-    # SyntaxError: keyword argument repeated
-
-    # "You passed multiple arguments named {this_name} to {this_call}, which will cause "
-    # "an error. Check your spelling, or remove one of the arguments."
-    return "You passed a keyword argument multiple times."
-
-def wrong_call(this, that):
-    # def foo(a, b=1): pass
-
-    # bar(1)
-    # foo(1)
-
-    # "I expected you to call {that} where you called {this}."
-    pass
-
-
-
-def surplus_argument(this, this_arg):
-
-    # def foo(a, b=1): pass
-    # foo(x=1) => TypeError: foo() got an unexpected keyword argument 'x'
-
-    # "I did not expect your call to {this} to ",
-    # "include {this_arg}. You ",
-    # "may have included an unnecessary argument, or you ",
-    # "may have left out or misspelled an important ",
-    # "argument name."
-    pass
+    Parameters
+    ----------
+    left_call : ast.AST
+        student's function call
+    right_call : ast.AST
+        solution function call
+    right_source : str
+        solution source text
+    e : TypeError
+        the error object
+        
+    Raises
+    ------
+    AssertionError
+        to ripple up back to grade_code
+    """
+    msg = "I expected {} but what you wrote was interpreted as {}, which I can't execute because there are {}."
+    msg_args = (
+        right_source, 
+        formatted(left_call), 
+        str(e).lower()
+    )
+    raise AssertionError(msg.format(*msg_args))
