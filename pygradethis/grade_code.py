@@ -166,17 +166,20 @@ def check_functions(left_call: ast.AST,
     right_source : str
         the source text for the solution code, by default ""
     """
+    # TODO standardize_arguments args naming is confusing, perhaps refactor it.
     # standardize the left and right tree
-    ls = standardize_arguments(left_call, right_call, left_source, right_source)
-    # TODO the argument naming for this function is confusing, perhaps refactor it.
-    rs = standardize_arguments(left_call=right_call, left_source=right_source)
+    ls = standardize_arguments(left_call=left_call, right_call=right_call, left_source=left_source, right_source=right_source)
+    rs = standardize_arguments(left_call=right_call, right_call=right_call, left_source=right_source, right_source=right_source)
     # if we don't have any arguments simply compare the two nodes
     if len(ls.keywords) == 0:
         check_children(left_call, right_call, line_info, last_parent, left_source, right_source,)
     # else, check all of the arguments which are all in keywords after running
     # `standardize_arguments` to simplify checking
-    for l, r in zip_longest(ls.keywords, rs.keywords, fillvalue=""):
-        wrong_value(ls, rs, line_info, last_parent, formatted(l.value) == formatted(r.value))
+    if ls != None and rs != None:
+        for l, r in zip_longest(ls.keywords, rs.keywords, fillvalue=""):
+            wrong_value(ls, rs, line_info, last_parent, formatted(l.value) == formatted(r.value))
+    else:
+        raise AssertionError("Foo-y! Something went wrong with function call checking.")
     
 def compare_node_type(
         left: Any, 

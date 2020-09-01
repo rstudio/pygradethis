@@ -17,7 +17,7 @@ from itertools import zip_longest
 
 def standardize_arguments(
         left_call: ast.Call, 
-        right_call: ast.Call = None, 
+        right_call: ast.Call, 
         left_source: str = "",
         right_source: str = ""
     ) -> ast.Call:
@@ -57,7 +57,11 @@ def standardize_arguments(
         # first pass: is it legal Python code?
         # for e.g., positional args should always be before keywords args
         # exec will catch these issues
-        exec(left_source)
+        # NOTE: we are attempting to import `r` object for learnr use.
+        if "r" in globals():
+            exec(left_source, {}, r)
+        else:
+            exec(left_source)
         # 2) construct a environment containing encompassing both global and locals, 
         # overwriting the globals with locals, and builtins.
         envir = dict(globals(), **locals(), **builtins.__dict__)
@@ -65,7 +69,7 @@ def standardize_arguments(
         # if we're calling a function on an object, the function info has
         # to be extracted from an ast.Attribute
         if isinstance(left_call.func, ast.Attribute):
-            func_name = getattr(left_call.func, "attr") 
+            func_name = getattr(left_call.func, "attr")
             # the object's name 
             obj = left_call.func.value.id
             # the live function from the environment associated with object
@@ -113,21 +117,33 @@ def standardize_arguments(
             missing_argument(
                 left_call,
                 right_call,
-                formatted(standardize_arguments(left_call=right_call, left_source=right_source)),
+                formatted(standardize_arguments(
+                    left_call=right_call, right_call = right_call, 
+                    left_source=right_source, right_source=right_source
+                    )
+                ),
                 error
             )
         if "unexpected" in error:
             unexpected_argument(
                 left_call,
                 right_call,
-                formatted(standardize_arguments(left_call=right_call, left_source=right_source)),
+                formatted(standardize_arguments(
+                    left_call=right_call, right_call = right_call, 
+                    left_source=right_source, right_source=right_source
+                    )
+                ),
                 error
             )
         if "too many" in error:
             surplus_argument(
                 left_call,
                 right_call,
-                formatted(standardize_arguments(left_call=right_call, left_source=right_source)),
+                formatted(standardize_arguments(
+                    left_call=right_call, right_call = right_call, 
+                    left_source=right_source, right_source=right_source
+                    )
+                ),
                 error
             )
     except NameError as e:
@@ -136,3 +152,10 @@ def standardize_arguments(
     except Exception as e:
         print("Exception: {}".format(e))
         pass
+
+if __name__ != '__main__':
+  try:
+    # attempt to import if used with R's `learnr` package
+    from __main__ import r
+  except:
+    pass
