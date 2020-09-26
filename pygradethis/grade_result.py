@@ -2,8 +2,8 @@
 This module is used to check python code output.
 """
 
+import sys
 from typing import Any, Union, List, Tuple
-import pandas as pd
 
 from .conditions import GraderCondition
 
@@ -11,12 +11,19 @@ def python_compare_output(user_output: Any, expected_output: Any) -> bool:
   """Return whether the user output and expected output match"""
   if type(user_output) != type(expected_output):
     return False
-  elif isinstance(user_output, pd.DataFrame) and isinstance(expected_output, pd.DataFrame):
+  # TODO: add more pandas + numpy DS
+  # TODO this is okay for now and doesn't break existing functionality
+  # but we will likely change this after refactoring checks to use asserts
+  elif user_output.__class__.__name__ == "DataFrame" and expected_output.__class__.__name__ == "DataFrame":
+    if "pandas" in sys.modules:
       return user_output.equals(expected_output)
+    # we will want to properly handle this case in the future by raising Exception
+    # when refactoring to the assertEqual approach this will become easier
+    return False
   else:
     return user_output == expected_output
   
-def python_grade_conditions(*conditions: GraderCondition, user_result: Any = None) -> Tuple[bool, GraderCondition]:
+def python_grade_conditions(*conditions: GraderCondition, user_result: Any = None, r: dict = {}) -> Tuple[bool, GraderCondition]:
   """Goes through all conditions (python_pass_if, python_fail_if) and
   returns the first condition that comes True.
 
@@ -41,6 +48,7 @@ def python_grade_conditions(*conditions: GraderCondition, user_result: Any = Non
     if result:
       return result, condition
   # If there is at least one pass_if() condition, then default to an incorrect grade;
+  # otherwise, we default to a correct grade https://github.com/rstudio-education/gradethis/issues/118
   if len([c for c in conditions if c['correct']]) != 0:
     return False, None
   # otherwise if we only have fail_ifs, we default to a correct grade 
@@ -73,7 +81,8 @@ def python_grade_result(*conditions: List[GraderCondition], user_result: Any = N
   Exception
       if GraderConditions are not passed in for conditions
   """
-  if conditions == None or len([c for c in conditions if isinstance(c, GraderCondition)]) == 0:
+  all_conditions = [c for c in conditions if isinstance(c, GraderCondition)]
+  if conditions == None or len(all_conditions) == 0:
     raise Exception(
       "At least one condition object (e.g., `python_pass_if()`, "
       "`python_fail_if()`, `python_condition()`) must be provided to"
@@ -82,3 +91,10 @@ def python_grade_result(*conditions: List[GraderCondition], user_result: Any = N
   if user_result is not None:
     return python_grade_conditions(*conditions, user_result=user_result)
   return conditions
+
+if __name__ != '__main__':
+  try:
+    # attempt to import `pandas`
+    import pandas
+  except:
+    pass

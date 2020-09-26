@@ -90,7 +90,7 @@ def grade(*check_code: GraderCondition,
       correct = True,
       type = "info"
     )
-  
+    
   # TODO input scrubbing for malicious code
   # parse user, and solution code
   solution_code = parse_code(solution_code)
@@ -112,6 +112,7 @@ def grade(*check_code: GraderCondition,
   try:
     # evaluate user code so that we can compare to expected
     user_result = eval(user_code_source)
+    
   except Exception as e:
     # TODO somehow trickle up the specific error message?
     return dict(

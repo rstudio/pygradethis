@@ -13,7 +13,9 @@ from .formatters import formatted
 # checking functions
 from .check_functions import standardize_arguments
 # feedback
-from .message_generators import missing, not_expected, wrong_value
+from .message_generators import (
+    missing, not_expected, wrong_value, repeated_argument
+)
 
 # add any libraries you might need
 from math import *
@@ -164,16 +166,20 @@ def check_functions(left_call: ast.AST,
     right_source : str
         the source text for the solution code, by default ""
     """
+    # TODO standardize_arguments args naming is confusing, perhaps refactor it.
     # standardize the left and right tree
-    ls = standardize_arguments(left_call, left_source)
-    rs = standardize_arguments(right_call, right_source)
+    ls = standardize_arguments(left_call=left_call, right_call=right_call, left_source=left_source, right_source=right_source)
+    rs = standardize_arguments(left_call=right_call, right_call=right_call, left_source=right_source, right_source=right_source)
     # if we don't have any arguments simply compare the two nodes
     if len(ls.keywords) == 0:
         check_children(left_call, right_call, line_info, last_parent, left_source, right_source,)
     # else, check all of the arguments which are all in keywords after running
     # `standardize_arguments` to simplify checking
-    for l, r in zip_longest(ls.keywords, rs.keywords, fillvalue=""):
-        wrong_value(ls, rs, line_info, last_parent, formatted(l.value) == formatted(r.value))
+    if ls != None and rs != None:
+        for l, r in zip_longest(ls.keywords, rs.keywords, fillvalue=""):
+            wrong_value(ls, rs, line_info, last_parent, formatted(l.value) == formatted(r.value))
+    else:
+        raise AssertionError("Foo-y! Something went wrong with function call checking.")
     
 def compare_node_type(
         left: Any, 
@@ -247,6 +253,11 @@ def grade_code(student_code: str, solution_code: str):
         # set parent node of child nodes for better feedback
         last_parent = formatted(next(n for n in ast.walk(student)))
         compare_ast(student, solution, last_parent = last_parent, left_source=student_code, right_source=solution_code)
+    except SyntaxError as e:
+        message = str(e)
+        # TODO figure out why we're getting unknown for diagnosis of argument
+        if "repeated" in message:
+            return repeated_argument(e)
     except AssertionError as e:
         return str(e) # back to either the python_grader or python_grade_learnr
     except Exception as e:

@@ -60,8 +60,7 @@ def python_grade_learnr(label: str = None,
                         envir_result: dict = None,
                         evaluate_result: List[str] = None,
                         envir_prep: dict = None,
-                        last_value: Any = None,
-                        **kwargs) -> dict:
+                        last_value: Any = None) -> dict:
   """This function mirrors the `grade_learnr` function from {gradethis} package so that
   we can check Python exercises. This function does two things:
   - Do static code grading (AST) if both user and solution code is provided
@@ -133,22 +132,29 @@ def python_grade_learnr(label: str = None,
 
   # evaluate exercise and check code output
   try:
-    # Note: because Python is eager evaluation, we already have introduced
-    # the `r` object in the current scope when entering this function
+    # NOTE: the `r` comes from the explicit import when loading this module
+    # via reticulate
     # evaluate check code so that expected output is ready
     check_code_conditions = eval(check_code_source, {}, r)
     # for e.g. did knitr already execute result and it's somewhere in the `r`?
     # evaluate user code so that we can compare to expected
     user_result = eval(user_code_source, {}, r)
     # grade python_pass_if/fail_if conditions against user's code output
-    result, condition = python_grade_result(check_code_conditions, user_result = user_result)
+    result, condition = python_grade_result(*check_code_conditions, user_result = user_result)
   except Exception as e:
     # TODO somehow trickle up the specific error message?
     return dict(
-      message="Error occured while checking the submission. {e}".format(e),
+      message="Error occured while checking the submission. {}".format(str(e)),
       correct=False,
       type="warning",
       location="append"
     )
   # return a dict for learnr to process for feedback
   return graded_learnr(result, condition)
+
+if __name__ != '__main__':
+  try:
+    # attempt to import if used with R's `learnr` package
+    from __main__ import r
+  except:
+    pass
