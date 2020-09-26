@@ -90,7 +90,6 @@ def standardize_arguments(call: ast.Call, source_code: str) -> ast.Call:
 
         # 7) return a modified AST representing the standardized call
         # we do this by updating Call.keywords and reset the args
-        # TODO handle functions where you don't have keywords: import math; math.sqrt(math.log(1))
         new_keywords = []
         for k, v in partial_args.arguments.items():
             new_keywords.append(ast.keyword(arg=k, value=v))
