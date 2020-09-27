@@ -142,7 +142,6 @@ def compare_ast(left: ast.AST,
     else:
         compare_node(left, right, line_info, last_parent)
 
-# TODO document
 def check_functions(left_call: ast.AST, 
                    right_call: ast.AST, 
                    line_info: Optional[Dict[str, int]] = None,
