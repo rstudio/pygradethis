@@ -139,6 +139,7 @@ def python_grade_learnr(label: str = None,
     # for e.g. did knitr already execute result and it's somewhere in the `r`?
     # evaluate user code so that we can compare to expected
     user_result = eval(user_code_source, {}, r)
+
     # grade python_pass_if/fail_if conditions against user's code output
     result, condition = python_grade_result(*check_code_conditions, user_result = user_result)
   except Exception as e:

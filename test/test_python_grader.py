@@ -99,6 +99,33 @@ class PythonGraderTest(unittest.TestCase):
         )
         self.assertFalse(result['correct'])
         self.assertEqual(result['type'], "error")
+
+    # Grade unittest style -------------------------------------
+    def test_unittest_style_correct(self):
+        # TODO we now need a way to pass functions so we can test multiple
+        # conditions :D 
+        result = grade(
+            python_pass_if(1),
+            user_code="1",
+            unittest_style=True
+        )
+        self.assertEqual(result['message'], '1/1 correct.')
+        # self.assertEqual(result['num_correct'], 1)
+        # self.assertEqual(result['total'], 1)
+        self.assertTrue(result['correct'])
+        self.assertEqual(result['type'], "success")
+
+    def test_unittest_style_incorrect(self):
+        result = grade(
+            python_pass_if(1),
+            user_code="2",
+            unittest_style=True
+        )
+        self.assertEqual(result['message'], '0/1 correct.')
+        # self.assertEqual(result['num_correct'], 1)
+        # self.assertEqual(result['total'], 1)
+        self.assertFalse(result['correct'])
+        self.assertEqual(result['type'], "error")
     
     # Grade code -------------------------------------
     # TODO add static code check examples

@@ -11,7 +11,11 @@ from .result_checker import test_conditions
 # TODO add the glue type messages to construct custom messages
 # glue_correct = getOption("gradethis_glue_correct"),
 # glue_incorrect = getOption("gradethis_glue_incorrect")
-def python_grade_result(*conditions: List[GraderCondition], user_result: Any = None) -> Union[dict, str]:
+def python_grade_result(
+    *conditions: List[GraderCondition], 
+    user_result: Any = None, 
+    unittest_style: bool = False
+  ) -> Union[dict, str]:
   """This function checks the user's code output against the list of conditions.
 
   Parameters
@@ -40,5 +44,5 @@ def python_grade_result(*conditions: List[GraderCondition], user_result: Any = N
       "`python_grade_result()`"
     )
   if user_result is not None:
-    return test_conditions(*conditions, user_result=user_result)
+    return test_conditions(*conditions, user_result = user_result, unittest_style = unittest_style)
   return conditions

@@ -9,9 +9,20 @@ from .conditions import GraderCondition
 from .feedback import praise, encourage
 from .utils import parse_code
 
-def graded(result: Union[str, dict], condition: GraderCondition):
+def graded(result: Union[str, dict], condition: GraderCondition, unittest_style: bool = False):
   # return a dict for feedback
-  if (result and condition):
+  if unittest_style:
+    num_correct = condition['num_correct']
+    total = condition['total']
+    message = condition['message'].format(num_correct, total)
+    correct = True if num_correct == total else False
+    type = "success" if correct else "error"
+    return dict(
+      message = message,
+      correct = correct,
+      type = type
+    )
+  if result and condition:
     # correct
     if condition['correct']:
       return dict(
@@ -47,9 +58,12 @@ def graded(result: Union[str, dict], condition: GraderCondition):
     )
 
 
-def grade(*check_code: GraderCondition,
-          user_code: str = None, 
-          solution_code: str = None) -> dict:
+def grade(
+  *check_code: GraderCondition,
+  user_code: str = None, 
+  solution_code: str = None,
+  unittest_style = False
+  ) -> dict:
   """Python standalone verson of `python_grade_learnr`. This function does
   two things:
   - Do static code grading (AST) if both user and solution code is provided
@@ -112,7 +126,6 @@ def grade(*check_code: GraderCondition,
   try:
     # evaluate user code so that we can compare to expected
     user_result = eval(user_code_source)
-    
   except Exception as e:
     # TODO somehow trickle up the specific error message?
     return dict(
@@ -122,7 +135,8 @@ def grade(*check_code: GraderCondition,
     )
 
   # grade python_pass_if/fail_if conditions against user's code output
-  result, condition = python_grade_result(*check_code, user_result = user_result)
+  result, condition = python_grade_result(*check_code, user_result = user_result, unittest_style = unittest_style)
+  # print(result, condition)
   # return a graded dict
-  return graded(result, condition)
+  return graded(result = result, condition = condition, unittest_style = unittest_style)
 
