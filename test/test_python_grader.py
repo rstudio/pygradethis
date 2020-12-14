@@ -110,9 +110,7 @@ class PythonGraderTest(unittest.TestCase):
             unittest_style=True
         )
         self.assertEqual(result['message'], '1/1 correct.')
-        # self.assertEqual(result['num_correct'], 1)
-        # self.assertEqual(result['total'], 1)
-        self.assertTrue(result['correct'])
+        self.assertEqual(result['num_correct'], 1)
         self.assertEqual(result['type'], "success")
 
     def test_unittest_style_incorrect(self):
@@ -122,11 +120,9 @@ class PythonGraderTest(unittest.TestCase):
             unittest_style=True
         )
         self.assertEqual(result['message'], '0/1 correct.')
-        # self.assertEqual(result['num_correct'], 1)
-        # self.assertEqual(result['total'], 1)
-        self.assertFalse(result['correct'])
+        self.assertEqual(result['num_correct'], 0)
         self.assertEqual(result['type'], "error")
-    
+
     # Grade code -------------------------------------
     # TODO add static code check examples
     

@@ -15,11 +15,10 @@ def graded(result: Union[str, dict], condition: GraderCondition, unittest_style:
     num_correct = condition['num_correct']
     total = condition['total']
     message = condition['message'].format(num_correct, total)
-    correct = True if num_correct == total else False
-    type = "success" if correct else "error"
+    type = "success" if num_correct == total else "error"
     return dict(
       message = message,
-      correct = correct,
+      num_correct = num_correct,
       type = type
     )
   if result and condition:
