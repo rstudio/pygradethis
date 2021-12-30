@@ -2,6 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/pygradethis.svg)](https://badge.fury.io/py/pygradethis)
 [![PyPI - License](https://img.shields.io/pypi/l/pygradethis)](LICENSE)
+[![Downloads](https://pepy.tech/badge/pygradethis)](https://pepy.tech/project/pygradethis)
 
 A Python package to facilitate checking code output or static code checking
 using AST analysis. It can either be used with R using the [`learnr`](https://rstudio.github.io/learnr/) package, as 
@@ -18,12 +19,7 @@ pip install pygradethis
 
 ## Dependencies
 
-- Python 3.6
-- [astunparse](https://github.com/simonpercivall/astunparse) *
-
-*We rely on astunparse for getting the text back from a source node (if possible) for 
-static AST checking (more on that below). Python 3.8 has an improved ast module which
-can do away with this dependency in the future.
+- Python 3.9+
 
 ## Optional Dependencies
 
