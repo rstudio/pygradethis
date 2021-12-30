@@ -108,9 +108,6 @@ def grade(
   # parse user, and solution code
   solution_code = parse_code(solution_code)
   user_code_source = parse_code(user_code)
-
-  # print('user_code_source', user_code_source)
-  # print('solution_code', solution_code)
   if solution_code is not None:
     # do static checks on code if the solution code is provided
     graded_code = grade_code(user_code_source, solution_code)
@@ -135,7 +132,6 @@ def grade(
 
   # grade python_pass_if/fail_if conditions against user's code output
   result, condition = python_grade_result(*check_code, user_result = user_result, unittest_style = unittest_style)
-  # print(result, condition)
   # return a graded dict
   return graded(result = result, condition = condition, unittest_style = unittest_style)
 

@@ -4,9 +4,7 @@ note when the two differ.
 """
 
 # parsing
-import parser
 import ast
-import astunparse
 
 # formatting
 from .formatters import formatted
@@ -199,18 +197,15 @@ def compare_node_type(
     last_parent : str
         the nearest parent that can be converted to source text
     """
-    # str stands for "empty", so if user code is missing something, present 
-    # a message about missing expectation  
-    if isinstance(left, str) and not isinstance(right, str):
+    # handle missing code
+    if (isinstance(left, str) and left == '') and not isinstance(right, str):
         missing(left, right, line_info)
-    # otherwise, present a message about unexpected user's AST
-    elif not isinstance(left, str):
-        # if we do expect a certain AST, point out that expectation
-        if not isinstance(right, str):
-            wrong_value(left, right, line_info, last_parent, type(left) == type(right))
-        # otherwise, just state what was not expected
-        else:
-            not_expected(left, right, line_info)
+    elif left != '' and right == '':
+        # handle case for an unexpected value
+        not_expected(left, right, line_info)
+    else:
+        # or, wrong types
+        wrong_value(left, right, line_info, last_parent, type(left) == type(right))
 
 def compare_node(left: Any, right: Any, line_info: Dict[str, int], last_parent: str):
     """Compare two objects of the same type and raise an exception with feedback if nodes differ.
@@ -247,6 +242,10 @@ def grade_code(student_code: str, solution_code: str):
     """
     try:
         # source node back
+        if student_code == '':
+            raise Exception("I didn't receive the student code.")
+        elif solution_code == '':
+            raise Exception("I didn't receive the solution code.")
         student = ast.parse(student_code)
         solution = ast.parse(solution_code)
         # set parent node of child nodes for better feedback

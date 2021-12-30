@@ -62,7 +62,7 @@ def standardize_arguments(
             exec(left_source, {}, r)
         else:
             exec(left_source)
-        # 2) construct a environment containing encompassing both global and locals, 
+        # 2) construct an environment containing both global and locals, 
         # overwriting the globals with locals, and builtins.
         envir = dict(globals(), **locals(), **builtins.__dict__)
         # 3) grab the live function from the environment
@@ -146,10 +146,8 @@ def standardize_arguments(
                 error
             )
     except NameError as e:
-        print("NameError: {}".format(e))
         raise AssertionError(str(e).capitalize())
     except Exception as e:
-        print("Exception: {}".format(e))
         pass
 
 if __name__ != '__main__':

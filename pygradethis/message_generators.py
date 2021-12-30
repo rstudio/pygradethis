@@ -83,16 +83,6 @@ def wrong_value(left: Any, right: Any, line_info: Dict[str, int], last_parent: s
         formatted(left),
         line_info.get("left"),
     )
-    if (formatted(left) != last_parent 
-        and not isinstance(left, ast.AST)
-        and not isinstance(left, ast.Call)):
-        msg = "I expected {}, but what you wrote was interpreted as {} in {} at line {}."
-        msg_args = (
-            formatted(right),
-            formatted(left),
-            last_parent,
-            line_info.get("left"),
-        )
     assert condition, msg.format(*msg_args)
 
 # Call related -------------------------------
