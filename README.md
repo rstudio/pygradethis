@@ -19,12 +19,7 @@ pip install pygradethis
 
 ## Dependencies
 
-- Python 3.6
-- [astunparse](https://github.com/simonpercivall/astunparse) *
-
-*We rely on astunparse for getting the text back from a source node (if possible) for 
-static AST checking (more on that below). Python 3.8 has an improved ast module which
-can do away with this dependency in the future.
+- Python 3.9+
 
 ## Optional Dependencies
 
