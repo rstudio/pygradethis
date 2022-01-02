@@ -7,7 +7,7 @@ import ast
 from typing import Dict, Any
 from .formatters import formatted
 
-def missing(left: Any, right: Any, line_info: Dict[str, int]) -> str:
+def missing(left: Any, right: Any, line_info: Dict[str, int]) -> None:
     """Generates message when user is missing a node or element in code.
 
     Parameters
@@ -31,7 +31,7 @@ def missing(left: Any, right: Any, line_info: Dict[str, int]) -> str:
     )
     assert type(left) == type(right), msg.format(*msg_args)
 
-def not_expected(left: Any, right: Any, line_info: Dict[str, int]) -> str:
+def not_expected(left: Any, right: Any, line_info: Dict[str, int]) -> None:
     """Generates message when user supplies an extra node or element in code.
 
     Parameters
@@ -55,7 +55,7 @@ def not_expected(left: Any, right: Any, line_info: Dict[str, int]) -> str:
     )
     assert type(left) == type(right), msg.format(*msg_args)
 
-def wrong_value(left: Any, right: Any, line_info: Dict[str, int], last_parent: str, condition: bool) -> str:
+def wrong_value(left: Any, right: Any, line_info: Dict[str, int], condition: bool) -> None:
     """Generates message when user's code contains in an incorrect value.
 
     Parameters
@@ -103,7 +103,7 @@ def repeated_argument(e: SyntaxError) -> str:
     msg = "I couldn't parse your function call because I got a repeated keyword argument."
     return msg.format(str(e).lower())
 
-def missing_argument(left_call: ast.AST, right_call: ast.AST, right_source: str, e: TypeError):
+def missing_argument(left_call: ast.AST, right_call: ast.AST, right_source: str, e: str) -> None:
     """Generates a feedback when there is a missing argument for a function call.
 
     Parameters
@@ -130,7 +130,7 @@ def missing_argument(left_call: ast.AST, right_call: ast.AST, right_source: str,
     )
     raise AssertionError(msg.format(*msg_args))
 
-def unexpected_argument(left_call: ast.AST, right_call: ast.AST, right_source: str, e: TypeError):
+def unexpected_argument(left_call: ast.AST, right_call: ast.AST, right_source: str, e: str) -> None:
     """Generates a feedback when there is an unexpected argument for a function call.
 
     Parameters
@@ -157,7 +157,7 @@ def unexpected_argument(left_call: ast.AST, right_call: ast.AST, right_source: s
     )
     raise AssertionError(msg.format(*msg_args))
 
-def surplus_argument(left_call: ast.AST, right_call: ast.AST, right_source: str, e: TypeError):
+def surplus_argument(left_call: ast.AST, right_call: ast.AST, right_source: str, e: str) -> None:
     """Generates a feedback when there extra arguments for a function call.
 
     Parameters

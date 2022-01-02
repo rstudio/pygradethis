@@ -15,9 +15,6 @@ from .message_generators import (
     missing, not_expected, wrong_value, repeated_argument
 )
 
-# add any libraries you might need
-from math import *
-
 # misc
 from itertools import zip_longest
 from typing import Optional, Dict, Any
@@ -51,9 +48,10 @@ def new_parent_source(tree: Any, last_parent: str) -> str:
         last_parent = parent_source
     return last_parent
 
-def check_children(left: ast.AST, 
-                   right: ast.AST, 
-                   line_info: Optional[Dict[str, int]] = None,
+    
+def check_children(left: Any, 
+                   right: Any, 
+                   line_info: Dict[str, int],
                    last_parent: str = "",
                    left_source: str = "", 
                    right_source: str = ""):
@@ -65,13 +63,13 @@ def check_children(left: ast.AST,
         the student code
     right : ast.AST
         the solution code
-    line_info :  Optional[Dict[str, int]], optional
-        holds line information about a particular node, by default None
+    line_info :  Dict[str, int]]
+        holds line information about a particular node
     last_parent : str, optional
         the nearest parent that can be converted to source text, by default ""
-    left_source : str
+    left_source : str, optional
         the source text for user code, by default ""
-    right_source : str
+    right_source : str, optional
         the source text for the solution code, by default ""
     """
     lf, rf = ast.iter_fields(left), ast.iter_fields(right)
@@ -85,9 +83,9 @@ def check_children(left: ast.AST,
         # recurse on values
         compare_ast(left_values, right_values, line_info, last_parent, left_source, right_source,)
 
-def compare_ast(left: ast.AST, 
-                right: ast.AST, 
-                line_info: Optional[Dict[str, int]] = None,
+def compare_ast(left: Any, 
+                right: Any, 
+                line_info: Dict[str, int],
                 last_parent: str = "",
                 left_source: str = "", 
                 right_source: str = "") -> None:
@@ -95,13 +93,13 @@ def compare_ast(left: ast.AST,
 
     Parameters
     ----------
-    left : ast.AST
+    left : Any
         the student code
-    right : ast.AST
+    right : Any
         the solution code
-    line_info :  Optional[Dict[str, int]], optional
-        holds line information about a particular node, by default None
-    last_parent : str, optional
+    line_info :  Dict[str, int]]
+        holds line information about a particular node
+    last_parent : str
         the nearest parent that can be converted to source text, by default ""
     left_source : str
         the source text for user code, by default ""
@@ -111,7 +109,7 @@ def compare_ast(left: ast.AST,
     # to hold line information like line number, and original source
     line_info = {} if line_info is None else line_info
     # check types first
-    compare_node_type(left, right, line_info, last_parent)
+    compare_node_type(left, right, line_info)
 
     # the check AST, list of Expr, or a core data type
     if isinstance(left, ast.AST):
@@ -140,9 +138,9 @@ def compare_ast(left: ast.AST,
     else:
         compare_node(left, right, line_info, last_parent)
 
-def check_functions(left_call: ast.AST, 
-                   right_call: ast.AST, 
-                   line_info: Optional[Dict[str, int]] = None,
+def check_functions(left_call: ast.Call, 
+                   right_call: ast.Call, 
+                   line_info: Dict[str, int],
                    last_parent: str = "",
                    left_source: str = "", 
                    right_source: str = ""):
@@ -150,13 +148,13 @@ def check_functions(left_call: ast.AST,
 
     Parameters
     ----------
-    left_call : ast.AST
+    left_call : ast.Call
         the user function call
-    right_call : ast.AST
+    right_call : ast.Call
         the solution function call
-    line_info :  Optional[Dict[str, int]], optional
-        holds line information about a particular node, by default None
-    last_parent : str, optional
+    line_info :  Dict[str, int]]
+        holds line information about a particular node
+    last_parent : str
         the nearest parent that can be converted to source text, by default ""
     left_source : str
         the source text for user code, by default ""
@@ -174,15 +172,14 @@ def check_functions(left_call: ast.AST,
     # `standardize_arguments` to simplify checking
     if ls != None and rs != None:
         for l, r in zip_longest(ls.keywords, rs.keywords, fillvalue=""):
-            wrong_value(ls, rs, line_info, last_parent, formatted(l.value) == formatted(r.value))
+            wrong_value(ls, rs, line_info, formatted(l.value) == formatted(r.value))
     else:
         raise AssertionError("Foo-y! Something went wrong with function call checking.")
     
 def compare_node_type(
         left: Any, 
         right: Any,
-        line_info: Dict[str, int],
-        last_parent: str
+        line_info: Dict[str, int]
     ) -> None:
     """Compare two ASTs' types and raise an exception with the line number if different.
 
@@ -194,8 +191,6 @@ def compare_node_type(
         an ast.Node, a custom type, or a python data type
     line_info : Dict[str, int]
         holds line information about a particular node
-    last_parent : str
-        the nearest parent that can be converted to source text
     """
     # handle missing code
     if (isinstance(left, str) and left == '') and not isinstance(right, str):
@@ -205,23 +200,23 @@ def compare_node_type(
         not_expected(left, right, line_info)
     else:
         # or, wrong types
-        wrong_value(left, right, line_info, last_parent, type(left) == type(right))
+        wrong_value(left, right, line_info, type(left) == type(right))
 
-def compare_node(left: Any, right: Any, line_info: Dict[str, int], last_parent: str):
+def compare_node(left: Any, right: Any, line_info: Dict[str, int], last_parent: str = ""):
     """Compare two objects of the same type and raise an exception with feedback if nodes differ.
 
-    Parameters
-    ----------
-    left : Any
-        an ast.Node, a custom type, or a python data type
-    right : Any
-        an ast.Node, a custom type, or a python data type
-    line_info : Dict[str, int]
-        holds line information about a particular node
-    last_parent : str
-        the nearest parent that can be converted to source text
+        Parameters
+        ----------
+        left : Any
+            an ast.Node, a custom type, or a python data type
+        right : Any
+            an ast.Node, a custom type, or a python data type
+        line_info : Dict[str, int]
+            holds line information about a particular node
+        last_parent : str
+            the nearest parent that can be converted to source text
     """
-    wrong_value(left, right, line_info, last_parent, left == right)
+    wrong_value(left, right, line_info, left == right)
 
 def grade_code(student_code: str, solution_code: str):
     """Checks user and solution code and prints a message if they differ
@@ -250,7 +245,7 @@ def grade_code(student_code: str, solution_code: str):
         solution = ast.parse(solution_code)
         # set parent node of child nodes for better feedback
         last_parent = formatted(next(n for n in ast.walk(student)))
-        compare_ast(student, solution, last_parent = last_parent, left_source=student_code, right_source=solution_code)
+        compare_ast(student, solution, {}, last_parent = last_parent, left_source=student_code, right_source=solution_code)
     except SyntaxError as e:
         message = str(e)
         # TODO figure out why we're getting unknown for diagnosis of argument

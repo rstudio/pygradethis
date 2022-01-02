@@ -72,6 +72,7 @@ def test_core():
         )
 
 def test_function_calls():
+    from math import sqrt
     test_cases = [
         Case(
             "2 + sum([1,2])", "2 + sum([1,1])", 

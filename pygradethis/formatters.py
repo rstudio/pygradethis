@@ -27,8 +27,10 @@ the respective register function definition, or overriden with `format_node`.
 import ast
 from functools import singledispatch
 
+from typing import Any
+
 @singledispatch
-def formatted(node: ast.AST) -> str:
+def formatted(node: Any) -> str:
     """Generic function to return a formatted representation of an AST node"""
     try:
         return ast.unparse(node)
@@ -90,7 +92,7 @@ format_node(ast.Str, lambda x: "\"{}\"".format(x.s))
 format_node(ast.Constant, lambda x: formatted(x.value))
 
 @formatted.register(ast.List)
-def _(node: ast.AST) -> str:
+def _(node: ast.List) -> str:
     return "[" + ", ".join(formatted(e.value) for e in node.elts) + "]"
 
 @formatted.register(ast.Lambda)
@@ -101,34 +103,34 @@ def _(node: ast.AST) -> str:
     return ast.unparse(node)
 
 @formatted.register(list)
-def _(node: ast.AST) -> str:
+def _(node: list) -> str:
     return "{}".format(", ".join(formatted(e) for e in node))
 
 @formatted.register(ast.keyword)
-def _(node: ast.AST) -> str:
+def _(node: ast.keyword) -> str:
     return "{}={}".format(node.arg, formatted(node.value))
 
 @formatted.register(ast.Call)
-def _(node: ast.AST) -> str:
+def _(node: ast.Call) -> str:
     return "{}({})".format(
         formatted(node.func), 
         ", ".join(filter(None, [formatted(node.args), formatted(node.keywords)]))
     )
 
 @formatted.register(ast.UnaryOp)
-def _(node: ast.AST) -> str:
+def _(node: ast.UnaryOp) -> str:
     return "{}{}".format(formatted(node.op), formatted(node.operand))
 
 @formatted.register(ast.Module)
-def _(node: ast.AST) -> str:
+def _(node: ast.Module) -> str:
     """Formatting function for:
     
     ast.Module
 
     Parameters
     ----------
-    node : ast.AST
-        the ast node
+    node : ast.Module
+        the Module node
 
     Returns
     -------
