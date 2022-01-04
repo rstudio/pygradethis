@@ -2,8 +2,7 @@
 This module is used to check python code output.
 """
 
-import sys
-from typing import Any, Union, List, Tuple
+from typing import Any, Union, List
 
 from .conditions import GraderCondition
 from .result_checker import test_conditions

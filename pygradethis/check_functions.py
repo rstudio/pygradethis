@@ -5,12 +5,10 @@ and return standardized call.
 import ast
 import inspect
 import builtins
-
+from typing import Union
 # add any libraries you might need for grading
 # TODO we need a better way to include lib dependencies for running student code
 from math import *
-
-from typing import Union
 
 from .message_generators import (
     missing_argument, unexpected_argument, surplus_argument
@@ -38,9 +36,9 @@ def standardize_arguments(
     right_call : ast.Call
         the solution function call to standardize arguments
     left_source : str, optional
-        the source code for left_call, by default ""
+        the entire source code in which left_call belongs, by default ""
     right_source : str, optional
-        the source code for right_call, by default ""
+        the entire source code in which right_call belongs the source code, by default ""
 
     Returns
     -------
@@ -88,6 +86,7 @@ def standardize_arguments(
         kwargs = {a.arg: a.value for a in left_call.keywords}
 
         # 5) get the formal arguments for function
+        sig = None
         try:
             # Note: this will raise ValueError if inspect cannot retrieve signature
             # which can happen for some builtins like `print`, where underlying C
@@ -97,6 +96,8 @@ def standardize_arguments(
             # if we can't get a signature just return call for normal Call
             # checking flow
             final_call = left_call
+        if sig is None:
+            raise ValueError()
 
         # 6) unpack args and kwargs and attempt to standardize argument calls
         # returns: https://docs.python.org/3.6/library/inspect.html#inspect.BoundArguments
@@ -117,7 +118,6 @@ def standardize_arguments(
         if "missing" in error:
             missing_argument(
                 left_call,
-                right_call,
                 formatted(standardize_arguments(
                     left_call=right_call, right_call = right_call, 
                     left_source=right_source, right_source=right_source
@@ -128,7 +128,6 @@ def standardize_arguments(
         if "unexpected" in error:
             unexpected_argument(
                 left_call,
-                right_call,
                 formatted(standardize_arguments(
                     left_call=right_call, right_call = right_call, 
                     left_source=right_source, right_source=right_source
@@ -139,7 +138,6 @@ def standardize_arguments(
         if "too many" in error:
             surplus_argument(
                 left_call,
-                right_call,
                 formatted(standardize_arguments(
                     left_call=right_call, right_call = right_call, 
                     left_source=right_source, right_source=right_source
