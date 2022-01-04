@@ -21,19 +21,9 @@ pip install pygradethis
 
 - Python 3.9+
 
-## Optional Dependencies
+## Dev Dependencies
 
-- pandas
-- numpy
-
-There are some optional dependencies for `pygradethis` currently to enhance the
-checking done with certain data types for output checks. For e.g. for checking
-code in the data science context using `pandas` and `numpy`, you can run:
-
-`pip install .[checkers]` 
-
-to enable the set of `assertEqual` functions which will be used to check
-data structures like `pandas.DataFrame` or `numpy.array`.
+- pytest
 
 ## Features
 
