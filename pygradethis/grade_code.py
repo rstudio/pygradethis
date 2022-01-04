@@ -4,9 +4,7 @@ note when the two differ.
 """
 
 # parsing
-import parser
 import ast
-import astunparse
 
 # formatting
 from .formatters import formatted
@@ -17,12 +15,9 @@ from .message_generators import (
     missing, not_expected, wrong_value, repeated_argument
 )
 
-# add any libraries you might need
-from math import *
-
 # misc
 from itertools import zip_longest
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 
 def new_parent_source(tree: Any, last_parent: str) -> str:
     """Given an ast, the current tree, and the last parent source,
@@ -41,24 +36,26 @@ def new_parent_source(tree: Any, last_parent: str) -> str:
     str
         the new last_parent or the same
     """
-    # attempt to get a new parent source text for feedback
-    try:
-        parent_source = formatted(tree)
-    except:
-        pass
     # only set the last_parent if:
-    # - it is a compound ast, and
-    # - we can get a source text
-    if isinstance(tree, ast.AST) and len(tree._fields) > 1 and parent_source != "":
-        last_parent = parent_source
+    # 1) it is a somewhat complex AST which is defined as having more than 1 field, 
+    # wich means that for e.g. "1" is not a good candidate since we're trying to support
+    # calling out higher level expressions
+    # 2) we can get a source text
+    if (len(tree._fields) > 1 and 
+        (issubclass(tree.__class__, ast.Expr) or issubclass(tree.__class__, ast.Call))):
+        # attempt to get a new parent source text for feedback
+        try:
+            last_parent = formatted(tree)
+        except:
+            pass
     return last_parent
-
-def check_children(left: ast.AST, 
-                   right: ast.AST, 
-                   line_info: Optional[Dict[str, int]] = None,
-                   last_parent: str = "",
+    
+def check_children(left: Any, 
+                   right: Any, 
+                   line_info: Dict[str, int],
                    left_source: str = "", 
-                   right_source: str = ""):
+                   right_source: str = "",
+                   last_parent: str = ""):
     """Checks children of two asts by iterating their fields
 
     Parameters
@@ -67,14 +64,14 @@ def check_children(left: ast.AST,
         the student code
     right : ast.AST
         the solution code
-    line_info :  Optional[Dict[str, int]], optional
-        holds line information about a particular node, by default None
+    line_info :  Dict[str, int]]
+        holds line information about a particular node
+    left_source : str, optional
+        the source text for user code, by default ""
+    right_source : str, optional
+        the source text for the solution code, by default ""
     last_parent : str, optional
         the nearest parent that can be converted to source text, by default ""
-    left_source : str
-        the source text for user code, by default ""
-    right_source : str
-        the source text for the solution code, by default ""
     """
     lf, rf = ast.iter_fields(left), ast.iter_fields(right)
     # iterate through the children of both ASTs
@@ -85,35 +82,35 @@ def check_children(left: ast.AST,
         # check that the name of the AST nodes match
         compare_node(left_name, right_name, line_info, last_parent)
         # recurse on values
-        compare_ast(left_values, right_values, line_info, last_parent, left_source, right_source,)
+        compare_ast(left_values, right_values, line_info, left_source, right_source, last_parent)
 
-def compare_ast(left: ast.AST, 
-                right: ast.AST, 
-                line_info: Optional[Dict[str, int]] = None,
-                last_parent: str = "",
+def compare_ast(left: Any, 
+                right: Any, 
+                line_info: Dict[str, int],
                 left_source: str = "", 
-                right_source: str = "") -> None:
+                right_source: str = "",
+                last_parent: str = "") -> None:
     """Compare two abstract syntax trees. Raise AssertionError as soon as they differ.
 
     Parameters
     ----------
-    left : ast.AST
+    left : Any
         the student code
-    right : ast.AST
+    right : Any
         the solution code
-    line_info :  Optional[Dict[str, int]], optional
-        holds line information about a particular node, by default None
-    last_parent : str, optional
-        the nearest parent that can be converted to source text, by default ""
+    line_info :  Dict[str, int]]
+        holds line information about a particular node
     left_source : str
         the source text for user code, by default ""
     right_source : str
         the source text for the solution code, by default ""
+    last_parent : str
+        the nearest parent that can be converted to source text, by default ""
     """
     # to hold line information like line number, and original source
     line_info = {} if line_info is None else line_info
     # check types first
-    compare_node_type(left, right, line_info, last_parent)
+    compare_node_type(left, right, line_info)
 
     # the check AST, list of Expr, or a core data type
     if isinstance(left, ast.AST):
@@ -130,35 +127,35 @@ def compare_ast(left: ast.AST,
         # with the function or the arguments do not match after standardization
         if isinstance(left, ast.Call):
             # check that the standardized left and right Calls are the same
-            check_functions(left, right, line_info, last_parent, left_source, right_source)
+            check_functions(left, right, line_info, left_source, right_source, last_parent)
         else:
-            check_children(left, right, line_info, last_parent, left_source, right_source)
+            check_children(left, right, line_info, left_source, right_source, last_parent)
+        
     elif isinstance(left, list):
         for left_child, right_child in zip_longest(left, right, fillvalue=""):
             # recurse on [Expr, ...]
             # attempt to get a new parent source text for feedback
-            last_parent = new_parent_source(left_child, last_parent)
-            compare_ast(left_child, right_child, line_info, last_parent, left_source, right_source)
+            compare_ast(left_child, right_child, line_info, left_source, right_source, last_parent)
     else:
         compare_node(left, right, line_info, last_parent)
 
-def check_functions(left_call: ast.AST, 
-                   right_call: ast.AST, 
-                   line_info: Optional[Dict[str, int]] = None,
-                   last_parent: str = "",
+def check_functions(left_call: ast.Call, 
+                   right_call: ast.Call, 
+                   line_info: Dict[str, int],
                    left_source: str = "", 
-                   right_source: str = ""):
+                   right_source: str = "",
+                   last_parent: str = ""):
     """Standardizes and compares two ast.Calls. Raise AssertionError as soon as they differ.
 
     Parameters
     ----------
-    left_call : ast.AST
+    left_call : ast.Call
         the user function call
-    right_call : ast.AST
+    right_call : ast.Call
         the solution function call
-    line_info :  Optional[Dict[str, int]], optional
-        holds line information about a particular node, by default None
-    last_parent : str, optional
+    line_info :  Dict[str, int]]
+        holds line information about a particular node
+    last_parent : str
         the nearest parent that can be converted to source text, by default ""
     left_source : str
         the source text for user code, by default ""
@@ -171,12 +168,15 @@ def check_functions(left_call: ast.AST,
     rs = standardize_arguments(left_call=right_call, right_call=right_call, left_source=right_source, right_source=right_source)
     # if we don't have any arguments simply compare the two nodes
     if len(ls.keywords) == 0:
-        check_children(left_call, right_call, line_info, last_parent, left_source, right_source,)
+        check_children(left_call, right_call, line_info, left_source, right_source, last_parent)
     # else, check all of the arguments which are all in keywords after running
     # `standardize_arguments` to simplify checking
     if ls != None and rs != None:
         for l, r in zip_longest(ls.keywords, rs.keywords, fillvalue=""):
-            wrong_value(ls, rs, line_info, last_parent, formatted(l.value) == formatted(r.value))
+            # check if the student and solution keyword matches in their value
+            wrong_value(l.value, r.value, line_info, formatted(l.value) == formatted(r.value), last_parent)
+            # last parent node would be the value of the parameter if it's an expression/call
+            last_parent = new_parent_source(l.value, last_parent)
     else:
         raise AssertionError("Foo-y! Something went wrong with function call checking.")
     
@@ -184,7 +184,7 @@ def compare_node_type(
         left: Any, 
         right: Any,
         line_info: Dict[str, int],
-        last_parent: str
+        last_parent: str = ""
     ) -> None:
     """Compare two ASTs' types and raise an exception with the line number if different.
 
@@ -196,37 +196,32 @@ def compare_node_type(
         an ast.Node, a custom type, or a python data type
     line_info : Dict[str, int]
         holds line information about a particular node
-    last_parent : str
-        the nearest parent that can be converted to source text
     """
-    # str stands for "empty", so if user code is missing something, present 
-    # a message about missing expectation  
-    if isinstance(left, str) and not isinstance(right, str):
+    # handle missing code
+    if (isinstance(left, str) and left == '') and not isinstance(right, str):
         missing(left, right, line_info)
-    # otherwise, present a message about unexpected user's AST
-    elif not isinstance(left, str):
-        # if we do expect a certain AST, point out that expectation
-        if not isinstance(right, str):
-            wrong_value(left, right, line_info, last_parent, type(left) == type(right))
-        # otherwise, just state what was not expected
-        else:
-            not_expected(left, right, line_info)
+    elif left != '' and right == '':
+        # handle case for an unexpected value
+        not_expected(left, right, line_info)
+    else:
+        # or, wrong types
+        wrong_value(left, right, line_info, type(left) == type(right), last_parent)
 
-def compare_node(left: Any, right: Any, line_info: Dict[str, int], last_parent: str):
+def compare_node(left: Any, right: Any, line_info: Dict[str, int], last_parent: str = ""):
     """Compare two objects of the same type and raise an exception with feedback if nodes differ.
 
-    Parameters
-    ----------
-    left : Any
-        an ast.Node, a custom type, or a python data type
-    right : Any
-        an ast.Node, a custom type, or a python data type
-    line_info : Dict[str, int]
-        holds line information about a particular node
-    last_parent : str
-        the nearest parent that can be converted to source text
+        Parameters
+        ----------
+        left : Any
+            an ast.Node, a custom type, or a python data type
+        right : Any
+            an ast.Node, a custom type, or a python data type
+        line_info : Dict[str, int]
+            holds line information about a particular node
+        last_parent : str
+            the nearest parent that can be converted to source text
     """
-    wrong_value(left, right, line_info, last_parent, left == right)
+    wrong_value(left, right, line_info, left == right, last_parent)
 
 def grade_code(student_code: str, solution_code: str):
     """Checks user and solution code and prints a message if they differ
@@ -247,11 +242,21 @@ def grade_code(student_code: str, solution_code: str):
     """
     try:
         # source node back
+        if student_code == '':
+            raise Exception("I didn't receive the student code.")
+        elif solution_code == '':
+            raise Exception("I didn't receive the solution code.")
         student = ast.parse(student_code)
         solution = ast.parse(solution_code)
-        # set parent node of child nodes for better feedback
-        last_parent = formatted(next(n for n in ast.walk(student)))
-        compare_ast(student, solution, last_parent = last_parent, left_source=student_code, right_source=solution_code)
+        last_parent = [a for a in ast.walk(ast.parse(student))][1]
+        compare_ast(
+            student, 
+            solution, 
+            {}, 
+            left_source = student_code, 
+            right_source = solution_code, 
+            last_parent = new_parent_source(last_parent, "")
+        )
     except SyntaxError as e:
         message = str(e)
         # TODO figure out why we're getting unknown for diagnosis of argument
