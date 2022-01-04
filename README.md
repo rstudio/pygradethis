@@ -103,11 +103,12 @@ grade_code(
 
 ```
 Feedback:
-> I expected 1, but you wrote 2 in log(2) at line 1.
+> I expected `log(1)`, but what you wrote was interpreted as `log(2)` in `sqrt(log(2))` at line 1.
 
-Note how the expression in which the problem occurs (`log(2)`) is pointed out so that the 
-student is aware that the `2` within the `log` is incorrect not the `2` on the left operand of 
-the addition.
+Note how the feedback narrows in on the expression in which the problem occurs (`sqrt(log(2))`)
+so that the student can focus on the most relevant outer expression of the problem. In this case, the 
+`log(2)` is the problem and the `2` on the left operand of 
+the addition is not as relevant.
 
 Similarly, here the feedback points out that the 2 within the `log` function is incorrect, similar to the 
 `gradethis` [example](https://rstudio-education.github.io/gradethis/reference/grade_code.html).
@@ -134,8 +135,7 @@ grade_code(
 )
 ```
 
-means that `foo(1)` turns into `foo(a=1, b=1)` before grading. In the example above,
-the `grade_code` doesn't give us a feedback message since they are equivalent expressions.
+In the example above, the `grade_code` doesn't give us a feedback message since they are equivalent expressions.
 
 However, if the student supplies `foo(2)`
 
@@ -147,12 +147,14 @@ grade_code(
 ```
 
 we get back this feedback:
-> I expected foo(a=1, b=1), but what you wrote was interpreted as foo(a=2, b=1) at line 1.
+> I expected `1`, but what you wrote was interpreted as `2` in `foo(2)` at line 1.
 
-Note how the arguments are filled in according to formal parameters, `a` and `b`, which can
-help students be aware of how Python actually interprets their function calls.
+**Note:** Although underneath the hood we do standardize the arguments of both the student and the solution code
+before checking, we don't surface this standardized form to the feedback message. This is certainly possible to
+achieve but in certain cases can hinder learning by revealing too much information. For example, the builtin functions
+like `sum` is normally called without specifying its actual formal parameters (e.g. `sum(1)` => `sum(iterable=[1], start=0)`.
 
-**Note:** For call standardizing to work, the function definitions corresponding to function 
+For call standardizing to work, the function definitions corresponding to function 
 calls must be defined  and 'live' in the environment, whether that is the `globals()`/`locals()`,
 `builtins`, or custom module imports `pandas`. This works if the student/solution source code also 
 includes the definition (like `foo` above) in their own source code or it's included by instructor. 
