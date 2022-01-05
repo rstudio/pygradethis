@@ -142,7 +142,7 @@ we get back this feedback:
 **Note:** Although underneath the hood we do standardize the arguments of both the student and the solution code
 before checking, we don't surface this standardized form to the feedback message. This is certainly possible to
 achieve but in certain cases can hinder learning by revealing too much information. For example, the builtin functions
-like `sum` is normally called without specifying its actual formal parameters (e.g. `sum(1)` => `sum(iterable=[1], start=0)`.
+like `sum` is normally called without specifying its actual formal parameters (e.g. `sum(1)` versus `sum(iterable=[1], start=0)`. In the future, a `verbose` mode could be made available such that the formal parameters are pointed out.
 
 For call standardizing to work, the function definitions corresponding to function 
 calls must be defined  and 'live' in the environment, whether that is the `globals()`/`locals()`,

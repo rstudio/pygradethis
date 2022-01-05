@@ -1,10 +1,12 @@
 [tool.poetry]
 name = "pygradethis"
-version = "0.1.0"
+version = "0.2.0"
 description = "\"Python autograder to facilitate code output and static code checking.\""
 authors = ["nischalshrestha <bitsorific@gmail.com>"]
-license = "MIT License"
+license = "MIT"
+readme = "README.md"
 homepage = "https://github.com/nischalshrestha/pygradethis"
+repository = "https://github.com/nischalshrestha/pygradethis"
 keywords = ["autograder", "education"]
 classifiers = [
     "Programming Language :: Python :: 3",
