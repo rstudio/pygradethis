@@ -3,7 +3,7 @@ This is the `learnr` version of `python_grader` module and contains
 the `python_grade_learnr` function called by the `gradethispython` R wrapper
 package
 """
-import parser
+#import parser
 from typing import Any, Union, List, Tuple
 
 from .grade_result import python_grade_result
