@@ -1,4 +1,11 @@
 
+# attempt to import if used with R's `learnr` package
+try:
+    from __main__ import r
+    #from pygradethis import grade_code, grade_result  # noqa:F401
+except:
+    pass
+
 from pygradethis import check_functions
 from pygradethis import conditions
 from pygradethis import feedback
