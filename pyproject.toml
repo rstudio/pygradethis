@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pygradethis"
-version = "0.2.0"
+version = "0.2.1"
 description = "\"Python autograder to facilitate code output and static code checking.\""
 authors = ["nischalshrestha <bitsorific@gmail.com>"]
 license = "MIT"
