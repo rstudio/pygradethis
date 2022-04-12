@@ -152,10 +152,3 @@ def standardize_arguments(
         # when other Exceptions occur, silently ignore for now
         pass
     return final_call
-
-if __name__ != '__main__':
-  try:
-    # attempt to import if used with R's `learnr` package
-    from __main__ import r
-  except:
-    pass

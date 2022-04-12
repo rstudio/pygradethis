@@ -7,7 +7,7 @@ from typing import Any, Union, List, Tuple
 
 from .grade_result import python_grade_result
 from .grade_code import grade_code
-from .conditions import GraderCondition
+from .conditions import GraderCondition, python_pass_if, python_fail_if
 from .feedback import praise, encourage
 from .utils import parse_code
 
@@ -131,16 +131,12 @@ def python_grade_learnr(label: str = None,
 
   # evaluate exercise and check code output
   try:
-    # NOTE: the `r` comes from the explicit import when loading this module
-    # via reticulate
-    # evaluate check code so that expected output is ready
-    check_code_conditions = eval(check_code_source, {}, r)
-    # for e.g. did knitr already execute result and it's somewhere in the `r`?
-    # evaluate user code so that we can compare to expected
-    user_result = eval(user_code_source, {}, r)
-
-    # grade python_pass_if/fail_if conditions against user's code output
-    result, condition = python_grade_result(*check_code_conditions, user_result = user_result)
+    # NOTE: eventually this will have to follow the gradethis grading flow where check code
+    # can either contain the grading the result or the code and use the student's result
+    # via `envir_result`
+    # evaluate check code and return the result (correct answer or not) and GraderCondition
+    # list structure
+    result, condition = eval(check_code_source, globals())
   except Exception as e:
     # TODO somehow trickle up the specific error message?
     return dict(
@@ -151,10 +147,3 @@ def python_grade_learnr(label: str = None,
     )
   # return a dict for learnr to process for feedback
   return graded_learnr(result, condition)
-
-if __name__ != '__main__':
-  try:
-    # attempt to import if used with R's `learnr` package
-    from __main__ import r
-  except:
-    pass
