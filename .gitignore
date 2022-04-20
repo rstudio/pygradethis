@@ -28,3 +28,4 @@ MANIFEST
 .mypy_cache
 .pytest_cache
 
+.Rproj.user

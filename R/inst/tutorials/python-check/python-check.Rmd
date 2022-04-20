@@ -1,0 +1,39 @@
+---
+title: "Checking Python exercise"
+author: "Nischal Shrestha"
+output: learnr::tutorial
+runtime: shiny_prerendered
+description: >
+  This is a demo of checking a Python exercise.
+---
+
+```{r setup, include = FALSE}
+library(learnr)
+library(gradethis)
+library(tidyverse)
+library(gradethispython)
+# this works, but you can also set python chunk's exercise.checker
+tutorial_options(exercise.checker = gradethispython::py_grade_learnr)
+d <- 2
+```
+
+# Python
+
+```{python df}
+mpg = r.mpg
+mpg
+```
+
+The expected answer is the `mpg` dataset from R.
+
+```{python ex1, exercise=TRUE, exercise.setup = "df"}
+mpg
+```
+
+```{python ex1-check}
+python_grade_result(
+  python_pass_if(mpg, "You also got the mpg dataframe!"),
+  python_fail_if(None, "")
+)
+```
+

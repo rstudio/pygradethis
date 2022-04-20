@@ -128,7 +128,6 @@ def python_grade_learnr(label: str = None,
       type = "error", 
       location = "append"
     )
-
   # evaluate exercise and check code output
   try:
     # NOTE: eventually this will have to follow the gradethis grading flow where check code
@@ -136,7 +135,7 @@ def python_grade_learnr(label: str = None,
     # via `envir_result`
     # evaluate check code and return the result (correct answer or not) and GraderCondition
     # list structure
-    result, condition = eval(check_code_source, globals())
+    result, condition = eval(check_code_source)
   except Exception as e:
     # TODO somehow trickle up the specific error message?
     return dict(
