@@ -46,7 +46,6 @@ def praise() -> str:
     ]
   )
 
-# TODO move this to feedback.py
 def encourage() -> str:
   """Returns a random encouragement message"""
   return random.choice([

@@ -1,3 +1,4 @@
+import pygradethis
 from pygradethis.python_grade_learnr import python_grade_learnr
 
 check_code = (
