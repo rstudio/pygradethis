@@ -96,7 +96,6 @@ def python_grade_learnr(label: str = None,
         location = "append|prepend|replace"
       }
   """
-  print('hello new world!')
   # check if there is user_code
   if user_code and "".join(user_code) == "":
     return dict(
