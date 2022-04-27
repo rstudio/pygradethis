@@ -8,32 +8,33 @@ description: >
 ---
 
 ```{r setup, include = FALSE}
+reticulate::use_virtualenv("~/.virtualenvs/pygradethis")
 library(learnr)
 library(gradethis)
 library(tidyverse)
-library(gradethispython)
-# this works, but you can also set python chunk's exercise.checker
-tutorial_options(exercise.checker = gradethispython::py_grade_learnr)
-d <- 2
+library(pygradethis)
 ```
 
-# Python
-
-```{python df}
-mpg = r.mpg
-mpg
+```{python py-result, exercise=TRUE, exercise.checker = pygradethis::exercise_checker}
+3 + 3
 ```
 
-The expected answer is the `mpg` dataset from R.
-
-```{python ex1, exercise=TRUE, exercise.setup = "df"}
-mpg
+```{python, py-result-solution}
+3 + 3
 ```
 
-```{python ex1-check}
-python_grade_result(
-  python_pass_if(mpg, "You also got the mpg dataframe!"),
-  python_fail_if(None, "")
+```{python, py-result-check}
+# currently only code check is working here so flow also needs revisiting
+import pandas as pd
+import pygradethis as pgt
+from pygradethis import grade_code as gc
+from pygradethis import grade_result as gr
+from pygradethis import conditions as c
+
+# could not find function "gr.python_grade_result"
+gr.python_grade_result(
+  c.python_pass_if(6, "You wrote the add!"),
+  c.python_fail_if(None, "")
 )
 ```
 
