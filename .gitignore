@@ -22,9 +22,34 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# Sphinx documentation
+python/docs/_build/
+
 # misc
 .DS_Store
 .vscode
 .mypy_cache
 .pytest_cache
 
+## R
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+Untitled
+issues
+
+# Potential python artifacts to ignore
+__pycache__
+
+# atom config folder
+.atom/
+
+# html tutorial output
+inst/tutorials/*/*.html
+
+# deployment output
+rsconnect/
+inst/doc
+doc
+Meta

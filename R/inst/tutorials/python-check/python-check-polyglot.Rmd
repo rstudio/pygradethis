@@ -1,0 +1,75 @@
+---
+title: "Checking Python and R exercises"
+author: "Nischal Shrestha"
+output: learnr::tutorial
+runtime: shiny_prerendered
+description: >
+  This is a demo of checking both Python and R exercises.
+---
+
+```{r setup, include = FALSE}
+reticulate::use_virtualenv("~/.venvs/pygradethis")
+library(learnr)
+library(gradethis)
+library(tidyverse)
+library(reticulate)
+library(pygradethis) # exercise checker for R exercises
+tutorial_options(exercise.checker = gradethis::grade_learnr)
+d <- 2
+```
+
+# R
+
+```{r ex2, exercise=TRUE}
+mpg
+```
+
+```{r ex2-code-check}
+gradethis::grade_code(
+  correct = "Good job!"
+)
+```
+
+```{r ex2-solution}
+mpg
+```
+
+```{r ex2-check}
+gradethis::grade_result(
+  pass_if(~ identical(.result, mpg), "You also got the mpg dataframe"),
+  fail_if(~ TRUE, "Oops!")
+)
+```
+
+# Python
+
+```{python df}
+mpg = r.mpg
+```
+
+The expected answer is the `mpg` dataset from R. This exercise uses `pygradethis::exercise_checker` for checking solution.
+
+```{python ex1, exercise=TRUE, exercise.setup = "df", exercise.checker = pygradethis::exercise_checker}
+mpg
+```
+
+```{python ex1-solution}
+mpg
+```
+
+```{python ex1-check}
+# currently not working
+# mpg became a dict instead of a data.frame (might be related to import issues)
+# Error occured while checking the submission. invalid syntax (<string>, line 2)
+import pandas as pd
+import pygradethis as pgt
+from pygradethis import grade_code as gc
+from pygradethis import grade_result as gr
+from pygradethis import conditions as c
+
+gr.python_grade_result(
+  c.python_pass_if(mpg, "You also got the mpg dataframe!"),
+  c.python_fail_if(None, "Remember to return the right dataset!"),
+)
+```
+

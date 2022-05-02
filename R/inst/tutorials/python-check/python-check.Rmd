@@ -1,0 +1,40 @@
+---
+title: "Checking Python exercise"
+author: "Nischal Shrestha"
+output: learnr::tutorial
+runtime: shiny_prerendered
+description: >
+  This is a demo of checking a Python exercise.
+---
+
+```{r setup, include = FALSE}
+reticulate::use_virtualenv("~/.venvs/pygradethis")
+library(learnr)
+library(gradethis)
+library(tidyverse)
+library(pygradethis)
+```
+
+```{python py-result, exercise=TRUE, exercise.checker = pygradethis::exercise_checker}
+3 + 3
+```
+
+```{python, py-result-solution}
+3 + 3
+```
+
+```{python, py-result-check}
+# currently only code check is working here so flow also needs revisiting
+import pandas as pd
+import pygradethis as pgt
+from pygradethis import grade_code as gc
+from pygradethis import grade_result as gr
+from pygradethis import conditions as c
+
+# could not find function "gr.python_grade_result"
+gr.python_grade_result(
+  c.python_pass_if(6, "You wrote the add!"),
+  c.python_fail_if(None, "")
+)
+```
+
