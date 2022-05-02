@@ -4,11 +4,15 @@ Version: 0.0.0.9000
 Authors@R: 
     c(person(given = "Nischal",
              family = "Shrestha",
-             role = c("aut", "ccp"),
-             email = "nsrocker92@gmail.com"),
+             role = c("aut", "cre"),
+             email = "nischal.shrestha@rstudio.com"),
+      person(given = "Daniel",
+             family = "Chen",
+             role = "ctb",
+             email = "daniel.chen@rstudio.com"),
       person(given = "Barret",
              family = "Schloerke",
-             role = c("ths", "cre"),
+             role = "ctb",
              email = "barret@rstudio.com"))
 Description: pygradethis provides a Python exercise checker to grade Python exercises in 'learnr' tutorials. To
     learn more about 'learnr' tutorials, please visit

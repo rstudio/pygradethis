@@ -1,6 +1,6 @@
 .PHONY: clean clean-build clean-pyc clean-test coverage dist docs help install lint lint/flake8
 .DEFAULT_GOAL := help
-VENV_PATH := ~/.virtualenvs/pygradethis
+VENV_PATH := ~/.venvs/pygradethis
 
 define BROWSER_PYSCRIPT
 import os, webbrowser, sys

@@ -8,7 +8,7 @@ description: >
 ---
 
 ```{r setup, include = FALSE}
-reticulate::use_virtualenv("~/.virtualenvs/pygradethis")
+reticulate::use_virtualenv("~/.venvs/pygradethis")
 library(learnr)
 library(gradethis)
 library(tidyverse)
