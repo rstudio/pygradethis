@@ -1,4 +1,5 @@
 PACKAGE=pygradethis
+VERSION=$(shell grep 'Version' ./DESCRIPTION | cut -d':' -f2 | tr -d ' ')
 
 ############
 # Building #
@@ -12,8 +13,8 @@ build: clean
 	R CMD build .
 
 .PHONY: install
-install: install
-	R CMD INSTALL --no-multiarch --with-keep.source R .
+install: build
+	R CMD INSTALL $(PACKAGE)_$(VERSION).tar.gz
 
 ###########
 # Testing #
@@ -26,6 +27,10 @@ test: check
 ############
 # Clean up #
 ############
+
+.PHONY: uninstall
+uninstall:
+	R CMD REMOVE $(PACKAGE)
 
 .PHONY: clean
 

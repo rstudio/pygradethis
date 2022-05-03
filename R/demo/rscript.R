@@ -1,4 +1,4 @@
-reticulate::use_virtualenv("~/.virtualenvs/pygradethis")
+reticulate::use_virtualenv("~/.venvs/pygradethis")
 library(pygradethis)
 
 exercise_checker(
