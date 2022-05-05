@@ -3,6 +3,7 @@ This is the `learnr` version of `python_grader` module and contains
 the `python_grade_learnr` function called by the `gradethispython` R wrapper
 package
 """
+from copy import copy
 from typing import Any, Union, List, Tuple
 
 from .grade_result import python_grade_result
@@ -11,42 +12,30 @@ from .conditions import GraderCondition, python_pass_if, python_fail_if
 from .feedback import praise, encourage
 from .utils import parse_code
 
-def graded_learnr(result: Union[str, dict], condition: GraderCondition):
-  if (result and condition):
+from pprint import pprint
+
+def graded_learnr(graded: Union[str, dict]):
+  if (graded is not None):
+    correct = graded['correct']
     # correct
-    if condition['correct']:
+    if correct:
       return dict(
-        message = "{} {}".format(praise(), condition['message']), 
+        message = "{} {}".format(praise(), graded['message']),
         correct = True,
         type = "success", 
         location = "append"
       )
     # incorrect
     return dict(
-      message = "{} {}".format(encourage(), condition['message']),
+      message = "{} {}".format(encourage(), graded['message']),
       correct = False,
       type = "error", 
       location = "append"
     )
   # if there was none of the conditions matched, return error by default
-  elif not result and not condition:
+  elif not graded:
     return dict(
       message = "{}".format(encourage()), 
-      correct = False, 
-      type = "error", 
-      location = "append"
-    )
-  # if there were fail_ifs and none matched, return success by default
-  elif result and not condition:
-    return dict(
-      message = "{}".format(praise()),
-      correct = True,
-      type = "success", 
-      location = "append"
-    )
-  else:
-    return dict(
-      message = "{} {}".format(encourage(), condition['message']), 
       correct = False, 
       type = "error", 
       location = "append"
@@ -119,15 +108,17 @@ def python_grade_learnr(label: str = None,
   check_code_source = parse_code(check_code)
   user_code_source = parse_code(user_code)
 
-  # do static checks on code if the solution code is provided
-  graded_code = grade_code(user_code_source, solution_code)
-  if graded_code is not None:
-    return dict(
-      message = "{}".format(graded_code),
-      correct = False,
-      type = "error", 
-      location = "append"
-    )
+  import_check_libs = """import pygradethis
+from pygradethis.grade_code import grade_code
+from pygradethis.grade_result import python_grade_result
+from pygradethis.conditions import *
+"""
+  final_check_source = import_check_libs + f"\nresult = {check_code_source}"
+  # we need to incorporate all of the imports in this package so that our grading functions are available
+  envir_prep = dict(**locals(), **envir_prep)
+  # but get rid of Nones
+  envir_prep = {k: v for k, v in envir_prep.items() if v is not None}
+
   # evaluate exercise and check code output
   try:
     # NOTE: eventually this will have to follow the gradethis grading flow where check code
@@ -135,7 +126,10 @@ def python_grade_learnr(label: str = None,
     # via `envir_result`
     # evaluate check code and return the result (correct answer or not) and GraderCondition
     # list structure
-    result, condition = eval(check_code_source)
+    # execute the check code with the `envir_prep`
+    exec(final_check_source, envir_prep)
+    # extract the result out of the environment
+    graded = envir_prep['result']
   except Exception as e:
     # TODO somehow trickle up the specific error message?
     return dict(
@@ -145,4 +139,4 @@ def python_grade_learnr(label: str = None,
       location="append"
     )
   # return a dict for learnr to process for feedback
-  return graded_learnr(result, condition)
+  return graded_learnr(graded)

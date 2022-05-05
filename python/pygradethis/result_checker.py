@@ -97,7 +97,7 @@ def test_conditions(*conditions: GraderCondition,
         # return on the first `python_pass_if`
         for mc in matched_conditions:
             if mc['correct']:
-                return True, mc
+                return mc
             elif incorrect_match == None:
                 # keep record of the first `python_fail_if` to return (if any)
                 incorrect_match = mc

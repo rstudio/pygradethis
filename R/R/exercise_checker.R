@@ -36,9 +36,9 @@ exercise_checker <- function(label = NULL,
     solution_code,
     user_code,
     check_code,
-    as.list(envir_result),
+    envir_result,
     evaluate_result,
-    as.list(envir_prep),
+    envir_prep,
     last_value
   )
   # Note: each field needs to be manually converted as the returned dict
