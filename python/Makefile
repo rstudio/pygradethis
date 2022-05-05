@@ -87,6 +87,9 @@ dist: clean ## builds source and wheel package
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
+install-dev: ## install the dev dependencies
+	python -m pip install -e .[dev]
+
 $(VENV_PATH)/bin/activate: setup.cfg 
 	python3 -m venv $(VENV_PATH)
 	source $(VENV_PATH)/bin/activate

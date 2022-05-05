@@ -11,19 +11,17 @@ use in educational settings.
 
 **Note**: This package is in early development and will undergo rapid changes.
 
-## Install
+## Install pygradethis
 
 ```
 pip install pygradethis
 ```
 
-## Dependencies
+## Install Dev Dependencies
 
-- Python 3.9+
-
-## Dev Dependencies
-
-- pytest
+```
+pip install -e .[dev]
+```
 
 ## Features
 
