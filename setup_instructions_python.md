@@ -1,6 +1,6 @@
 # Python Setup Instructions
 
-Using `pyenv` and `venv`
+Using `pyenv` and `pyenv-virtualenv` plugin
 
 ## Install `pyenv`
 
@@ -18,6 +18,19 @@ pyenv init
 
 - Check your `.rc` files to make sure pyenv will load on boot
 
+These lines should be in your `.rc` file (e.g., `~/.zshrc` on a mac)
+
+```
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+```
+
+- restart your shell or source the `.rc` file
+
+```bash
+source ~/.zshrc
+```
+
 ## Install Python
 
 ```
@@ -29,49 +42,40 @@ pyenv versions
 
 ```bash
 pyenv install 3.10.3
-pyenv virtualenv 3.10.3 pygradethis
+pyenv virtualenv 3.10.3 pygradethis # create a virtualenv using 3.10.3
 ```
 
 ## Setup Python
 
-- Uses `pyenv` for the Python Version, and `venv` for the virtual enviornment
+- Uses `pyenv` for the Python Version, and `pyenv-virtualenv` for the virtual enviornment
 
 ### Default Python to Non-System Python
 
 ```bash
 cd ~
-pyenv local 3.10.3
+pyenv global 3.10.3
 pip freeze # should return nothing
 ```
 
-### Setup `pygradethis` Environment
-
-```bash
-cd ~
-pyenv shell pygradethis
-python -m venv ~/.venvs/pygradethis
-source ~/.venvs/pygradethis/bin/activate
-```
-
-## Install package
+## Setup and Install Package
 
 ```bash
 mkdir -p ~/git/rstudio/
 cd ~/git/rstudio/
 git clone git@github.com:rstudio/pygradethis.git
-cd pygradethis/python
-pip install -e .
+cd pygradethis
+pyenv local pygradethis
+cd python
+pip install -e .[dev]
 ```
 
 ## Confirm Package
 
 ```bash
-pip freeze
+pip freeze # should see pygradethis
 ```
 
-## Setup Package Default
-
 ```bash
-~/git/rstudio/pygradethis
-pyenv local pygradethis # will create a .python-version file
+cd ~
+pip freeze # should be empty
 ```
