@@ -28,13 +28,12 @@ class TestCondition(unittest.TestCase):
         # and is only included to avoid a tuple unpacking error
         ID, actual, expected, correct = self.condition
         try:
-            if (
-                actual.__class__.__name__ == "DataFrame" and 
+            if (actual.__class__.__name__ == "DataFrame" and 
                 expected.__class__.__name__ == "DataFrame" and
-                "pandas" in sys.modules
-            ):
-                self.assertTrue(assert_frame_equal(actual, expected))
-            self.assertEqual(actual, expected)
+                "pandas" in sys.modules):
+                assert_frame_equal(actual, expected)
+            else:
+                self.assertEqual(actual, expected)
         except Exception:
             # Note: this ID isn't really being used at the moment for error
             # checking
@@ -59,9 +58,7 @@ class ConditionTestResult(unittest.TextTestResult):
 
 def test_conditions(*conditions: GraderCondition, 
                     user_result: Any = None, 
-                    unittest_style: bool = False,
-                    default_correct: bool = False,
-                    r: dict = {}) -> Tuple[bool, GraderCondition]:
+                    unittest_style: bool = False) -> Tuple[bool, GraderCondition]:
     # create a test suite
     suite = unittest.TestSuite()
     # convenience tuple for structuring test cases
