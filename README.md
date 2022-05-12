@@ -1,15 +1,16 @@
-# pygradethis
+# pygradethis (WORK IN PROGRESS)
 
 [![PyPI version](https://badge.fury.io/py/pygradethis.svg)](https://badge.fury.io/py/pygradethis)
 [![PyPI - License](https://img.shields.io/pypi/l/pygradethis)](LICENSE)
-[![Downloads](https://pepy.tech/badge/pygradethis)](https://pepy.tech/project/pygradethis)
+[![lifecycle](https://img.shields.io/badge/lifecycle-experimental-blue.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+
 
 A Python package to facilitate checking code output or static code checking
 using AST analysis. It can either be used with R using the [`learnr`](https://rstudio.github.io/learnr/) package, as 
 a mirror of [`gradethis`](https://rstudio-education.github.io/gradethis/index.html) package, or as a standalone package for general Python 
 use in educational settings.
 
-**Note**: This package is in early development and will undergo rapid changes.
+**NOTE: This package is in early development and does not work yet!** Things may change drastically without warning during this early phase.
 
 ## Install pygradethis
 
