@@ -102,11 +102,13 @@ def test_conditions(*conditions: GraderCondition,
                 # keep record of the first `python_fail_if` to return (if any)
                 incorrect_match = mc
     else: # no match
-        # - if there is at least one pass_if() condition, then default to an incorrect grade 
-        # - otherwise, we default to a correct grade
-        if len([c for c in conditions if c['correct']]) != 0:
-            return default_correct, None
-        # otherwise if we only have fail_ifs, we default to a correct grade 
-        elif len([c for c in conditions if not c['correct']]) != 0:
-            return True, None
-    return default_correct, incorrect_match
+        # for now just return failing
+        # we will need to revisit the grading flow later to handle cases where there are no
+        # matching grading conditions
+        return GraderCondition(
+                x = None,
+                message = "",
+                correct = False,
+                type = "error"
+            )
+    return incorrect_match

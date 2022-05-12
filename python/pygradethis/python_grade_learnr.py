@@ -12,8 +12,6 @@ from .conditions import GraderCondition, python_pass_if, python_fail_if
 from .feedback import praise, encourage
 from .utils import parse_code
 
-from pprint import pprint
-
 def graded_learnr(graded: Union[str, dict]):
   if (graded is not None):
     correct = graded['correct']
@@ -105,31 +103,27 @@ def python_grade_learnr(label: str = None,
   # TODO input scrubbing for malicious code
   # parse user, check and solution code
   solution_code = parse_code(solution_code)
-  check_code_source = parse_code(check_code)
+  # this will fail currently because it won't include imports of grading submodules
+  # check_code_source = parse_code(check_code)
   user_code_source = parse_code(user_code)
 
-  import_check_libs = """import pygradethis
-from pygradethis.grade_code import grade_code
-from pygradethis.grade_result import python_grade_result
-from pygradethis.conditions import *
-"""
-  final_check_source = import_check_libs + f"\nresult = {check_code_source}"
-  # we need to incorporate all of the imports in this package so that our grading functions are available
-  envir_prep = dict(**locals(), **envir_prep)
-  # but get rid of Nones
-  envir_prep = {k: v for k, v in envir_prep.items() if v is not None}
+  # the final checking code includes the grading modules and stores the final grade in
+  # a variable that we can reference later
+  final_check_source = f"__result__ = {check_code}"
+  
+  # prep the dictionary that will hold imports, the variables passed into this function, and 
+  # everything else that learnr stored into `envir_prep`
+  graded_envir = dict(globals(), **locals(), **envir_prep)
+  graded_envir = {k: v for k, v in graded_envir.items() if v is not None}
 
   # evaluate exercise and check code output
   try:
     # NOTE: eventually this will have to follow the gradethis grading flow where check code
     # can either contain the grading the result or the code and use the student's result
-    # via `envir_result`
-    # evaluate check code and return the result (correct answer or not) and GraderCondition
-    # list structure
-    # execute the check code with the `envir_prep`
-    exec(final_check_source, envir_prep)
+    # evaluate check code and return the result and a GraderCondition list structure
+    exec(final_check_source, graded_envir)
     # extract the result out of the environment
-    graded = envir_prep['result']
+    graded = graded_envir['__result__']
   except Exception as e:
     # TODO somehow trickle up the specific error message?
     return dict(
