@@ -10,7 +10,7 @@ from .result_checker import test_conditions
 # TODO add the glue type messages to construct custom messages
 # glue_correct = getOption("gradethis_glue_correct"),
 # glue_incorrect = getOption("gradethis_glue_incorrect")
-def python_grade_result(
+def grade_result(
     *conditions: List[GraderCondition], 
     user_result: Any = None, 
     unittest_style: bool = False
@@ -38,9 +38,9 @@ def python_grade_result(
   all_conditions = [c for c in conditions if isinstance(c, GraderCondition)]
   if conditions == None or len(all_conditions) == 0:
     raise Exception(
-      "At least one condition object (e.g., `python_pass_if()`, "
-      "`python_fail_if()`, `python_condition()`) must be provided to"
-      "`python_grade_result()`"
+      "At least one condition object (e.g., `pass_if_equals()`, "
+      "`fail_if_equals()`, `python_condition()`) must be provided to"
+      "`grade_result()`"
     )
   if user_result is not None:
     return test_conditions(*conditions, user_result = user_result, unittest_style = unittest_style)

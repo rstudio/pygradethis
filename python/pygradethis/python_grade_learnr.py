@@ -6,9 +6,9 @@ package
 from copy import copy
 from typing import Any, Union, List, Tuple
 
-from .grade_result import python_grade_result
+from .grade_result import grade_result
 from .grade_code import grade_code
-from .conditions import GraderCondition, python_pass_if, python_fail_if
+from .conditions import GraderCondition, pass_if_equals, fail_if_equals
 from .feedback import praise, encourage
 from .utils import parse_code
 
@@ -43,9 +43,9 @@ def python_grade_learnr(label: str = None,
                         solution_code: str = None,
                         user_code: str = None,
                         check_code: List[str] = None,
-                        envir_result: dict = None,
-                        evaluate_result: List[str] = None,
-                        envir_prep: dict = None,
+                        envir_result: dict = {},
+                        evaluate_result: List[str] = [],
+                        envir_prep: dict = {},
                         last_value: Any = None) -> dict:
   """This function mirrors the `grade_learnr` function from {gradethis} package so that
   we can check Python exercises. This function does two things:

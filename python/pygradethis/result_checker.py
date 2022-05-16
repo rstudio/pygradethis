@@ -33,7 +33,11 @@ class TestCondition(unittest.TestCase):
                 "pandas" in sys.modules):
                 assert_frame_equal(actual, expected)
             else:
-                self.assertEqual(actual, expected)
+                # skip if it's a plain pass or fail condition
+                if expected is None:
+                    pass
+                else:
+                    self.assertEqual(actual, expected)
         except Exception:
             # Note: this ID isn't really being used at the moment for error
             # checking
@@ -54,7 +58,7 @@ class ConditionTestResult(unittest.TextTestResult):
         # add matched case
         self.matched.append(test.condition.id)
         if test.condition.correct:
-            self.num_correct += 1 
+            self.num_correct += 1
 
 def test_conditions(*conditions: GraderCondition, 
                     user_result: Any = None, 
@@ -91,12 +95,12 @@ def test_conditions(*conditions: GraderCondition,
     matched_conditions = list(map(lambda i: conditions[i], results.matched))
     incorrect_match = None
     if len(matched_conditions) > 0:
-        # return on the first `python_pass_if`
+        # return on the first `pass_if_equals`
         for mc in matched_conditions:
             if mc['correct']:
                 return mc
             elif incorrect_match == None:
-                # keep record of the first `python_fail_if` to return (if any)
+                # keep record of the first `fail_if_equals` to return (if any)
                 incorrect_match = mc
     else: # no match
         # for now just return failing

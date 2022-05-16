@@ -45,9 +45,9 @@ exercise_checker(
     label = "dan-python-test",
     solution_code = "3",
     user_code = "3",
-    check_code = 'python_grade_result(
-    python_pass_if(3, "You wrote the add!"),
-    python_fail_if(None, ""),
+    check_code = 'grade_result(
+    pass_if_equals(3, "You wrote the add!"),
+    fail_if_equals(),
     user_result = last_value
   )',
   envir_prep = envir_prep,

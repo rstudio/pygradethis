@@ -23,10 +23,10 @@ def python_condition(x: Any, message: str, correct: bool, type: str = "value") -
   # TODO think about whether we allow passing of a function (lambda or regular)
   return GraderCondition(x = x, message = message, correct = correct, type = type)
 
-def python_pass_if(x: Any, message = "") -> dict:
+def pass_if_equals(x: Any = None, message = "") -> dict:
   """Return a pass condition."""
-  return python_condition(x, message, correct = True)
+  return python_condition(x = x, message = message, correct = True)
 
-def python_fail_if(x: Any, message = "") -> dict:
+def fail_if_equals(x: Any = None, message = "") -> dict:
   """Return a fail condition."""
-  return python_condition(x, message, correct = False)
+  return python_condition(x = x, message = message, correct = False)

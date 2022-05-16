@@ -3,9 +3,9 @@ from pygradethis.python_grade_learnr import python_grade_learnr
 
 check_code = (
 """
-python_grade_result(
-    python_pass_if(6, 'You wrote the add!'),
-    python_fail_if(None, 'Oops!'),
+grade_result(
+    pass_if_equals(6, 'You wrote the add!'),
+    fail_if_equals(None, 'Oops!'),
     user_result = 6
 )
 """

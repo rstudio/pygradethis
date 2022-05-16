@@ -31,10 +31,10 @@ from pygradethis import grade_code as gc
 from pygradethis import grade_result as gr
 from pygradethis import conditions as c
 
-# could not find function "gr.python_grade_result"
-gr.python_grade_result(
-  c.python_pass_if(6, "You wrote the add!"),
-  c.python_fail_if(None, "")
+# could not find function "gr.grade_result"
+gr.grade_result(
+  c.pass_if_equals(6, "You wrote the add!"),
+  c.fail_if_equals(None, "")
 )
 ```
 
