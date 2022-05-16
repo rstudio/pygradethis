@@ -110,7 +110,7 @@ def python_grade_learnr(label: str = None,
 
   # the final checking code includes the grading modules and stores the final grade in
   # a variable that we can reference later
-  final_check_source = f"{envir_prep['global_setup']}\n__result__ = {check_code}"
+  final_check_source = f"__result__ = {check_code}"
   
   # prep the dictionary that will hold imports, the variables passed into this function, and 
   # everything else that learnr stored into `envir_prep`

@@ -31,4 +31,5 @@ Config/reticulate:
 RoxygenNote: 7.1.2
 URL: https://rstudio.github.io/learnr/
 Suggests: 
-    testthat (>= 2.1.0)
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

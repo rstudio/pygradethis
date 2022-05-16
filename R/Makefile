@@ -20,9 +20,9 @@ install: build
 # Testing #
 ###########
 
-.PHONY: check test
-
-test: check
+.PHONY: test
+test:
+	R -e "devtools::test()"
 
 ############
 # Clean up #
