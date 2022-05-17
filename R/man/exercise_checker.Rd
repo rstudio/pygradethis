@@ -2,7 +2,7 @@
 % Please edit documentation in R/exercise_checker.R
 \name{exercise_checker}
 \alias{exercise_checker}
-\title{R wrapper around `python_grade_learnr`}
+\title{R wrapper around `pygradethis_exercise_checker`}
 \usage{
 exercise_checker(
   label = NULL,

@@ -52,7 +52,6 @@ test_that("Exercise checker works", {
       user_result = last_value
     )'
   )
-  # TODO there is a bug where the message of the fail if is not being used
   testthat::expect_match(sum_ex_incorrect$message, "Not quite the number we want.")
   testthat::expect_false(sum_ex_incorrect$correct)
   testthat::expect_equal(sum_ex_incorrect$type, "error")

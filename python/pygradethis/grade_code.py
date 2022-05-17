@@ -263,6 +263,6 @@ def grade_code(student_code: str, solution_code: str):
         if "repeated" in message:
             return repeated_argument(e)
     except AssertionError as e:
-        return str(e) # back to either the python_grader or python_grade_learnr
+        return str(e) # back to either the python_grader or pygradethis_exercise_checker
     except Exception as e:
         return "There was a problem checking user or solution code: {}".format(e)

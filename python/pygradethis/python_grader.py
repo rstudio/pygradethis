@@ -3,7 +3,7 @@ This module contains functions to faciliate checking Python code or output.
 """
 from typing import Any
 
-from .python_grade_learnr import python_grade_learnr
+from .pygradethis_exercise_checker import pygradethis_exercise_checker
 from .conditions import GraderCondition
 
 def grade(
@@ -12,13 +12,13 @@ def grade(
   solution_code: str = None,
   last_value: Any = None
   ) -> dict:
-  """Python standalone verson of `python_grade_learnr`. This function does
+  """Python standalone verson of `pygradethis_exercise_checker`. This function does
   two things:
   - Do static code grading (AST) if both user and solution code is provided
     before the result grading.
   - Do result grading based on code output and GraderCondition(s)
 
-  Note: Currently, this is just a wrapper around `python_grade_learnr` and in the
+  Note: Currently, this is just a wrapper around `pygradethis_exercise_checker` and in the
   future we can make changes to handle standalone-specific details.
 
   Parameters
@@ -41,7 +41,7 @@ def grade(
         location="append|prepend|replace"
       }
   """
-  return python_grade_learnr(
+  return pygradethis_exercise_checker(
     user_code = user_code,
     solution_code = solution_code,
     check_code = check_code,

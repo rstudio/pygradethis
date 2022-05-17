@@ -1,5 +1,5 @@
 import pygradethis
-from pygradethis.python_grade_learnr import python_grade_learnr
+from pygradethis.pygradethis_exercise_checker import pygradethis_exercise_checker
 
 check_code = (
 """
@@ -12,5 +12,5 @@ grade_result(
 )
 
 print(
-    python_grade_learnr(label = "dan-python-test", solution_code = "3 + 3", user_code = "3 + 3", check_code = check_code)
+    pygradethis_exercise_checker(label = "dan-python-test", solution_code = "3 + 3", user_code = "3 + 3", check_code = check_code)
 )

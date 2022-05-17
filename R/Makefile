@@ -16,6 +16,10 @@ build: clean
 install: build
 	R CMD INSTALL $(PACKAGE)_$(VERSION).tar.gz
 
+.PHONY: docs
+docs:
+	R -e "devtools::document(roclets = c('rd', 'collate', 'namespace'))"
+
 ###########
 # Testing #
 ###########

@@ -1,6 +1,6 @@
 """
 This is the `learnr` version of `python_grader` module and contains
-the `python_grade_learnr` function called by the `gradethispython` R wrapper
+the `pygradethis_exercise_checker` function called by the `gradethispython` R wrapper
 package
 """
 from copy import copy
@@ -12,7 +12,7 @@ from .conditions import GraderCondition, pass_if_equals, fail_if_equals
 from .feedback import praise, encourage
 from .utils import parse_code
 
-def graded_learnr(graded: Union[str, dict]):
+def graded(graded: Union[str, dict]):
   if (graded is not None):
     correct = graded['correct']
     # correct
@@ -39,7 +39,7 @@ def graded_learnr(graded: Union[str, dict]):
       location = "append"
     )
 
-def python_grade_learnr(label: str = None,
+def pygradethis_exercise_checker(label: str = None,
                         solution_code: str = None,
                         user_code: str = None,
                         check_code: List[str] = None,
@@ -124,7 +124,7 @@ def python_grade_learnr(label: str = None,
     # evaluate check code and return the result and a GraderCondition list structure
     exec(final_check_source, graded_envir)
     # extract the result out of the environment
-    graded = graded_envir['__result__']
+    result = graded_envir['__result__']
   except Exception as e:
     # TODO somehow trickle up the specific error message?
     return dict(
@@ -134,4 +134,4 @@ def python_grade_learnr(label: str = None,
       location="append"
     )
   # return a dict for learnr to process for feedback
-  return graded_learnr(graded)
+  return graded(result)

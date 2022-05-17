@@ -1,5 +1,5 @@
 
-#' R wrapper around `python_grade_learnr`
+#' R wrapper around `pygradethis_exercise_checker`
 #'
 #' To enable exercise checking in your learnr tutorial, you can set
 #' `tutorial_options(exercise.checker = gradethispython::exercise_checker)` in the setup chunk
@@ -31,7 +31,7 @@ exercise_checker <- function(label = NULL,
                             last_value = NULL,
                             ...) {
   # need to cast environment types to a list so reticulate can translate to Python's dicts
-  grade <- python_grade_learnr(
+  grade <- pygradethis_exercise_checker(
     label,
     solution_code,
     user_code,

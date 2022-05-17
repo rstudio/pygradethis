@@ -5,14 +5,14 @@
 #' @export
 pygradethis <- NULL
 
-#' The `exercise.checker` python_grade_learnr to use in learnr
+#' The `exercise.checker` pygradethis_exercise_checker to use in learnr
 #'
-#' @return the `python_grade_learnr` Python function
+#' @return the `pygradethis_exercise_checker` Python function
 #' @export
-python_grade_learnr <- NULL
+pygradethis_exercise_checker <- NULL
 
 .onLoad <- function(libname, pkgname) {
   # import `pygradethis` and the exercise checking function
   pygradethis <<- reticulate::import("pygradethis", convert=FALSE, delay_load = TRUE)
-  python_grade_learnr <<- pygradethis$python_grade_learnr$python_grade_learnr
+  pygradethis_exercise_checker <<- pygradethis$pygradethis_exercise_checker$pygradethis_exercise_checker
 }

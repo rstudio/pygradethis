@@ -1,6 +1,6 @@
 from re import U
 from pygradethis.conditions import *
-from pygradethis.python_grade_learnr import *
+from pygradethis.pygradethis_exercise_checker import *
 
 # Grade result -------------------------------------
 
@@ -9,7 +9,7 @@ def test_pass_if_correct():
         pass_if_equals(2, "Woah, nice!"),
         user_result = last_value
     )"""
-    result = python_grade_learnr(
+    result = pygradethis_exercise_checker(
         user_code="2",
         solution_code="2",
         check_code=check_code,
@@ -25,7 +25,7 @@ def test_pass_if_incorrect():
         pass_if_equals(2, "Woah, nice!"),
         user_result = last_value
     )"""
-    result = python_grade_learnr(
+    result = pygradethis_exercise_checker(
         user_code="1",
         solution_code="2",
         check_code=check_code,
@@ -42,7 +42,7 @@ def test_multiple_pass_if_correct():
         pass_if_equals(3, "Piece of cake!"),
         user_result = last_value
     )"""
-    result = python_grade_learnr(
+    result = pygradethis_exercise_checker(
         user_code="3",
         solution_code="2",
         check_code=check_code,
@@ -58,7 +58,7 @@ def test_multiple_pass_if_correct():
         pass_if_equals(3, "Piece of cake!"),
         user_result = last_value
     )"""
-    result = python_grade_learnr(
+    result = pygradethis_exercise_checker(
         user_code="2",
         solution_code="2",
         check_code=check_code,
@@ -74,7 +74,7 @@ def test_multiple_pass_if_incorrect():
         pass_if_equals(3, "Piece of cake!"),
         user_result = last_value
     )"""
-    result = python_grade_learnr(
+    result = pygradethis_exercise_checker(
         user_code="3",
         solution_code="2",
         check_code=check_code,
@@ -90,7 +90,7 @@ def test_pass_if_fail_if_correct():
         fail_if_equals(1, "We do not want 1."),
         user_result = last_value
     )"""
-    result = python_grade_learnr(
+    result = pygradethis_exercise_checker(
         user_code="2",
         solution_code="2",
         check_code=check_code,
@@ -106,7 +106,7 @@ def test_pass_if_fail_if_incorrect():
         fail_if_equals(1, "We do not want 1."),
         user_result = last_value
     )"""
-    result = python_grade_learnr(
+    result = pygradethis_exercise_checker(
         user_code="1",
         solution_code="2",
         check_code=check_code,
