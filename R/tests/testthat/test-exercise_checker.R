@@ -7,14 +7,15 @@ get_exercise_result <- function(label = "ex", setup_code = "", setup_label = "",
     user_code = user_code,
     solution_code = solution_code,
     engine = "python",
-    check = check_code
+    check = check_code,
+    exercise.checker = learnr:::dput_to_string(pygradethis::exercise_checker)
   )
   # for creating a setup chunk
   if (nzchar(setup_code) && nzchar(setup_label)) {
     args <- append(args,
       list(
         chunks = list(
-          learnr:::mock_chunk(setup_label, setup_code, engine = "python")
+          learnr:::mock_chunk(setup_label, setup_code, engine = "python") 
         ),
         exercise.setup = setup_label
       )
@@ -22,8 +23,7 @@ get_exercise_result <- function(label = "ex", setup_code = "", setup_label = "",
   }
   ex <- do.call(learnr:::mock_exercise, args)
   res <- learnr:::evaluate_exercise(ex, envir = new.env())
-  checker_args <- res$feedback$checker_args
-  do.call(pygradethis::exercise_checker, checker_args)
+  res$feedback
 }
 
 test_that("Exercise checking flow works", {
