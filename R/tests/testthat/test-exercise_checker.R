@@ -15,7 +15,7 @@ get_exercise_result <- function(label = "ex", setup_code = "", setup_label = "",
     args <- append(args,
       list(
         chunks = list(
-          learnr:::mock_chunk(setup_label, setup_code, engine = "python") 
+          learnr:::mock_chunk(setup_label, setup_code, engine = "python")
         ),
         exercise.setup = setup_label
       )

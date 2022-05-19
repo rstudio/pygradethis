@@ -114,7 +114,12 @@ def pygradethis_exercise_checker(label: str = None,
   
   # prep the dictionary that will hold imports, the variables passed into this function, and 
   # everything else that learnr stored into `envir_prep`
-  graded_envir = dict(globals(), **locals(), **envir_prep)
+  # NOTE: in the future, we could abstract and have an Exercise class that would have envir bits 
+  # and could have functions to do the checking + check flows
+  if envir_prep is not None:
+    graded_envir = dict(globals(), **locals(), **envir_prep)
+  else:
+    graded_envir = dict(globals(), **locals())
   graded_envir = {k: v for k, v in graded_envir.items() if v is not None}
 
   # evaluate exercise and check code output
