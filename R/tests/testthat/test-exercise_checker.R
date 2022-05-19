@@ -1,11 +1,7 @@
-library(learnr)
-library(pygradethis)
 library(reticulate)
 
 # helper function to test the exercise checker through the learnr flow
 get_exercise_result <- function(label = "ex", setup_code = "", setup_label = "", user_code, solution_code, check_code) {
-  # NOTE: the is_AsIs won't be found unless we make this available in this function
-  is_AsIs <- learnr:::is_AsIs
   args <- list(
     label = label,
     user_code = user_code,
