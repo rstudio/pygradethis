@@ -61,8 +61,7 @@ class ConditionTestResult(unittest.TextTestResult):
             self.num_correct += 1
 
 def test_conditions(*conditions: GraderCondition, 
-                    user_result: Any = None, 
-                    unittest_style: bool = False) -> Tuple[bool, GraderCondition]:
+                    user_result: Any = None) -> Tuple[bool, GraderCondition]:
     # create a test suite
     suite = unittest.TestSuite()
     # convenience tuple for structuring test cases
@@ -82,14 +81,6 @@ def test_conditions(*conditions: GraderCondition,
     results = unittest.TextTestRunner(resultclass = ConditionTestResult).run(suite)
     # restore stderr to buffer so we catch any errors on our matching code below
     sys.stderr = default_buffer
-    # for unit test style
-    if unittest_style:
-        result = dict(
-            message = "{}/{} correct.",
-            num_correct = results.num_correct, 
-            total =  len(conditions)
-        )
-        return True, result
     
     # get matched conditions by subsetting conditions list with matched index list
     matched_conditions = list(map(lambda i: conditions[i], results.matched))

@@ -12,8 +12,7 @@ from .result_checker import test_conditions
 # glue_incorrect = getOption("gradethis_glue_incorrect")
 def grade_result(
     *conditions: List[GraderCondition], 
-    user_result: Any = None, 
-    unittest_style: bool = False
+    user_result: Any = None
   ) -> Union[dict, str]:
   """This function checks the user's code output against the list of conditions.
 
@@ -43,5 +42,5 @@ def grade_result(
       "`grade_result()`"
     )
   if user_result is not None:
-    return test_conditions(*conditions, user_result = user_result, unittest_style = unittest_style)
+    return test_conditions(*conditions, user_result = user_result)
   return conditions
