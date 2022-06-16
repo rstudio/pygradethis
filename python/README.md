@@ -34,17 +34,17 @@ pip install -e .[dev]
 check that the student supplies the `mpg` dataset like so:
 
 ```python
-python_grade_result(
-  python_pass_if(mpg, "You also got the mpg dataframe!"),
-  python_fail_if(None, "")
+grade_result(
+  pass_if_equals(mpg, "You also got the mpg dataframe!"),
+  fail_if_equals(None, "")
 )
 ```
 
-Internally, these `python_pass_if(output, message)` or `python_fail_if(output, message)` will be checked sequentially in
+Internally, these `pass_if_equals(output, message)` or `fail_if_equals(output, message)` will be checked sequentially in
 the order of arguments and return on first condition we match. The `None` here can be used
 if you simply want to execute a condition if none of the other conditions matched.
 
-If we match a `python_pass_if` or `python_fail_if`, we will present a feedback message wrapped in a convenient `dict`:
+If we match a `pass_if_equals` or `fail_if_equals`, we will present a feedback message wrapped in a convenient `dict`:
 
 ```python
 dict(
@@ -62,13 +62,13 @@ this package as a standalone the `location` is not an important field and it can
 Internally, a random praise/encouragement message will be appended before any custom message supplied. 
 
 ```python
-python_pass_if(x = mpg, message = "You also got the mpg dataframe!")
+pass_if_equals(x = mpg, message = "You also got the mpg dataframe!")
 ```
 Feedback:
 > Bravo! You also got the mpg dataframe!
 
 ```python
-python_fail_if(x = None, message = "")
+fail_if_equals(x = None, message = "")
 ```
 Feedback:
 > Try it again. You get better each time.

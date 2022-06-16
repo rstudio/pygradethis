@@ -21,6 +21,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+.python-version
 
 # Sphinx documentation
 python/docs/_build/
@@ -36,6 +37,7 @@ python/docs/_build/
 .Rhistory
 .RData
 .Ruserdata
+.tar.gz
 Untitled
 issues
 
