@@ -1,5 +1,5 @@
 
-#' Helper function to execute global setup code for learnr tutorials
+#' Helper function to execute Python global setup code for learnr tutorials
 #'
 #' @param code a character
 #' @return nothing

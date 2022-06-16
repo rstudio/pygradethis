@@ -34,7 +34,7 @@ test_that("Exercise with a global setup chunk works", {
   expect_match(feedback$message, "Not quite the number we want.")
 })
 
-test_that("Exercise with a global imports works", {
+test_that("Exercise with global imports works", {
   # setup of imports
   ex_correct <- mock_py_exercise(
     user_code = 'pd.DataFrame({"a": [1, 2, 3]})',
