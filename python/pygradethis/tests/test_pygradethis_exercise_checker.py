@@ -19,7 +19,6 @@ def test_pass_if_correct():
     assert result['type'] == "success"
     assert "Woah, nice!" in result['message']
 
-
 def test_pass_if_incorrect():
     check_code = """grade_result(
         pass_if_equals(2, "Woah, nice!"),

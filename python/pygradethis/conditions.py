@@ -1,32 +1,31 @@
 
 from typing import Any, List, Tuple
 
-class GraderCondition(dict):
+class Graded(dict):
     """Convience class to represent the a grader condition for an exercise.
     
     Example:
     
-    GraderCondition(
+    Graded(
       x = x,
       message = message,
       correct = correct,
       type = type
     )
     """
-    def __init__(self, *args, **kwargs):
-      # TODO validation of kwargs to only accept the valid names
-      super(GraderCondition, self).__init__(kwargs)
+    def __init__(self, x: Any, message: str = "", correct: bool = True, type: str = "value"):
+      super(Graded, self).__init__({'x': x, 'message': message, 'correct': correct, 'type': type})
 
-def python_condition(x: Any, message: str, correct: bool, type: str = "value") -> dict:
+def python_condition(x: Any, message: str = "", correct: bool = True, type: str = "value") -> dict:
   """Return the proper structure for a particular type of condition."""
   # Note: we don't use the type field from `gradethis::condition` yet, so assumes value
   # TODO think about whether we allow passing of a function (lambda or regular)
-  return GraderCondition(x = x, message = message, correct = correct, type = type)
+  return Graded(x = x, message = message, correct = correct, type = type)
 
 def pass_if_equals(x: Any = None, message = "") -> dict:
   """Return a pass condition."""
-  return python_condition(x = x, message = message, correct = True)
+  return Graded(x = x, message = message, correct = True)
 
 def fail_if_equals(x: Any = None, message = "") -> dict:
   """Return a fail condition."""
-  return python_condition(x = x, message = message, correct = False)
+  return Graded(x = x, message = message, correct = False)

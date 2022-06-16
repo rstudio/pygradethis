@@ -21,7 +21,8 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
-  reticulate
+  reticulate,
+  learnr
 Config/reticulate:
   list(
     packages = list(

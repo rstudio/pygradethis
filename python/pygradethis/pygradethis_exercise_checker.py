@@ -8,7 +8,7 @@ from typing import Any, Union, List, Tuple
 
 from .grade_result import grade_result
 from .grade_code import grade_code
-from .conditions import GraderCondition, pass_if_equals, fail_if_equals
+from .conditions import *
 from .feedback import praise, encourage
 from .utils import parse_code
 
@@ -35,7 +35,7 @@ def graded(graded: Union[str, dict]):
     return dict(
       message = "{}".format(encourage()), 
       correct = False, 
-      type = "error", 
+      type = "error",
       location = "append"
     )
 
@@ -51,7 +51,7 @@ def pygradethis_exercise_checker(label: str = None,
   we can check Python exercises. This function does two things:
   - Do static code grading (AST) if both user and solution code is provided
     before the result grading.
-  - Do result grading based on code output and GraderCondition(s)
+  - Do result grading based on code output and Graded(s)
 
   Parameters
   ----------
@@ -126,7 +126,7 @@ def pygradethis_exercise_checker(label: str = None,
   try:
     # NOTE: eventually this will have to follow the gradethis grading flow where check code
     # can either contain the grading the result or the code and use the student's result
-    # evaluate check code and return the result and a GraderCondition list structure
+    # evaluate check code and return the result and a Graded list structure
     exec(final_check_source, graded_envir)
     # extract the result out of the environment
     result = graded_envir['__result__']

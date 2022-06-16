@@ -5,7 +5,7 @@ from itertools import zip_longest
 from collections import namedtuple
 from typing import Any, Tuple
 
-from .conditions import GraderCondition
+from .conditions import Graded
 # testing
 import unittest
 try:
@@ -15,14 +15,14 @@ except:
     pass
 
 class TestCondition(unittest.TestCase):
-    """Custom TestCase to do asserts on GraderCondition(s) and incorporate
+    """Custom TestCase to do asserts on Graded(s) and incorporate
     custom asserts from libraries like pandas for dataframe checking.
     """
-    def __init__(self, test_name: str, condition: GraderCondition):
+    def __init__(self, test_name: str, condition: Graded):
         super(TestCondition, self).__init__(test_name)
         self.condition = condition
         
-    ## Test Case for `GraderCondition`
+    ## Test Case for `Graded`
     def test_condition(self):
         # Note: currently the `correct` field from TestCase tuple isn't used
         # and is only included to avoid a tuple unpacking error
@@ -60,8 +60,8 @@ class ConditionTestResult(unittest.TextTestResult):
         if test.condition.correct:
             self.num_correct += 1
 
-def test_conditions(*conditions: GraderCondition, 
-                    user_result: Any = None) -> Tuple[bool, GraderCondition]:
+def test_conditions(*conditions: Graded, 
+                    user_result: Any = None) -> Tuple[bool, Graded]:
     # create a test suite
     suite = unittest.TestSuite()
     # convenience tuple for structuring test cases
@@ -97,7 +97,7 @@ def test_conditions(*conditions: GraderCondition,
         # for now just return failing
         # we will need to revisit the grading flow later to handle cases where there are no
         # matching grading conditions
-        return GraderCondition(
+        return Graded(
                 x = None,
                 message = "",
                 correct = False,
