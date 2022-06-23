@@ -90,6 +90,9 @@ install: clean ## install the package to the active Python's site-packages
 install-dev: ## install the dev dependencies
 	python -m pip install -e .[dev]
 
+install-extras: ## install extra dependencies
+	python -m pip install -e .[extras]
+
 $(VENV_PATH)/bin/activate: setup.cfg 
 	python3 -m venv $(VENV_PATH)
 	source $(VENV_PATH)/bin/activate
