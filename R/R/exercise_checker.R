@@ -30,7 +30,29 @@ exercise_checker <- function(label = NULL,
                             envir_prep = NULL,
                             last_value = NULL,
                             ...) {
-  # need to cast environment types to a list so reticulate can translate to Python's dicts
+  # redirect table grading to tblcheck for now if solution object is a DataFrame
+  .solution <- tryCatch(
+    reticulate::py_to_r(reticulate::py_eval(as.character(solution_code))),
+    error = function(e) NULL
+  )
+  if (!is.null(.solution) && class(.solution) %in% "pandas.core.frame.DataFrame") {
+    .result <- reticulate::py_to_r(last_value)
+    # prep the checking environment
+    checking_env <-
+      list2env(list(
+        .solution = .solution,
+        .envir_prep = envir_prep,
+        .envir_result = envir_result,
+        .last_value = .result,
+        .result = .result,
+        .user = .result
+    ))
+    # grade
+    checker_fun <- eval(parse(text = check_code))
+    return(checker_fun(checking_env))
+  }
+
+  # produce a grade result
   grade <- pygradethis_exercise_checker(
     label,
     solution_code,
