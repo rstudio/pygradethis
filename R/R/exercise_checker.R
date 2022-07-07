@@ -31,12 +31,18 @@ exercise_checker <- function(label = NULL,
                             last_value = NULL,
                             ...) {
   # redirect table grading to tblcheck for now if solution object is a DataFrame
-  .solution <- tryCatch(
-    reticulate::py_to_r(reticulate::py_eval(as.character(solution_code))),
-    error = function(e) NULL
+  .solution <- tryCatch({
+      solution_code <- paste0(as.character(solution_code), collapse = "\n")
+      reticulate::py_run_string(solution_code)
+      reticulate::py_eval('builtins._')
+    },
+    error = function(e) {
+      NULL
+    }
   )
   if (!is.null(.solution) && class(.solution) %in% "pandas.core.frame.DataFrame") {
-    .result <- reticulate::py_to_r(last_value)
+    .result <- py_to_tbl(last_value)
+    .solution <- py_to_tbl(.solution)
     # prep the checking environment
     checking_env <-
       list2env(list(
@@ -52,7 +58,7 @@ exercise_checker <- function(label = NULL,
     return(checker_fun(checking_env))
   }
 
-  # produce a grade result
+  # if not a DataFrame, use assert checking to produce a grade result
   grade <- pygradethis_exercise_checker(
     label,
     solution_code,

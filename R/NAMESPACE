@@ -2,5 +2,6 @@
 
 export(add_global_setup)
 export(exercise_checker)
+export(py_to_tbl)
 export(pygradethis)
 export(pygradethis_exercise_checker)

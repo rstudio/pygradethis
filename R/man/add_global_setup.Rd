@@ -2,7 +2,7 @@
 % Please edit documentation in R/pygradethis_setup.R
 \name{add_global_setup}
 \alias{add_global_setup}
-\title{Helper function to execute global setup code for learnr tutorials}
+\title{Helper function to execute Python global setup code for learnr tutorials}
 \usage{
 add_global_setup(code)
 }
@@ -13,5 +13,5 @@ add_global_setup(code)
 nothing
 }
 \description{
-Helper function to execute global setup code for learnr tutorials
+Helper function to execute Python global setup code for learnr tutorials
 }

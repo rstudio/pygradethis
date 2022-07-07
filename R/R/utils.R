@@ -35,3 +35,24 @@ evaluate_exercise_feedback <- function(ex, envir = NULL, evaluate_global_setup =
   res <- learnr:::evaluate_exercise(ex, envir = envir, evaluate_global_setup = evaluate_global_setup)
   res$feedback
 }
+
+#' Converts a Python pandas.DataFrame into an R tibble
+#'
+#' @param data A pandas.DataFrame
+#'
+#' @return A tibble
+#' @export
+py_to_tbl <- function(data) {
+  # check if data is a MultiIndex (e.g. multiple groups)
+  if ("pandas.core.indexes.multi.MultiIndex" %in% class(data$index)) {
+    py_run_string("import builtins")
+    # NOTE: the index names is a FrozenList so we have to cast it with list()
+    group_vars <- py$builtins$list(data$index$names)
+    # flatten MultiIndex into regular columns
+    data_reset <- data$reset_index()
+    # construct a tibble and apply any groups
+    return(dplyr::group_by(data_reset, dplyr::across(group_vars)))
+  }
+  # keep rownames to preserve the idea of the Index
+  tibble::as_tibble(reticulate::py_to_r(data), rownames = data$index$name)
+}
