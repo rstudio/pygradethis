@@ -33,8 +33,7 @@ exercise_checker <- function(label = NULL,
   # redirect table grading to tblcheck for now if solution object is a DataFrame
   .solution <- tryCatch({
       solution_code <- paste0(as.character(solution_code), collapse = "\n")
-      reticulate::py_run_string(solution_code)
-      reticulate::py_eval('builtins._')
+      get_last_value(solution_code, envir_prep$py)
     },
     error = function(e) {
       NULL

@@ -36,6 +36,23 @@ evaluate_exercise_feedback <- function(ex, envir = NULL, evaluate_global_setup =
   res$feedback
 }
 
+# helper function that converts a Python DataFrame ensuring that
+# the Index/MultiIndex is flattened 
+convert_to_tbl <- function(data) {
+  data_reset <- data$reset_index()
+  # NOTE: the index names is a FrozenList so we have to cast it with list()
+  # flatten MultiIndex into regular columns
+  tbl <- tryCatch(tibble::as_tibble(data_reset), error = function(e) NULL)
+  if (is.null(tbl)) {
+    tbl <- tibble::as_tibble(reticulate::py_to_r(data_reset))
+  }
+  if ("index" %in% names(tbl)) {
+    return(dplyr::select(tbl, -index))
+  } else {
+    return(tbl)
+  }
+}
+
 #' Converts a Python pandas.DataFrame into an R tibble
 #'
 #' @param data A pandas.DataFrame
@@ -46,13 +63,11 @@ py_to_tbl <- function(data) {
   # check if data is a MultiIndex (e.g. multiple groups)
   if ("pandas.core.indexes.multi.MultiIndex" %in% class(data$index)) {
     py_run_string("import builtins")
-    # NOTE: the index names is a FrozenList so we have to cast it with list()
     group_vars <- py$builtins$list(data$index$names)
-    # flatten MultiIndex into regular columns
-    data_reset <- data$reset_index()
+    tbl <- convert_to_tbl(data)
     # construct a tibble and apply any groups
-    return(dplyr::group_by(data_reset, dplyr::across(group_vars)))
+    return(dplyr::group_by(tbl, dplyr::across(group_vars)))
   }
-  # keep rownames to preserve the idea of the Index
-  tibble::as_tibble(reticulate::py_to_r(data), rownames = data$index$name)
+  # reset Index for DataFrames that have rownames
+  convert_to_tbl(data)
 }

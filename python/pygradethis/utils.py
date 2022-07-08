@@ -34,3 +34,12 @@ def parse_code(input: Union[str, List[str]]) -> str:
             return "\n".join(input)
         else:
             raise SyntaxError("Problem parsing your code!")
+
+def get_last_value(script, globals):
+  # grab list of AST nodes
+  stmts = list(ast.iter_child_nodes(ast.parse(script)))
+  # first execute entire source (since we need statements to be executed)
+  exec(compile(script, filename="<string>", mode="exec"), globals)
+  # then, execute last expression
+  return eval(compile(ast.Expression(body=stmts[-1].value), filename="<ast>", mode="eval"), globals)
+  
