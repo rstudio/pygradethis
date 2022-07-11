@@ -102,12 +102,8 @@ def pygradethis_exercise_checker(label: str = None,
 
   # TODO input scrubbing for malicious code
   # parse user, check and solution code
-  solution_code = parse_code(solution_code)
-  # this will fail currently because it won't include imports of grading submodules
-  # TODO do this parsing check after the final check source is constructed
-  # check_code_source = parse_code(check_code)
-  user_code_source = parse_code(user_code)
 
+  # TODO validate checking code after the final check source is constructed
   # the final checking code includes the grading modules and stores the final grade in
   # a variable that we can reference later
   final_check_source = f"__result__ = {check_code}"
