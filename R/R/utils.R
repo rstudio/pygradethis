@@ -40,12 +40,14 @@ evaluate_exercise_feedback <- function(ex, envir = NULL, evaluate_global_setup =
 # the Index/MultiIndex is flattened 
 convert_to_tbl <- function(data) {
   data_reset <- data$reset_index()
-  # NOTE: the index names is a FrozenList so we have to cast it with list()
-  # flatten MultiIndex into regular columns
+  # attempt to convert directly to tibble
   tbl <- tryCatch(tibble::as_tibble(data_reset), error = function(e) NULL)
   if (is.null(tbl)) {
+    # if conversion to tibble fails, first convert to R data.frame
     tbl <- tibble::as_tibble(reticulate::py_to_r(data_reset))
   }
+  # for regular dataframes we will end up with an "index" column
+  # so we remove that
   if ("index" %in% names(tbl)) {
     return(dplyr::select(tbl, -index))
   } else {
@@ -63,6 +65,8 @@ py_to_tbl <- function(data) {
   # check if data is a MultiIndex (e.g. multiple groups)
   if ("pandas.core.indexes.multi.MultiIndex" %in% class(data$index)) {
     py_run_string("import builtins")
+    # NOTE: the index names is a FrozenList so we have to cast it with list()
+    # flatten MultiIndex into regular columns
     group_vars <- py$builtins$list(data$index$names)
     tbl <- convert_to_tbl(data)
     # construct a tibble and apply any groups

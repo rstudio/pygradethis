@@ -41,5 +41,6 @@ def get_last_value(script, globals):
   # first execute entire source (since we need statements to be executed)
   exec(compile(script, filename="<string>", mode="exec"), globals)
   # then, execute last expression
+  # TODO: we are assuming here that the last statement is an expression, we could
+  # do the work to figure that out first and perhaps throw an error if there were no expressions
   return eval(compile(ast.Expression(body=stmts[-1].value), filename="<ast>", mode="eval"), globals)
-  

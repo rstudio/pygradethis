@@ -30,7 +30,7 @@ exercise_checker <- function(label = NULL,
                             envir_prep = NULL,
                             last_value = NULL,
                             ...) {
-  # redirect table grading to tblcheck for now if solution object is a DataFrame
+  # get solution object for result checking
   .solution <- tryCatch({
       solution_code <- paste0(as.character(solution_code), collapse = "\n")
       get_last_value(solution_code, envir_prep$py)
@@ -39,7 +39,10 @@ exercise_checker <- function(label = NULL,
       NULL
     }
   )
+  # redirect table grading to tblcheck for now if solution object is a DataFrame
   if (!is.null(.solution) && class(.solution) %in% "pandas.core.frame.DataFrame") {
+    # auto convert the result and solution to a tibble before the tblcheck grading
+    # (we can also choose to not convert here and let user do conversions)
     .result <- py_to_tbl(last_value)
     .solution <- py_to_tbl(.solution)
     # prep the checking environment
