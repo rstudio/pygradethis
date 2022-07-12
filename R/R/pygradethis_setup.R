@@ -5,7 +5,7 @@
 #' @return nothing
 #' @export
 add_global_setup <- function(code) {
-    global_code <- paste0(code, collapse = ";")
+    global_code <- paste0(code, collapse = "; ")
     reticulate::py_run_string(global_code, convert = FALSE)
     return(invisible())
 }

@@ -49,10 +49,10 @@ convert_to_tbl <- function(data) {
   # for regular dataframes we will end up with an "index" column
   # so we remove that
   if ("index" %in% names(tbl)) {
-    return(dplyr::select(tbl, -index))
-  } else {
-    return(tbl)
+    tbl <- dplyr::select(tbl, -index)
   }
+  attr(tbl, "pandas.index") <- NULL
+  tbl
 }
 
 #' Converts a Python pandas.DataFrame into an R tibble

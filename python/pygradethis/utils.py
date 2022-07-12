@@ -2,7 +2,7 @@
 Module with useful functions.
 """
 
-from typing import Union, List
+from typing import Union, List, Any
 import ast
 
 def parse_code(input: Union[str, List[str]]) -> str:
@@ -35,12 +35,26 @@ def parse_code(input: Union[str, List[str]]) -> str:
         else:
             raise SyntaxError("Problem parsing your code!")
 
-def get_last_value(script, globals):
-  # grab list of AST nodes
-  stmts = list(ast.iter_child_nodes(ast.parse(script)))
-  # first execute entire source (since we need statements to be executed)
-  exec(compile(script, filename="<string>", mode="exec"), globals)
-  # then, execute last expression
-  # TODO: we are assuming here that the last statement is an expression, we could
-  # do the work to figure that out first and perhaps throw an error if there were no expressions
-  return eval(compile(ast.Expression(body=stmts[-1].value), filename="<ast>", mode="eval"), globals)
+def get_last_value(script: str, globals: dict) -> Any:
+    """Evaluate Python code and return the value of the last Expression
+
+    Parameters
+    ----------
+    script : str
+        A string of Python code
+    globals : dict
+        A dictionary for the environment in which to evaluate code
+
+    Returns
+    -------
+    Any
+        A Python object
+    """
+    # grab list of AST nodes
+    stmts = list(ast.iter_child_nodes(ast.parse(script)))
+    # first execute entire source (since we need statements to be executed)
+    exec(compile(script, filename="<string>", mode="exec"), globals)
+    # then, execute last expression
+    # TODO: we are assuming here that the last statement is an expression, we could
+    # do the work to figure that out first and perhaps throw an error if there were no expressions
+    return eval(compile(ast.Expression(body=stmts[-1].value), filename="<ast>", mode="eval"), globals)
