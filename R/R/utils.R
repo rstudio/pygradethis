@@ -1,6 +1,6 @@
 
 #' A helper function to mock a Python exercise in learnr.
-#' 
+#'
 #' This is an internal function used for testing purposes.
 #'
 #' @param user_code Python code submitted by the user
@@ -11,6 +11,7 @@
 #' 
 #' @return The mocked exercise
 mock_py_exercise <- function(user_code, solution_code, check, ...) {
+  # TODO: this currently will not work for the tblcheck grading of Python dataframes.
   learnr:::mock_exercise(
     user_code = user_code,
     solution_code = solution_code,
@@ -51,6 +52,8 @@ convert_to_tbl <- function(data) {
   if ("index" %in% names(tbl)) {
     tbl <- dplyr::select(tbl, -index)
   }
+  # NOTE: "pandas.index" will have a pointer address that will be unique so
+  # comparing identical tibbles won't work unless this is stripped off
   attr(tbl, "pandas.index") <- NULL
   tbl
 }
@@ -62,16 +65,22 @@ convert_to_tbl <- function(data) {
 #' @return A tibble
 #' @export
 py_to_tbl <- function(data) {
-  # check if data is a MultiIndex (e.g. multiple groups)
-  if ("pandas.core.indexes.multi.MultiIndex" %in% class(data$index)) {
-    py_run_string("import builtins")
+  reticulate::py_run_string("import builtins")
+  # check if data should be grouped
+  index_names <- py$builtins$list(data$index$names)
+  has_groups <- all(unlist(lapply(index_names, function(name) !is.null(name))))
+  # construct a tibble that has groups if needed
+  if (has_groups) {
     # NOTE: the index names is a FrozenList so we have to cast it with list()
     # flatten MultiIndex into regular columns
     group_vars <- py$builtins$list(data$index$names)
     tbl <- convert_to_tbl(data)
-    # construct a tibble and apply any groups
-    return(dplyr::group_by(tbl, dplyr::across(group_vars)))
+    if (length(group_vars) > 0) {
+      tbl <- dplyr::group_by(tbl, dplyr::across(group_vars))
+    }
+    class(tbl) <- append("py_grouped_df", class(tbl))
+    return(tbl)
   }
-  # reset Index for DataFrames that have rownames
+  # reset Index for regular DataFrames that might have rownames
   convert_to_tbl(data)
 }

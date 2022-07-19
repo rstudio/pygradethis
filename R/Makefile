@@ -9,16 +9,16 @@ all: test
 .PHONY: all clean
 .PHONY: build
 
+.PHONY: docs
+docs:
+	R -e "devtools::document(roclets = c('rd', 'collate', 'namespace'))"
+
 build: clean
 	R CMD build .
 
 .PHONY: install
-install: build
+install: docs build
 	R CMD INSTALL $(PACKAGE)_$(VERSION).tar.gz
-
-.PHONY: docs
-docs:
-	R -e "devtools::document(roclets = c('rd', 'collate', 'namespace'))"
 
 ###########
 # Testing #

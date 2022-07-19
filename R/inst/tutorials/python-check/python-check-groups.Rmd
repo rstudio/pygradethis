@@ -16,7 +16,7 @@ library(pygradethis)
 library(reticulate)
 
 # python global setup code
-pygradethis::add_global_setup(c(
+pygradethis::prepare_py(c(
   "import pandas as pd",
   "import numpy as np"
 ))
