@@ -5,6 +5,15 @@ Module with useful functions.
 from typing import Union, List, Any
 import ast
 
+class NotSet:
+    """Sentinel value to distinguish a special type of None from literal
+    None. This is used specifically for get_last_value function.
+    """
+    def __repr__(self):
+        return "None"
+
+NONE = NotSet()
+
 def parse_code(input: Union[str, List[str]]) -> str:
     """Tries to parse code represented as string or list of strings
 
@@ -55,16 +64,15 @@ def get_last_value(script: str, globals: dict = globals()) -> Any:
     >>> get_last_value("x = 2; x + 1")
     3
 
-    >>> get_last_value("2 + 2; x = 2") # returns None
+    >>> get_last_value("2 + 2; x = 2") # returns NONE (sentinel value for None)
     """
     stmts = list(ast.iter_child_nodes(ast.parse(script)))
     # iteratively walk through AST and execute statements and expressions while storing the last value
     last_value = None
     for s in stmts:
         if isinstance(s, ast.Expr):
-            result = eval(compile(ast.Expression(body=s.value), filename="<ast>", mode="eval"), globals)
-            last_value = result
+            last_value = eval(compile(ast.Expression(body=s.value), filename="<ast>", mode="eval"), globals)
         else:
             exec(compile(ast.Module(body=[s], type_ignores=[]), filename="<ast>", mode="exec"), globals)
-            last_value = None
+            last_value = NONE
     return last_value

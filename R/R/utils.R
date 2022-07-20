@@ -37,9 +37,9 @@ evaluate_exercise_feedback <- function(ex, envir = NULL, evaluate_global_setup =
   res$feedback
 }
 
-# helper function that converts a Python DataFrame ensuring that
-# the Index/MultiIndex is flattened 
-convert_to_tbl <- function(data) {
+# helper function that flattens a Python DataFrame ensuring that
+# the Index/MultiIndex is flattened and converted to columns
+flatten_py_dataframe <- function(data) {
   data_reset <- data$reset_index()
   # attempt to convert directly to tibble
   tbl <- tryCatch(tibble::as_tibble(data_reset), error = function(e) NULL)
@@ -52,6 +52,8 @@ convert_to_tbl <- function(data) {
   if ("index" %in% names(tbl)) {
     tbl <- dplyr::select(tbl, -index)
   }
+  # set the base class
+  class(tbl) <- append("py_tbl_df", class(tbl))
   # NOTE: "pandas.index" will have a pointer address that will be unique so
   # comparing identical tibbles won't work unless this is stripped off
   attr(tbl, "pandas.index") <- NULL
@@ -69,18 +71,18 @@ py_to_tbl <- function(data) {
   # check if data should be grouped
   index_names <- py$builtins$list(data$index$names)
   has_groups <- all(unlist(lapply(index_names, function(name) !is.null(name))))
+  # flatten Index/MultiIndex
+  tbl <- flatten_py_dataframe(data)
   # construct a tibble that has groups if needed
   if (has_groups) {
     # NOTE: the index names is a FrozenList so we have to cast it with list()
     # flatten MultiIndex into regular columns
     group_vars <- py$builtins$list(data$index$names)
-    tbl <- convert_to_tbl(data)
     if (length(group_vars) > 0) {
       tbl <- dplyr::group_by(tbl, dplyr::across(group_vars))
     }
-    class(tbl) <- append("py_grouped_df", class(tbl))
+    class(tbl) <- append(c("py_grouped_df", "py_tbl_df"), class(tbl))
     return(tbl)
   }
-  # reset Index for regular DataFrames that might have rownames
-  convert_to_tbl(data)
+  tbl
 }
