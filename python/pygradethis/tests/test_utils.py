@@ -6,9 +6,6 @@ def test_get_last_value_exprs():
     last_value = get_last_value("x = 2\nx + 1")
     assert last_value == 3
 
-    last_value = get_last_value("2 + 2\nNone")
-    assert last_value == None
-
     last_value = get_last_value("def foo(x):\n\treturn x + 1\nfoo(1)")
     assert last_value == 2
 
@@ -17,4 +14,9 @@ def test_get_last_value_exprs():
 
 def test_get_last_value_statement():
     last_value = get_last_value("2 + 2\nx = 2")
+    assert last_value != None
     assert last_value == NONE
+
+    last_value = get_last_value("2 + 2\nNone")
+    assert last_value == None
+    assert last_value != NONE
