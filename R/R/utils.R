@@ -70,7 +70,7 @@ py_to_tbl <- function(data) {
   reticulate::py_run_string("import builtins")
   # check if data should be grouped
   index_names <- py$builtins$list(data$index$names)
-  has_groups <- all(unlist(lapply(index_names, function(name) !is.null(name))))
+  has_groups <- all(vapply(index_names, Negate(is.null), logical(1)))
   # flatten Index/MultiIndex
   tbl <- flatten_py_dataframe(data)
   # construct a tibble that has groups if needed
