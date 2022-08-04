@@ -69,7 +69,7 @@ flatten_py_dataframe <- function(data) {
 py_to_tbl <- function(data) {
   reticulate::py_run_string("import builtins")
   # check if data should be grouped
-  index_names <- py$builtins$list(data$index$names)
+  index_names <- reticulate::py$builtins$list(data$index$names)
   has_groups <- all(vapply(index_names, Negate(is.null), logical(1)))
   # flatten Index/MultiIndex
   tbl <- flatten_py_dataframe(data)
@@ -77,7 +77,7 @@ py_to_tbl <- function(data) {
   if (has_groups) {
     # NOTE: the index names is a FrozenList so we have to cast it with list()
     # flatten MultiIndex into regular columns
-    group_vars <- py$builtins$list(data$index$names)
+    group_vars <- reticulate::py$builtins$list(data$index$names)
     if (length(group_vars) > 0) {
       tbl <- dplyr::group_by(tbl, dplyr::across(group_vars))
     }
