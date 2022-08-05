@@ -67,6 +67,13 @@ flatten_py_dataframe <- function(data) {
 #' @return A tibble
 #' @export
 py_to_tbl <- function(data) {
+  if (!any(class(data) %in% "pandas.core.frame.DataFrame")) { 
+    # assign Python type to the object's class
+    # NOTE: reticulate is forcing conversion of core data type so we convert it back
+    # we will need to consider cases where objects have more than one classes
+    class(data) <- reticulate::py$builtins$type(reticulate::r_to_py(data))$`__name__`
+    return(data)
+  }
   reticulate::py_run_string("import builtins")
   # check if data should be grouped
   index_names <- reticulate::py$builtins$list(data$index$names)
