@@ -30,10 +30,13 @@ exercise_checker <- function(label = NULL,
                             envir_prep = NULL,
                             last_value = NULL,
                             ...) {
+  # retrieve the Python environment from the envir_prep / envir_result
+  envir_prep_py <- get0(".__py__", envir = envir_prep, ifnotfound = NULL)
+  envir_result_py <- get0(".__py__", envir = envir_result, ifnotfound = NULL)
   # get solution object for result checking
   .solution <- tryCatch({
       solution_code <- paste0(as.character(solution_code), collapse = "\n")
-      get_last_value(solution_code, envir_prep$py)
+      get_last_value(solution_code, envir_prep_py)
     },
     error = function(e) {
       NULL
@@ -66,9 +69,9 @@ exercise_checker <- function(label = NULL,
     solution_code,
     user_code,
     check_code,
-    envir_result,
+    envir_result_py,
     evaluate_result,
-    envir_prep$py,
+    envir_prep_py,
     last_value
   )
   # Note: each field needs to be manually converted as the returned dict
