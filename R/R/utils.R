@@ -40,14 +40,17 @@ evaluate_exercise_feedback <- function(ex, envir = NULL, evaluate_global_setup =
 # helper function that flattens a Python DataFrame ensuring that
 # the Index/MultiIndex is flattened and converted to columns
 flatten_py_dataframe <- function(data) {
-  data_reset <- data$reset_index()
-  # attempt to convert directly to tibble
-  tbl <- tryCatch(tibble::as_tibble(data_reset), error = function(e) NULL)
-  if (is.null(tbl)) {
-    # if conversion to tibble fails, first convert to R data.frame
-    tbl <- tibble::as_tibble(reticulate::py_to_r(data_reset))
-  }
-  # for regular dataframes we will end up with an "index" column
+  # flatten the row Index
+  data <- data$reset_index()
+  # convert to tible
+  tbl <- tryCatch(
+    tibble::as_tibble(data),
+    error = function(e) {
+      # if conversion to tibble fails, first convert to R data.frame
+      tibble::as_tibble(reticulate::py_to_r(data))
+    }
+  )
+  # for a regular DataFrame we will end up with an "index" column
   # so we remove that
   if ("index" %in% names(tbl)) {
     tbl <- dplyr::select(tbl, -index)
