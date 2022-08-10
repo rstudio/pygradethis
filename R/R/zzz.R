@@ -11,8 +11,15 @@ pygradethis <- NULL
 #' @export
 pygradethis_exercise_checker <- NULL
 
+#' Get the last value of Python source code
+#'
+#' @return the value
+#' @export
+get_last_value <- NULL
+
 .onLoad <- function(libname, pkgname) {
   # import `pygradethis` and the exercise checking function
   pygradethis <<- reticulate::import("pygradethis", convert=FALSE, delay_load = TRUE)
   pygradethis_exercise_checker <<- pygradethis$pygradethis_exercise_checker$pygradethis_exercise_checker
+  get_last_value <<- pygradethis$utils$get_last_value
 }

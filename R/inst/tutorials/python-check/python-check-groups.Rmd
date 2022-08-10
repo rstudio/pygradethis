@@ -1,0 +1,95 @@
+---
+title: "Grouped DataFrames"
+author: "Nischal Shrestha"
+output: learnr::tutorial
+runtime: shiny_prerendered
+description: >
+  This is a demo of checking Python exercises for grouped DataFrames.
+---
+
+```{r setup, include = FALSE}
+library(learnr)
+library(gradethis)
+gradethis_setup()
+library(tblcheck)
+library(pygradethis)
+library(reticulate)
+
+# python global setup code
+pygradethis::prepare_py(c(
+  "import pandas as pd",
+  "import numpy as np"
+))
+```
+
+# Checking single group
+
+<!-- https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html#pandas.DataFrame.groupby -->
+```{python py-ex-single, exercise=TRUE, exercise.checker = pygradethis::exercise_checker}
+df = pd.DataFrame({"Animal": ["Falcon", "Falcon",
+                              "Parrot", "Parrot"],
+                   "Max Speed": [380., 370., 24., 26.]})
+df
+```
+
+```{python, py-ex-single-solution}
+df = pd.DataFrame({"Animal": ["Falcon", "Falcon",
+                              "Parrot", "Parrot"],
+                   "Max Speed": [380., 370., 24., 26.]})
+df.groupby(["Animal"]).mean()
+```
+
+```{r, py-ex-single-check}
+# example where you check for collapsed rows for groups
+grade_this_table(
+  pre_check = {
+    str(.result)
+    if (nrow(.result) == 4) {
+      fail('I expected only 2 rows, one for Falcon and one for Parrot. Did you remember to groupby "Animal"?')
+    }
+  }
+)
+```
+
+# Checking multiple groups
+
+<!-- https://pandas.pydata.org/pandas-docs/stable/user_guide/groupby.html#splitting-an-object-into-groups -->
+```{python py-ex-multiple, exercise=TRUE, exercise.checker = pygradethis::exercise_checker}
+df = pd.DataFrame(
+    [
+        ("bird", "Falconiformes", 389.0),
+        ("bird", "Psittaciformes", 24.0),
+        ("mammal", "Carnivora", 80.2),
+        ("mammal", "Primates", np.nan),
+        ("mammal", "Carnivora", 58),
+    ],
+    columns=("class", "order", "max_speed"),
+)
+df.groupby("class").mean()
+```
+
+```{python, py-ex-multiple-solution}
+df = pd.DataFrame(
+    [
+        ("bird", "Falconiformes", 389.0),
+        ("bird", "Psittaciformes", 24.0),
+        ("mammal", "Carnivora", 80.2),
+        ("mammal", "Primates", np.nan),
+        ("mammal", "Carnivora", 58),
+    ],
+    columns=("class", "order", "max_speed")
+)
+df.groupby(["class", "order"]).mean()
+```
+
+```{r, py-ex-multiple-check}
+# example where you check they have specific columns as a proxy for checking they have multiple groups
+grade_this_table(
+  check_groups = FALSE,
+  pre_check = {
+    if (!all(c("class", "order") %in% names(.result))) {
+      fail('I expected class and order as two groups. Did you remember to groupby these variables?')
+    }
+  }
+)
+```

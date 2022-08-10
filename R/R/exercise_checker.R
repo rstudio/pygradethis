@@ -30,15 +30,48 @@ exercise_checker <- function(label = NULL,
                             envir_prep = NULL,
                             last_value = NULL,
                             ...) {
-  # need to cast environment types to a list so reticulate can translate to Python's dicts
+  # retrieve the Python environment from the envir_prep / envir_result
+  envir_prep_py <- get0(".__py__", envir = envir_prep, ifnotfound = NULL)
+  envir_result_py <- get0(".__py__", envir = envir_result, ifnotfound = NULL)
+  # get solution object for result checking
+  .solution <- tryCatch({
+      solution_code <- paste0(as.character(solution_code), collapse = "\n")
+      get_last_value(solution_code, envir_prep_py)
+    },
+    error = function(e) {
+      NULL
+    }
+  )
+  # redirect table grading to tblcheck for now if solution object is a DataFrame
+  if (!is.null(.solution) && class(.solution) %in% "pandas.core.frame.DataFrame") {
+    # auto convert the result and solution to a tibble before the tblcheck grading
+    # (we can also choose to not convert here and let user do conversions)
+    .result <- py_to_tbl(last_value)
+    .solution <- py_to_tbl(.solution)
+    # prep the checking environment
+    checking_env <-
+      list2env(list(
+        .solution = .solution,
+        .envir_prep = envir_prep,
+        .envir_result = envir_result,
+        .last_value = .result,
+        .result = .result,
+        .user = .result
+    ))
+    # grade
+    checker_fun <- eval(parse(text = check_code))
+    return(checker_fun(checking_env))
+  }
+
+  # if not a DataFrame, use assert checking to produce a grade result
   grade <- pygradethis_exercise_checker(
     label,
     solution_code,
     user_code,
     check_code,
-    envir_result,
+    envir_result_py,
     evaluate_result,
-    envir_prep$py,
+    envir_prep_py,
     last_value
   )
   # Note: each field needs to be manually converted as the returned dict

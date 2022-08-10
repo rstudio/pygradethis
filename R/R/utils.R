@@ -1,6 +1,6 @@
 
 #' A helper function to mock a Python exercise in learnr.
-#' 
+#'
 #' This is an internal function used for testing purposes.
 #'
 #' @param user_code Python code submitted by the user
@@ -11,6 +11,7 @@
 #' 
 #' @return The mocked exercise
 mock_py_exercise <- function(user_code, solution_code, check, ...) {
+  # TODO: this currently will not work for the tblcheck grading of Python dataframes.
   learnr:::mock_exercise(
     user_code = user_code,
     solution_code = solution_code,
@@ -34,4 +35,64 @@ evaluate_exercise_feedback <- function(ex, envir = NULL, evaluate_global_setup =
   if (is.null(envir)) envir <- new.env()
   res <- learnr:::evaluate_exercise(ex, envir = envir, evaluate_global_setup = evaluate_global_setup)
   res$feedback
+}
+
+# helper function that flattens a Python DataFrame ensuring that
+# the Index/MultiIndex is flattened and converted to columns
+flatten_py_dataframe <- function(data) {
+  # flatten the row Index
+  data <- data$reset_index()
+  # convert to tible
+  tbl <- tryCatch(
+    tibble::as_tibble(data),
+    error = function(e) {
+      # if conversion to tibble fails, first convert to R data.frame
+      tibble::as_tibble(reticulate::py_to_r(data))
+    }
+  )
+  # for a regular DataFrame we will end up with an "index" column
+  # so we remove that
+  if ("index" %in% names(tbl)) {
+    tbl <- dplyr::select(tbl, -index)
+  }
+  # set the base class
+  class(tbl) <- append("py_tbl_df", class(tbl))
+  # NOTE: "pandas.index" will have a pointer address that will be unique so
+  # comparing identical tibbles won't work unless this is stripped off
+  attr(tbl, "pandas.index") <- NULL
+  tbl
+}
+
+#' Converts a Python pandas.DataFrame into an R tibble
+#'
+#' @param data A pandas.DataFrame
+#'
+#' @return A tibble
+#' @export
+py_to_tbl <- function(data) {
+  if (!any(class(data) %in% "pandas.core.frame.DataFrame")) {
+    # assign Python type to the object's class
+    obj_class <- reticulate::py$builtins$type(data)$`__name__`
+    data <- reticulate::py_to_r(data)
+    class(data) <- obj_class
+    return(data)
+  }
+  reticulate::py_run_string("import builtins")
+  # check if data should be grouped
+  index_names <- reticulate::py$builtins$list(data$index$names)
+  has_groups <- all(vapply(index_names, Negate(is.null), logical(1)))
+  # flatten Index/MultiIndex
+  tbl <- flatten_py_dataframe(data)
+  # construct a tibble that has groups if needed
+  if (has_groups) {
+    # NOTE: the index names is a FrozenList so we have to cast it with list()
+    # flatten MultiIndex into regular columns
+    group_vars <- reticulate::py$builtins$list(data$index$names)
+    if (length(group_vars) > 0) {
+      tbl <- dplyr::group_by(tbl, dplyr::across(group_vars))
+    }
+    class(tbl) <- append(c("py_grouped_df", "py_tbl_df"), class(tbl))
+    return(tbl)
+  }
+  tbl
 }
