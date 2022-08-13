@@ -23,6 +23,7 @@ LazyData: true
 Imports:
   reticulate,
   learnr,
+  dplyr,
   tibble
 Config/reticulate:
   list(

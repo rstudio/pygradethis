@@ -86,3 +86,65 @@ exercise_checker <- function(label = NULL,
     class = "gradethis_graded"
   )
 }
+
+#' A shim around the `gradethis::gradethis_exercise_checker` for grading Python exercises.
+#'
+#' To enable exercise checking in your learnr tutorial through R code (i.e. an R -check chunk), 
+#' you can set `tutorial_options(exercise.checker = pygradethis::gradethis_exercise_checker)` 
+#' in the setup chunk of your tutorial. Or, set the `exercise.checker` for an individual Python chunk.
+#'
+#' @param label Label for exercise chunk
+#' @param solution_code Code provided within the “-solution” chunk for the
+#'   exercise.
+#' @param user_code Python code submitted by the user
+#' @param check_code Code provided within the “-check” chunk for the exercise.
+#' @param envir_result The R environment after the execution of the chunk
+#'   which also contains a Python main module environment
+#' @param evaluate_result The return value from the `evaluate::evaluate`
+#'   function.
+#' @param envir_prep A copy of the R environment before the execution of the
+#'   chunk which also contains a Python main module environment.
+#' @param last_value The last value from evaluating the exercise.
+#' @param ... Extra arguments supplied by learnr
+#'
+#' @return The `gradethis::graded()` list which contains several fields indicating the 
+#' result of the check.
+#' @export
+gradethis_exercise_checker <- function(label = NULL,
+                            solution_code = NULL,
+                            user_code = NULL,
+                            check_code = NULL,
+                            envir_result = NULL,
+                            evaluate_result = NULL,
+                            envir_prep = NULL,
+                            last_value = NULL,
+                            ...) {
+  # retrieve the Python environment from the envir_prep / envir_result
+  envir_prep_py <- get0(".__py__", envir = envir_prep, ifnotfound = NULL)
+  envir_result_py <- get0(".__py__", envir = envir_result, ifnotfound = NULL)
+  # set the .result
+  .result <- last_value
+  # set solution object for result checking
+  .solution <- tryCatch({
+      solution_code <- paste0(as.character(solution_code), collapse = "\n")
+      get_last_value(solution_code, envir_prep_py)
+    },
+    error = function(e) {
+      NULL
+    }
+  )
+  # prep the checking environment
+  # NOTE: this manual method will be replaced with a direct call to `gradethis::gradethis_exercise_checker()`
+  checking_env <-
+    list2env(list(
+      .solution = .solution,
+      .envir_prep = envir_prep,
+      .envir_result = envir_result,
+      .last_value = .result,
+      .result = .result,
+      .user = .result
+  ))
+  # grade
+  checker_fun <- eval(parse(text = check_code))
+  checker_fun(checking_env)
+}

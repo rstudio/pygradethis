@@ -22,4 +22,5 @@ get_last_value <- NULL
   pygradethis <<- reticulate::import("pygradethis", convert=FALSE, delay_load = TRUE)
   pygradethis_exercise_checker <<- pygradethis$pygradethis_exercise_checker$pygradethis_exercise_checker
   get_last_value <<- pygradethis$utils$get_last_value
+  reticulate::py_run_string('import builtins', convert = FALSE)
 }

@@ -1,4 +1,3 @@
-
 #' A helper function to mock a Python exercise in learnr.
 #'
 #' This is an internal function used for testing purposes.
@@ -35,6 +34,67 @@ evaluate_exercise_feedback <- function(ex, envir = NULL, evaluate_global_setup =
   if (is.null(envir)) envir <- new.env()
   res <- learnr:::evaluate_exercise(ex, envir = envir, evaluate_global_setup = evaluate_global_setup)
   res$feedback
+}
+
+is.DataFrame <- function(obj) {
+  reticulate::py$builtins$isinstance(obj, reticulate::py$pd$DataFrame)
+}
+
+is.Index <- function(obj) {
+  reticulate::py$builtins$isinstance(obj, reticulate::py$pd$Index)
+}
+
+is.RangeIndex <- function(obj) {
+  reticulate::py$builtins$isinstance(obj, reticulate::py$pd$RangeIndex)
+}
+
+is.CategoricalIndex <- function(obj) {
+  reticulate::py$builtins$isinstance(obj, reticulate::py$pd$CategoricalIndex)
+}
+
+is.MultiIndex <- function(obj) {
+  reticulate::py$builtins$isinstance(obj, reticulate::py$pd$MultiIndex)
+}
+
+is.np.array <- function(obj) {
+  reticulate::py$builtins$isinstance(obj, reticulate::py$np$array)
+}
+
+# 
+# If the object can't be converted we return the Python object as-is
+
+#' Wrapper of reticulate::py_to_r to translate objects from Python to R.
+#'
+#' @param obj A Python object.
+#'
+#' @return An R object, or Python object if we can't translate
+#' @export
+translate <- function(obj) {
+  return(
+    tryCatch({
+      if (is.DataFrame(obj)) {
+        # for a DataFrame try to convert to a tibble for tblcheck grading
+        return(py_to_tbl(obj))
+      } else if (is.MultiIndex(obj)) {
+        # MultiIndex -> np.array -> list(list())
+        return(reticulate::py_to_r(obj$values$tolist()))
+      } else if (is.Index(obj)) {
+        if (is.CategoricalIndex(obj)) {
+          # CategoricalIndex -> np.array -> list
+          return(reticulate::py_to_r(obj$values$tolist()))
+        } else if (is.RangeIndex(obj) || is.np.array(obj)) {
+          # <>.Index -> list
+          return(obj$values)
+        }
+      } else {
+        return(reticulate::py_to_r(obj))
+      }
+    }, error = function(e) {
+      # if anything fails above, just return the Python object
+      obj
+    }
+    )
+  )
 }
 
 # helper function that flattens a Python DataFrame ensuring that
@@ -77,7 +137,7 @@ py_to_tbl <- function(data) {
     class(data) <- obj_class
     return(data)
   }
-  reticulate::py_run_string("import builtins")
+  reticulate::py_run_string("import builtins", convert = FALSE)
   # check if data should be grouped
   index_names <- reticulate::py$builtins$list(data$index$names)
   has_groups <- all(vapply(index_names, Negate(is.null), logical(1)))
