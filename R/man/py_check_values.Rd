@@ -10,6 +10,8 @@ py_check_values(object = .result, expected = .solution, env = parent.frame())
 \item{object}{A DataFrame/Series to be compared to `expected`.}
 
 \item{expected}{The expected DataFrame/Series}
+
+\item{env}{The environment used for grading.}
 }
 \value{
 A TRUE if equal, FALSE otherwise

@@ -66,6 +66,9 @@ is.np.array <- function(obj) {
 
 #' Wrapper of reticulate::py_to_r to convert objects from Python to R.
 #'
+#' We try to reasonable convert objects that `reticulate::py_to_r` either can't
+#' or produces a messy object (e.g. MultiIndex objects)
+#'
 #' @param obj A Python object.
 #'
 #' @return An R object, or Python object if we can't py_to_r
@@ -73,16 +76,16 @@ is.np.array <- function(obj) {
 py_to_r <- function(obj) {
   return(
     tryCatch({
-      if (is.DataFrame(obj) || is.Series(obj)) {
+      if (is.DataFrame(obj)) {
         # for a DataFrame try to convert to a tibble for tblcheck grading
         return(py_to_tbl(obj))
+      } else if (is.Series(obj)) {
+        return(reticulate::py_to_r(obj))
       } else if (is.MultiIndex(obj)) {
-        # MultiIndex -> np.array -> list(list())
-        return(reticulate::py_to_r(obj$values$tolist()))
+        return(index_to_list(obj))
       } else if (is.Index(obj)) {
         if (is.CategoricalIndex(obj)) {
-          # CategoricalIndex -> np.array -> list
-          return(reticulate::py_to_r(obj$values$tolist()))
+          return(index_to_list(obj))
         } else if (is.RangeIndex(obj) || is.np.array(obj)) {
           # <>.Index -> list
           return(obj$values)
@@ -98,30 +101,20 @@ py_to_r <- function(obj) {
   )
 }
 
-# helper function that flattens a Python DataFrame ensuring that
-# the Index/MultiIndex is flattened and converted to columns
-flatten_py_dataframe <- function(data) {
-  # flatten the row Index
-  data <- data$reset_index()
-  # convert to tible
-  tbl <- tryCatch(
-    tibble::as_tibble(data),
-    error = function(e) {
-      # if conversion to tibble fails, first convert to R data.frame
-      tibble::as_tibble(reticulate::py_to_r(data))
-    }
-  )
-  # for a regular DataFrame we will end up with an "index" column
-  # so we remove that
-  if ("index" %in% names(tbl)) {
-    tbl <- dplyr::select(tbl, -index)
+#' Helper funtion to unpack an Index and return the values
+#'
+#' @param obj A type of Index
+#'
+#' @return A list()
+#' @examples
+#' # ADD_EXAMPLES_HERE
+index_to_list <- function(obj) {
+  if (is.RangeIndex(obj)) {
+    return(obj$values)
   }
-  # set the base class
-  class(tbl) <- append("py_tbl_df", class(tbl))
-  # NOTE: "pandas.index" will have a pointer address that will be unique so
-  # comparing identical tibbles won't work unless this is stripped off
-  attr(tbl, "pandas.index") <- NULL
-  tbl
+  # if it's not a default index, need to unpack values
+  # <>Index -> np.array -> list(list())
+  reticulate::py_to_r(obj$values$tolist())
 }
 
 #' Converts a Python pandas.DataFrame into an R tibble
@@ -132,28 +125,43 @@ flatten_py_dataframe <- function(data) {
 #' @export
 py_to_tbl <- function(data) {
   if (!any(class(data) %in% "pandas.core.frame.DataFrame")) {
-    # assign Python type to the object's class
+    # # assign Python type to the object's class
     obj_class <- reticulate::py$builtins$type(data)$`__name__`
     data <- reticulate::py_to_r(data)
     class(data) <- obj_class
     return(data)
   }
   reticulate::py_run_string("import builtins", convert = FALSE)
-  # check if data should be grouped
-  index_names <- reticulate::py$builtins$list(data$index$names)
-  has_groups <- all(vapply(index_names, Negate(is.null), logical(1)))
   # flatten Index/MultiIndex
-  tbl <- flatten_py_dataframe(data)
-  # construct a tibble that has groups if needed
-  if (has_groups) {
-    # NOTE: the index names is a FrozenList so we have to cast it with list()
-    # flatten MultiIndex into regular columns
+  flatten_py_dataframe(data)
+}
+
+# helper function that flattens a Python DataFrame ensuring that
+# the Index/MultiIndex is flattened and converted to columns
+flatten_py_dataframe <- function(data) {
+  # flatten the row Index/MultiIndex as a result of a .groupby().agg()
+  if (is.Index(data$index) || is.MultiIndex(data$index)) {
+    # check if data should be grouped
     group_vars <- reticulate::py$builtins$list(data$index$names)
-    if (length(group_vars) > 0) {
+    has_groups <- all(vapply(group_vars, Negate(is.null), logical(1)))
+    if (has_groups) {
+      data <- data$reset_index()
+      # convert to tibble
+      tbl <- tibble::as_tibble(reticulate::py_to_r(data))
       tbl <- dplyr::group_by(tbl, dplyr::across(group_vars))
+      class(tbl) <- append(c("py_grouped_df", "py_tbl_df"), class(tbl))
+      attr(tbl, "pandas.index") <- NULL
+      return(tbl)
     }
-    class(tbl) <- append(c("py_grouped_df", "py_tbl_df"), class(tbl))
-    return(tbl)
   }
+  # otherwise just drop Index
+  data <- data$reset_index(drop = TRUE)
+  # convert to tibble
+  tbl <- tibble::as_tibble(reticulate::py_to_r(data))
+  # set the base class
+  class(tbl) <- append("py_tbl_df", class(tbl))
+  # NOTE: "pandas.index" will have a pointer address that will be unique so
+  # comparing identical tibbles won't work unless this is stripped off
+  attr(tbl, "pandas.index") <- NULL
   tbl
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{py_to_r}
 \alias{py_to_r}
-\title{Wrapper of reticulate::py_to_r to py_to_r objects from Python to R.}
+\title{Wrapper of reticulate::py_to_r to convert objects from Python to R.}
 \usage{
 py_to_r(obj)
 }
@@ -13,5 +13,6 @@ py_to_r(obj)
 An R object, or Python object if we can't py_to_r
 }
 \description{
-Wrapper of reticulate::py_to_r to py_to_r objects from Python to R.
+We try to reasonable convert objects that `reticulate::py_to_r` either can't
+or produces a messy object (e.g. MultiIndex objects)
 }

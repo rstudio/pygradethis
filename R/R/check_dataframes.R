@@ -18,7 +18,7 @@ py_get_index <- function(data) {
 #' Get the columns of a pandas.DataFrame/pandas.Series
 #'
 #' @param data A DataFrame/Series.
-#'
+#' 
 #' @return An Index/MultiIndex
 #' @export
 #' @examples
@@ -57,6 +57,7 @@ py_get_values <- function(data) {
 #'
 #' @param object A DataFrame/Series to be compared to `expected`.
 #' @param expected A DataFrame/Series containing the expected column.
+#' @param env The environment used for grading.
 #'
 #' @return A TRUE if equal, FALSE otherwise
 #' @export
@@ -84,8 +85,9 @@ py_check_index <- function(object = .result, expected = .solution, env = parent.
 #' This extracts columns from the two objects, converts them to R lists 
 #' and checks that they are identical.
 #'
-#' @param object A DataFrame/Series to be compared to `expected`.
-#' @param expected A DataFrame/Series containing the expected column.
+#' @param object A DataFrame to be compared to `expected`.
+#' @param expected A DataFrame containing the expected column.
+#' @param env The environment used for grading.
 #'
 #' @return A TRUE if equal, FALSE otherwise
 #' @export
@@ -116,6 +118,7 @@ py_check_columns <- function(object = .result, expected = .solution, env = paren
 #'
 #' @param object A DataFrame/Series to be compared to `expected`.
 #' @param expected The expected DataFrame/Series
+#' @param env The environment used for grading.
 #'
 #' @return A TRUE if equal, FALSE otherwise
 #' @export
@@ -136,6 +139,40 @@ py_check_values <- function(object = .result, expected = .solution, env = parent
   obj_vals <- py_to_r(py_get_values(object))
   exp_vals <- py_to_r(py_get_values(expected))
   identical(obj_vals, exp_vals)
+}
+
+#' Checks that two Series are the same.
+#' 
+#' This checks both the names and the values are the same.
+#'
+#' @param object A Series to be compared to `expected`..
+#' @param expected The expected Series.
+#' @param env The environment used for grading.
+#'
+#' @return A TRUE if equal, FALSE otherwise
+#' @examples
+#' \dontrun{
+#' reticulate::py_run_string('import pandas as pd; import numpy as np')
+#' # Plain Series
+#' .result = reticulate::py_eval("pd.Series(data=[1, 2])", F)
+#' .solution = reticulate::py_eval("pd.Series(data=[1, 2, 3])", F)
+#' py_check_series() # FALSE
+#'
+#' # Series w/ Index
+#' .result = reticulate::py_eval("pd.Series(data={'a': 1, 'b': 2, 'd': 3})", F)
+#' .solution =  reticulate::py_eval("pd.Series(data={'a': 1, 'b': 2, 'c': 3})", F)
+#' py_check_series() # FALSE
+#' }
+py_check_series <- function(object = .result, expected = .solution, env = parent.frame()) {
+  if (inherits(object, ".result")) {
+    object <- get(".result", env)
+  }
+  if (inherits(expected, ".solution")) {
+    expected <- get(".solution", env)
+  }
+  obj_vector <- py_to_r(object)
+  sol_vector <- py_to_r(expected)
+  identical(obj_vector, sol_vector)
 }
 
 #' Checks that two DataFrame are the same.
@@ -177,4 +214,3 @@ py_check_dataframe <- function(object = .result, expected = .solution, env = par
     )
   }
 }
-

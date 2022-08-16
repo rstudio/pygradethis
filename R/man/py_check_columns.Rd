@@ -7,9 +7,11 @@
 py_check_columns(object = .result, expected = .solution, env = parent.frame())
 }
 \arguments{
-\item{object}{A DataFrame/Series to be compared to `expected`.}
+\item{object}{A DataFrame to be compared to `expected`.}
 
-\item{expected}{A DataFrame/Series containing the expected column.}
+\item{expected}{A DataFrame containing the expected column.}
+
+\item{env}{The environment used for grading.}
 }
 \value{
 A TRUE if equal, FALSE otherwise
