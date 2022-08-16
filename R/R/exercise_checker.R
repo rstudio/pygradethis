@@ -87,10 +87,10 @@ exercise_checker <- function(label = NULL,
   )
 }
 
-#' A shim around the `gradethis::gradethis_exercise_checker` for grading Python exercises.
+#' A shim around the `gradethis::py_gradethis_exercise_checker` for grading Python exercises.
 #'
 #' To enable exercise checking in your learnr tutorial through R code (i.e. an R -check chunk), 
-#' you can set `tutorial_options(exercise.checker = pygradethis::gradethis_exercise_checker)` 
+#' you can set `tutorial_options(exercise.checker = pygradethis::py_gradethis_exercise_checker)` 
 #' in the setup chunk of your tutorial. Or, set the `exercise.checker` for an individual Python chunk.
 #'
 #' @param label Label for exercise chunk
@@ -110,7 +110,7 @@ exercise_checker <- function(label = NULL,
 #' @return The `gradethis::graded()` list which contains several fields indicating the 
 #' result of the check.
 #' @export
-gradethis_exercise_checker <- function(label = NULL,
+py_gradethis_exercise_checker <- function(label = NULL,
                             solution_code = NULL,
                             user_code = NULL,
                             check_code = NULL,
@@ -134,7 +134,7 @@ gradethis_exercise_checker <- function(label = NULL,
     }
   )
   # prep the checking environment
-  # NOTE: this manual method will be replaced with a direct call to `gradethis::gradethis_exercise_checker()`
+  # NOTE: this manual method will be replaced with a direct call to `gradethis::py_gradethis_exercise_checker()`
   checking_env <-
     list2env(list(
       .solution = .solution,

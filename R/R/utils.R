@@ -40,6 +40,10 @@ is.DataFrame <- function(obj) {
   reticulate::py$builtins$isinstance(obj, reticulate::py$pd$DataFrame)
 }
 
+is.Series <- function(obj) {
+  reticulate::py$builtins$isinstance(obj, reticulate::py$pd$Series)
+}
+
 is.Index <- function(obj) {
   reticulate::py$builtins$isinstance(obj, reticulate::py$pd$Index)
 }
@@ -60,19 +64,16 @@ is.np.array <- function(obj) {
   reticulate::py$builtins$isinstance(obj, reticulate::py$np$array)
 }
 
-# 
-# If the object can't be converted we return the Python object as-is
-
-#' Wrapper of reticulate::py_to_r to translate objects from Python to R.
+#' Wrapper of reticulate::py_to_r to convert objects from Python to R.
 #'
 #' @param obj A Python object.
 #'
-#' @return An R object, or Python object if we can't translate
+#' @return An R object, or Python object if we can't py_to_r
 #' @export
-translate <- function(obj) {
+py_to_r <- function(obj) {
   return(
     tryCatch({
-      if (is.DataFrame(obj)) {
+      if (is.DataFrame(obj) || is.Series(obj)) {
         # for a DataFrame try to convert to a tibble for tblcheck grading
         return(py_to_tbl(obj))
       } else if (is.MultiIndex(obj)) {

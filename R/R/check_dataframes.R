@@ -1,19 +1,17 @@
 
-return_if_problem <- function(problem, env = parent.frame()) {
-  if (!is.null(problem)) {
-    rlang::return_from(env, problem)
-  }
-}
-
 #' Get the index of a pandas.DataFrame/pandas.Series
 #'
 #' @param data A DataFrame/Series.
 #'
-#' @return An Inex
+#' @return An Index/MultiIndex
 #' @export
 #' @examples
-#' # ADD_EXAMPLES_HERE
-get_index <- function(data) {
+#' \dontrun{
+#' reticulate::py_run_string('import pandas as pd; import numpy as np')
+#' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
+#' py_get_index(.result) # RangeIndex(start=0, stop=3, step=1)
+#' }
+py_get_index <- function(data) {
   data$index
 }
 
@@ -21,11 +19,15 @@ get_index <- function(data) {
 #'
 #' @param data A DataFrame/Series.
 #'
-#' @return An np.array of values
+#' @return An Index/MultiIndex
 #' @export
 #' @examples
-#' # ADD_EXAMPLES_HERE
-get_columns <- function(data) {
+#' \dontrun{
+#' reticulate::py_run_string('import pandas as pd; import numpy as np')
+#' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
+#' py_get_columns(.result) # Index(['a'], dtype='object')
+#' }
+py_get_columns <- function(data) {
   data$columns
 }
 
@@ -36,8 +38,16 @@ get_columns <- function(data) {
 #' @return An np.array of values
 #' @export
 #' @examples
-#' # ADD_EXAMPLES_HERE
-get_values <- function(data) {
+#' \dontrun{
+#' reticulate::py_run_string('import pandas as pd; import numpy as np')
+#' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
+#' py_get_values(.result)
+#' #      [,1]
+#' # [1,]    1
+#' # [2,]    2
+#' # [3,]    3
+#' }
+py_get_values <- function(data) {
   data$values
 }
 
@@ -51,16 +61,21 @@ get_values <- function(data) {
 #' @return A TRUE if equal, FALSE otherwise
 #' @export
 #' @examples
-#' # ADD_EXAMPLES_HERE
-check_index <- function(object = .result, expected = .solution, env = parent.frame()) {
+#' \dontrun{
+#' reticulate::py_run_string('import pandas as pd; import numpy as np')
+#' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2]})")
+#' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
+#' py_check_index() # FALSE
+#' }
+py_check_index <- function(object = .result, expected = .solution, env = parent.frame()) {
   if (inherits(object, ".result")) {
     object <- get(".result", env)
   }
   if (inherits(expected, ".solution")) {
     expected <- get(".solution", env)
   }
-  left_vals <- translate(get_index(object))
-  right_vals <- translate(get_index(expected))
+  left_vals <- py_to_r(py_get_index(object))
+  right_vals <- py_to_r(py_get_index(expected))
   identical(left_vals, right_vals)
 }
 
@@ -75,17 +90,22 @@ check_index <- function(object = .result, expected = .solution, env = parent.fra
 #' @return A TRUE if equal, FALSE otherwise
 #' @export
 #' @examples
-#' # ADD_EXAMPLES_HERE
-check_columns <- function(object = .result, expected = .solution, env = parent.frame()) {
+#' \dontrun{
+#' reticulate::py_run_string('import pandas as pd; import numpy as np')
+#' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
+#' .solution <- reticulate::py_eval("pd.DataFrame({'b':[1,2,3]})")
+#' py_check_columns() # FALSE
+#' }
+py_check_columns <- function(object = .result, expected = .solution, env = parent.frame()) {
   if (inherits(object, ".result")) {
     object <- get(".result", env)
   }
   if (inherits(expected, ".solution")) {
     expected <- get(".solution", env)
   }
-  # extract and translate column values
-  obj_vals <- translate(get_columns(object))
-  exp_vals <- translate(get_columns(expected))
+  # extract and py_to_r column values
+  obj_vals <- py_to_r(py_get_columns(object))
+  exp_vals <- py_to_r(py_get_columns(expected))
   identical(obj_vals, exp_vals)
 }
 
@@ -95,48 +115,44 @@ check_columns <- function(object = .result, expected = .solution, env = parent.f
 #' and checks that they are identical.
 #'
 #' @param object A DataFrame/Series to be compared to `expected`.
-#' @param expected A DataFrame/Series to be compared to `expected`.
+#' @param expected The expected DataFrame/Series
 #'
 #' @return A TRUE if equal, FALSE otherwise
 #' @export
 #' @examples
-#' # ADD_EXAMPLES_HERE
-check_values <- function(object = .result, expected = .solution, env = parent.frame()) {
+#' \dontrun{
+#' reticulate::py_run_string('import pandas as pd; import numpy as np')
+#' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,99]})")
+#' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
+#' py_check_values() # FALSE
+#' }
+py_check_values <- function(object = .result, expected = .solution, env = parent.frame()) {
   if (inherits(object, ".result")) {
     object <- get(".result", env)
   }
   if (inherits(expected, ".solution")) {
     expected <- get(".solution", env)
   }
-  obj_vals <- translate(get_values(object))
-  exp_vals <- translate(get_values(expected))
+  obj_vals <- py_to_r(py_get_values(object))
+  exp_vals <- py_to_r(py_get_values(expected))
   identical(obj_vals, exp_vals)
 }
 
-#' Checks that two DataFrame/Series are the same.
+#' Checks that two DataFrame are the same.
 #'
-#' This will do the following checks:
-#' 1. Check that the Index are equal
-#' 2. Check that the columns are equal
-#' 3. Check that the values are equal
+#' If DataFrames are tibble-able, rely on tblcheck::tbl_check() feedback
 #'
-#' @param object A DataFrame/Series to be compared to `expected`.
-#' @param expected The expected DataFrame/Series.
+#' Otherwise the following checks are performed:
+#' 1. Check that the Index are equal (see `pygradethis::py_check_index()`)
+#' 2. Check that the columns are equal (see `pygradethis::py_check_columns()`)
+#' 3. Check that the values are equal (see `pygradethis::py_check_values()`)
+#'
+#' @param object A DataFrame to be compared to `expected`.
+#' @param expected The expected DataFrame.
 #'
 #' @return A TRUE if equal, FALSE otherwise
 #' @export
-#' @examples
-#' reticulate::py_run_string('import pandas as pd; import numpy as np')
-#' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2]})")
-#' check_py_dataframe()
-#'
-#' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' .solution <- reticulate::py_eval("pd.DataFrame({'b':[1,2,3]})")
-#' check_py_dataframe()
-#' 
-#' # TODO add a MultIindex column example as well
-check_py_dataframe <- function(object = .result, expected = .solution, env = parent.frame()) {
+py_check_dataframe <- function(object = .result, expected = .solution, env = parent.frame()) {
   if (inherits(object, ".result")) {
     object <- get(".result", env)
   }
@@ -155,9 +171,10 @@ check_py_dataframe <- function(object = .result, expected = .solution, env = par
     tblcheck::tbl_check(object, expected, env = env)
   } else {
     return(
-      check_index(object, expected) &&
-      check_columns(object, expected) &&
-      check_values(object, expected)
+      py_check_index(object, expected) &&
+      py_check_columns(object, expected) &&
+      py_check_values(object, expected)
     )
   }
 }
+
