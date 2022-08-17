@@ -1,3 +1,5 @@
+# TODO make a problem structure that can be used to return from the `py_check_*` funs
+
 
 #' Get the index of a pandas.DataFrame/pandas.Series
 #'
@@ -108,6 +110,7 @@ py_check_columns <- function(object = .result, expected = .solution, env = paren
   # extract and py_to_r column values
   obj_vals <- py_to_r(py_get_columns(object))
   exp_vals <- py_to_r(py_get_columns(expected))
+  # TODO could return an object or Null and unpack further
   identical(obj_vals, exp_vals)
 }
 
@@ -150,6 +153,7 @@ py_check_values <- function(object = .result, expected = .solution, env = parent
 #' @param env The environment used for grading.
 #'
 #' @return A TRUE if equal, FALSE otherwise
+#' @export
 #' @examples
 #' \dontrun{
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')

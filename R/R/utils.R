@@ -84,12 +84,7 @@ py_to_r <- function(obj) {
       } else if (is.MultiIndex(obj)) {
         return(index_to_list(obj))
       } else if (is.Index(obj)) {
-        if (is.CategoricalIndex(obj)) {
-          return(index_to_list(obj))
-        } else if (is.RangeIndex(obj) || is.np.array(obj)) {
-          # <>.Index -> list
-          return(obj$values)
-        }
+        return(index_to_list(obj))
       } else {
         return(reticulate::py_to_r(obj))
       }
@@ -109,9 +104,6 @@ py_to_r <- function(obj) {
 #' @examples
 #' # ADD_EXAMPLES_HERE
 index_to_list <- function(obj) {
-  if (is.RangeIndex(obj)) {
-    return(obj$values)
-  }
   # if it's not a default index, need to unpack values
   # <>Index -> np.array -> list(list())
   reticulate::py_to_r(obj$values$tolist())
@@ -124,7 +116,7 @@ index_to_list <- function(obj) {
 #' @return A tibble
 #' @export
 py_to_tbl <- function(data) {
-  if (!any(class(data) %in% "pandas.core.frame.DataFrame")) {
+  if (!is.DataFrame(data)) {
     # # assign Python type to the object's class
     obj_class <- reticulate::py$builtins$type(data)$`__name__`
     data <- reticulate::py_to_r(data)
