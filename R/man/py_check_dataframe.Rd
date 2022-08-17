@@ -16,7 +16,7 @@ py_check_dataframe(
 \item{expected}{The expected DataFrame.}
 }
 \value{
-A TRUE if equal, FALSE otherwise
+A NULL if equal, otherwise a `gradethis_graded` or `problem` object
 }
 \description{
 If DataFrames are tibble-able, rely on tblcheck::tbl_check() feedback

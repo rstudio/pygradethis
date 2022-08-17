@@ -14,7 +14,7 @@ py_check_index(object = .result, expected = .solution, env = parent.frame())
 \item{env}{The environment used for grading.}
 }
 \value{
-A TRUE if equal, FALSE otherwise
+A NULL if equal, a `pygradethis_problem` object otherwise
 }
 \description{
 Extracts the values out of the Index to do the check.

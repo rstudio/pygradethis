@@ -7,7 +7,7 @@
 #'   exercise.
 #' @param check Code provided within the "-check" chunk for the exercise.
 #' @param ... Extra grading arguments
-#' 
+#'
 #' @return The mocked exercise
 mock_py_exercise <- function(user_code, solution_code, check, ...) {
   # TODO: this currently will not work for the tblcheck grading of Python dataframes.
@@ -16,13 +16,14 @@ mock_py_exercise <- function(user_code, solution_code, check, ...) {
     solution_code = solution_code,
     engine = "python",
     check = check,
+    # NOTE: we might want to make this a parameter as well to swap gradethis shim for testing
     exercise.checker = learnr:::dput_to_string(pygradethis::exercise_checker),
     ...
   )
 }
 
 #' A helper function to test evaluation of a mocked Python exercise through learnr
-#' 
+#'
 #' This is an internal function used for testing purposes.
 #'
 #' @param ex A mocked Python exercise
@@ -104,9 +105,13 @@ py_to_r <- function(obj) {
 #' @examples
 #' # ADD_EXAMPLES_HERE
 index_to_list <- function(obj) {
-  # if it's not a default index, need to unpack values
+  # if MultiIndex don't unlist
+  if (is.MultiIndex(obj)) {
+    return(reticulate::py$builtins$list(obj$values))
+  }
+  # unpack values
   # <>Index -> np.array -> list(list())
-  reticulate::py_to_r(obj$values$tolist())
+  unlist(reticulate::py$builtins$list(obj$values))
 }
 
 #' Converts a Python pandas.DataFrame into an R tibble

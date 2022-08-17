@@ -14,7 +14,7 @@ py_check_series(object = .result, expected = .solution, env = parent.frame())
 \item{env}{The environment used for grading.}
 }
 \value{
-A TRUE if equal, FALSE otherwise
+A NULL if equal, a `pygradethis_problem` object otherwise
 }
 \description{
 This checks both the names and the values are the same.

@@ -14,7 +14,7 @@ py_check_values(object = .result, expected = .solution, env = parent.frame())
 \item{env}{The environment used for grading.}
 }
 \value{
-A TRUE if equal, FALSE otherwise
+A NULL if equal, a `pygradethis_problem` object otherwise
 }
 \description{
 This extracts values from the two objects, converts them to R lists

@@ -119,32 +119,33 @@ py_gradethis_exercise_checker <- function(label = NULL,
                             envir_prep = NULL,
                             last_value = NULL,
                             ...) {
-  # retrieve the Python environment from the envir_prep / envir_result
-  envir_prep_py <- get0(".__py__", envir = envir_prep, ifnotfound = NULL)
-  envir_result_py <- get0(".__py__", envir = envir_result, ifnotfound = NULL)
-  # set the .result
-  .result <- last_value
-  # set solution object for result checking
-  .solution <- tryCatch({
-      solution_code <- paste0(as.character(solution_code), collapse = "\n")
-      get_last_value(solution_code, envir_prep_py)
-    },
-    error = function(e) {
-      NULL
-    }
-  )
-  # prep the checking environment
-  # NOTE: this manual method will be replaced with a direct call to `gradethis::py_gradethis_exercise_checker()`
-  checking_env <-
-    list2env(list(
-      .solution = .solution,
-      .envir_prep = envir_prep,
-      .envir_result = envir_result,
-      .last_value = .result,
-      .result = .result,
-      .user = .result
+  # use `gradethis::gradethis_exercise_checker` with the custom solution(s) evaluator
+  return(withr::with_options(
+    list(
+      gradethis.exercise_checker.solution_eval_fn = list(
+        python = function(code, envir) {
+          tryCatch({
+              envir_prep_py <- get0(".__py__", envir = envir, ifnotfound = NULL)
+              solution_code <- paste0(as.character(solution_code), collapse = "\n")
+              pygradethis::get_last_value(solution_code, envir_prep_py)
+            },
+            error = function(e) {
+              NULL
+            }
+          )
+        }
+      )
+    ),
+    gradethis::gradethis_exercise_checker(
+      label = label,
+      solution_code = solution_code,
+      user_code = user_code,
+      check_code = check_code,
+      envir_result = envir_result,
+      evaluate_result = evaluate_result,
+      envir_prep = envir_prep,
+      last_value = last_value,
+      ...
+    )
   ))
-  # grade
-  checker_fun <- eval(parse(text = check_code))
-  checker_fun(checking_env)
 }

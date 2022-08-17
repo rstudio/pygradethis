@@ -13,7 +13,7 @@ test_that("py_check_index() works", {
     )
     pygradethis::py_check_index(.result, .solution)
   })
-  testthat::expect_true(check_index_correct)
+  testthat::expect_null(check_index_correct)
 
   check_index_incorrect <- callr::r_safe(function() {
     library(reticulate)
@@ -28,7 +28,8 @@ test_that("py_check_index() works", {
     )
     pygradethis::py_check_index(.result, .solution)
   })
-  testthat::expect_false(check_index_incorrect)
+  testthat::expect_true(is_pygradethis_problem(check_index_incorrect))
+  testthat::expect_false(check_index_incorrect$correct)
 })
 
 test_that("py_check_columns() works", {
@@ -45,7 +46,7 @@ test_that("py_check_columns() works", {
     )
     pygradethis::py_check_columns(.result, .solution)
   })
-  testthat::expect_true(check_columns_correct)
+  testthat::expect_null(check_columns_correct)
 
   check_columns_incorrect <- callr::r_safe(function() {
     library(reticulate)
@@ -60,7 +61,8 @@ test_that("py_check_columns() works", {
     )
     pygradethis::py_check_columns(.result, .solution)
   })
-  testthat::expect_false(check_columns_incorrect)
+  testthat::expect_true(is_pygradethis_problem(check_columns_incorrect))
+  testthat::expect_false(check_columns_incorrect$correct)
 })
 
 test_that("py_check_values() works", {
@@ -78,7 +80,7 @@ test_that("py_check_values() works", {
     )
     pygradethis::py_check_values(.result, .solution)
   })
-  testthat::expect_true(check_values_correct)
+  testthat::expect_null(check_values_correct)
 
   check_values_incorrect <- callr::r_safe(function() {
     library(reticulate)
@@ -93,7 +95,8 @@ test_that("py_check_values() works", {
     )
     pygradethis::py_check_values(.result, .solution)
   })
-  testthat::expect_false(check_values_incorrect)
+  testthat::expect_true(is_pygradethis_problem(check_values_incorrect))
+  testthat::expect_false(check_values_incorrect$correct)
 })
 
 test_that("py_check_dataframe() works", {
@@ -112,7 +115,7 @@ test_that("py_check_dataframe() works", {
   })
   testthat::expect_null(check_dataframe_correct)
 
-  check_dataframe_problem <- callr::r_safe(function() {
+  check_dataframe_incorrect <- callr::r_safe(function() {
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -125,8 +128,8 @@ test_that("py_check_dataframe() works", {
     )
     pygradethis::py_check_dataframe(.result, .solution)
   })
-  testthat::expect_true(tblcheck::is_tblcheck_problem(check_dataframe_problem))
-  testthat::expect_false(tblcheck::tblcheck_grade(check_dataframe_problem)$correct)
+  testthat::expect_true(inherits(check_dataframe_incorrect, "gradethis_graded"))
+  testthat::expect_false(check_dataframe_incorrect$correct)
 })
 
 test_that("py_check_series() works", {
@@ -143,7 +146,7 @@ test_that("py_check_series() works", {
     )
     pygradethis::py_check_series(.result, .solution)
   })
-  testthat::expect_true(check_series_correct)
+  testthat::expect_null(check_series_correct)
 
   check_series_incorrect <- callr::r_safe(function() {
     library(reticulate)
@@ -158,5 +161,6 @@ test_that("py_check_series() works", {
     )
     pygradethis::py_check_series(.result, .solution)
   })
-  testthat::expect_false(check_series_incorrect)
+  testthat::expect_true(pygradethis::is_pygradethis_problem(check_series_incorrect))
+  testthat::expect_false(check_series_incorrect$correct)
 })
