@@ -21,15 +21,17 @@
 #' @return The `gradethis::graded()` list which contains several fields indicating the result of the
 #'   check.
 #' @export
-exercise_checker <- function(label = NULL,
-                            solution_code = NULL,
-                            user_code = NULL,
-                            check_code = NULL,
-                            envir_result = NULL,
-                            evaluate_result = NULL,
-                            envir_prep = NULL,
-                            last_value = NULL,
-                            ...) {
+exercise_checker <- function(
+  label = NULL,
+  solution_code = NULL,
+  user_code = NULL,
+  check_code = NULL,
+  envir_result = NULL,
+  evaluate_result = NULL,
+  envir_prep = NULL,
+  last_value = NULL,
+  ...
+) {
   # retrieve the Python environment from the envir_prep / envir_result
   envir_prep_py <- get0(".__py__", envir = envir_prep, ifnotfound = NULL)
   envir_result_py <- get0(".__py__", envir = envir_result, ifnotfound = NULL)
@@ -110,42 +112,42 @@ exercise_checker <- function(label = NULL,
 #' @return The `gradethis::graded()` list which contains several fields indicating the 
 #' result of the check.
 #' @export
-py_gradethis_exercise_checker <- function(label = NULL,
-                            solution_code = NULL,
-                            user_code = NULL,
-                            check_code = NULL,
-                            envir_result = NULL,
-                            evaluate_result = NULL,
-                            envir_prep = NULL,
-                            last_value = NULL,
-                            ...) {
-  # use `gradethis::gradethis_exercise_checker` with the custom solution(s) evaluator
-  return(withr::with_options(
-    list(
-      gradethis.exercise_checker.solution_eval_fn = list(
-        python = function(code, envir) {
-          tryCatch({
-              envir_prep_py <- get0(".__py__", envir = envir, ifnotfound = NULL)
-              solution_code <- paste0(as.character(solution_code), collapse = "\n")
-              pygradethis::get_last_value(solution_code, envir_prep_py)
-            },
-            error = function(e) {
-              NULL
-            }
-          )
-        }
-      )
-    ),
-    gradethis::gradethis_exercise_checker(
-      label = label,
-      solution_code = solution_code,
-      user_code = user_code,
-      check_code = check_code,
-      envir_result = envir_result,
-      evaluate_result = evaluate_result,
-      envir_prep = envir_prep,
-      last_value = last_value,
-      ...
+py_gradethis_exercise_checker <- function(
+  label = NULL,
+  solution_code = NULL,
+  user_code = NULL,
+  check_code = NULL,
+  envir_result = NULL,
+  evaluate_result = NULL,
+  envir_prep = NULL,
+  last_value = NULL,
+  ...
+) {
+  withr::local_options(list(
+    gradethis.exercise_checker.solution_eval_fn = list(
+      python = function(code, envir) {
+        tryCatch({
+            envir_prep_py <- get0(".__py__", envir = envir, ifnotfound = NULL)
+            solution_code <- paste0(as.character(solution_code), collapse = "\n")
+            pygradethis::get_last_value(solution_code, envir_prep_py)
+          },
+          error = function(e) {
+            e
+          }
+        )
+      }
     )
   ))
+  # use `gradethis::gradethis_exercise_checker` with the custom solution(s) evaluator
+  gradethis::gradethis_exercise_checker(
+    label = label,
+    solution_code = solution_code,
+    user_code = user_code,
+    check_code = check_code,
+    envir_result = envir_result,
+    evaluate_result = evaluate_result,
+    envir_prep = envir_prep,
+    last_value = last_value,
+    ...
+  )
 }
