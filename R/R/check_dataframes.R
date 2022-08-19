@@ -1,60 +1,4 @@
 
-
-#' Helper function to return early from `py_check_*` functions
-#'
-#' This is especially useful when returning from checking functions that
-#' combine multiple checks
-#'
-#' @param problem A `pygradethis_problem` object.
-#' @param env The environment from which to return.
-#'
-#' @keywords internal
-#' @noRd
-return_if_problem <- function(problem, env = parent.frame()) {
-  if (is_pygradethis_problem(problem)) {
-    rlang::return_from(env, problem)
-  }
-  NULL
-}
-
-#' Declare a problem
-#'
-#' Useful for constructing a small list to communicate the problem that was
-#' discovered during checking.
-#'
-#' @param type A character string, e.g. `columns`, `index`, or `values` that
-#'   describes the problem that was discovered.
-#' @param expected actual The expected and actual values. These should be
-#'   included when the value is a summary, e.g. `nrow(expected)` or
-#'   `length(actual)`. Be careful not to include large amounts of data.
-#' @param ... Additional elements to be included in the `problem` object.
-#'
-#' @keywords internal
-#' @noRd
-problem <- function(
-  type, expected = NULL, actual = NULL, correct = FALSE, ...
-) {
-  checkmate::assert_string(type, min.chars = 1)
-
-  problem <- list(
-    type = type,
-    correct = correct,
-    expected = expected,
-    actual = actual,
-    ...
-  )
-
-  structure(
-    purrr::compact(problem),
-    class = c(paste0(type, "_problem"), "pygradethis_problem", "gradethis_problem")
-  )
-}
-
-is_pygradethis_problem <- function(x, type = NULL) {
-  inherits(x, "pygradethis_problem") &&
-  (is.null(type) || inherits(x, paste0(type, "_problem")))
-}
-
 #' Get the index of a pandas.DataFrame/pandas.Series
 #'
 #' @param data A DataFrame/Series.
@@ -137,7 +81,7 @@ py_check_index <- function(
   right_vals <- py_to_r(py_get_index(expected))
   if (!identical(left_vals, right_vals)) {
     return(problem(
-      type = "index",
+      type = "wrong_index",
       message = "The index does not match the expected.",
       actual = left_vals,
       expected = right_vals
@@ -145,7 +89,6 @@ py_check_index <- function(
   }
   NULL
 }
-
 
 #' Check the index of a DataFrame/Series matches the expected index,
 #' and return a `gradethis::fail` if they don't.
@@ -172,18 +115,14 @@ py_grade_index <- function(
   if (inherits(expected, ".solution")) {
     expected <- get(".solution", env)
   }
+
   problem <- pygradethis::py_check_index(object, expected, env)
-  if (pygradethis:::is_pygradethis_problem(problem)) {
-    extra <- gradethis:::capture_graded(
-      tblcheck::vec_grade(problem$actual, problem$expected, env = env)
-    )
-    return(gradethis::fail(
-      message = glue::glue("{problem$message} {extra$message}"),
-      problem = problem,
-      env = env
-    ))
+  
+  if (!is_pygradethis_problem(problem)) {
+    return(invisible())
   }
-  return(invisible())
+
+  tblcheck::problem_grade(problem)
 }
 
 #' Checks that the columns of two DataFrame/Series are the same.
