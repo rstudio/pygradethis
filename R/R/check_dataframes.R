@@ -77,8 +77,10 @@ py_check_index <- function(
   if (inherits(expected, ".solution")) {
     expected <- get(".solution", env)
   }
+
   left_vals <- py_to_r(py_get_index(object))
   right_vals <- py_to_r(py_get_index(expected))
+
   if (!identical(left_vals, right_vals)) {
     return(problem(
       type = "wrong_index",
@@ -109,15 +111,9 @@ py_check_index <- function(
 py_grade_index <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
-  if (inherits(object, ".result")) {
-    object <- get(".result", env)
-  }
-  if (inherits(expected, ".solution")) {
-    expected <- get(".solution", env)
-  }
-
+  # find problems with index
   problem <- pygradethis::py_check_index(object, expected, env)
-  
+
   if (!is_pygradethis_problem(problem)) {
     return(invisible())
   }
@@ -152,18 +148,50 @@ py_check_columns <- function(
   if (inherits(expected, ".solution")) {
     expected <- get(".solution", env)
   }
+
   # extract and py_to_r column values
   obj_vals <- py_to_r(py_get_columns(object))
   exp_vals <- py_to_r(py_get_columns(expected))
+
   if (!identical(obj_vals, exp_vals)) {
     return(problem(
-      type = "columns",
+      type = "wrong_columns",
       message = "The column names do not match the expected columns.",
       actual = obj_vals,
       expected = exp_vals
     ))
   }
   NULL
+}
+
+
+#' Checks that the columns of two DataFrame/Series are the same and returns
+#' a `gradethis::fail` if they don't.
+#'
+#' @param object A DataFrame to be compared to `expected`.
+#' @param expected A DataFrame containing the expected column.
+#' @param env The environment used for grading.
+#'
+#' @return A `gradethis::fail()` if the index does not match else NULL
+#' @export
+#' @examples
+#' \dontrun{
+#' reticulate::py_run_string('import pandas as pd; import numpy as np')
+#' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
+#' .solution <- reticulate::py_eval("pd.DataFrame({'b':[1,2,3]})")
+#' py_grade_columns() # a gradethis::fail()
+#' }
+py_grade_columns <- function(
+  object = .result, expected = .solution, env = parent.frame()
+) {
+  # find problems with columns
+  problem <- pygradethis::py_check_columns(object, expected, env)
+
+  if (!is_pygradethis_problem(problem)) {
+    return(invisible())
+  }
+
+  tblcheck::problem_grade(problem)
 }
 
 #' Checks that the values of two DataFrame/Series are the same.
@@ -193,17 +221,48 @@ py_check_values <- function(
   if (inherits(expected, ".solution")) {
     expected <- get(".solution", env)
   }
+
   obj_vals <- py_to_r(py_get_values(object))
   exp_vals <- py_to_r(py_get_values(expected))
+
   if (!identical(obj_vals, exp_vals)) {
     return(problem(
-      type = "values",
+      type = "wrong_values",
       message = "The DataFrame values do not match the expected values.",
       actual = obj_vals,
       expected = exp_vals
     ))
   }
   NULL
+}
+
+#' Checks that the values of two DataFrame/Series are the same and returns
+#' a `gradethis::fail` if they don't.
+#'
+#' @param object A DataFrame to be compared to `expected`.
+#' @param expected A DataFrame containing the expected values.
+#' @param env The environment used for grading.
+#'
+#' @return A `gradethis::fail()` if the index does not match else NULL
+#' @export
+#' @examples
+#' \dontrun{
+#' reticulate::py_run_string('import pandas as pd; import numpy as np')
+#' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,99]})")
+#' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
+#' py_grade_values() # a gradethis::fail()
+#' }
+py_grade_values <- function(
+  object = .result, expected = .solution, env = parent.frame()
+) {
+  # find problems with values
+  problem <- pygradethis::py_check_values(object, expected, env)
+
+  if (!is_pygradethis_problem(problem)) {
+    return(invisible())
+  }
+
+  tblcheck::problem_grade(problem)
 }
 
 #' Checks that two Series are the same.
@@ -238,17 +297,49 @@ py_check_series <- function(
   if (inherits(expected, ".solution")) {
     expected <- get(".solution", env)
   }
+
   obj_vector <- py_to_r(object)
   sol_vector <- py_to_r(expected)
+
   if (!identical(obj_vector, sol_vector)) {
     return(problem(
-      type = "series",
+      type = "wrong_series",
       message = "The Series do not match the expected Series.",
       actual = obj_vector,
       expected = sol_vector
     ))
   }
   NULL
+}
+
+
+#' Checks that two Series are the same and returns
+#' a `gradethis::fail` if they don't.
+#'
+#' @param object A Series to be compared to `expected`.
+#' @param expected The expected Series
+#' @param env The environment used for grading.
+#'
+#' @return A `gradethis::fail()` if the index does not match else NULL
+#' @export
+#' @examples
+#' \dontrun{
+#' reticulate::py_run_string('import pandas as pd; import numpy as np')
+#' .result = reticulate::py_eval("pd.Series(data=[1, 2])", F)
+#' .solution = reticulate::py_eval("pd.Series(data=[1, 2, 3])", F)
+#' py_grade_series() # a gradethis::fail()
+#' }
+py_grade_series <- function(
+  object = .result, expected = .solution, env = parent.frame()
+) {
+  # find problems with a Series
+  problem <- pygradethis::py_check_series(object, expected, env)
+
+  if (!is_pygradethis_problem(problem)) {
+    return(invisible())
+  }
+
+  tblcheck::problem_grade(problem)
 }
 
 #' Checks that two DataFrame are the same.
@@ -274,6 +365,7 @@ py_check_dataframe <- function(
   if (inherits(expected, ".solution")) {
     expected <- get(".solution", env)
   }
+
   is_tbl <- tryCatch({
       object <- py_to_tbl(object)
       expected <- py_to_tbl(expected)
@@ -282,12 +374,59 @@ py_check_dataframe <- function(
       FALSE
     }
   )
+
   if (is_tbl) {
-    return(tblcheck::tbl_grade(object, expected, env = env))
+    return(tblcheck::tbl_check(object, expected, env = env))
   } else {
     return_if_problem(py_check_index(object, expected), env)
     return_if_problem(py_check_columns(object, expected), env)
     return_if_problem(py_check_values(object, expected), env)
   }
+
   NULL
+}
+
+
+#' Checks that two DataFrame are the same and returns
+#' a `gradethis::fail` if they don't.
+#'
+#' @param object A DataFrame to be compared to `expected`.
+#' @param expected The expected DataFrame
+#' @param env The environment used for grading.
+#'
+#' @return A `gradethis::fail()` if the index does not match else NULL
+#' @export
+#' @examples
+#' \dontrun{
+#' reticulate::py_run_string('import pandas as pd; import numpy as np')
+#' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,99]})")
+#' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
+#' py_grade_dataframe() # a gradethis::fail()
+#' }
+py_grade_dataframe <- function(
+  object = .result, expected = .solution, env = parent.frame()
+) {
+  if (inherits(object, ".result")) {
+    object <- get(".result", env)
+  }
+  if (inherits(expected, ".solution")) {
+    expected <- get(".solution", env)
+  }
+
+  is_tbl <- tryCatch({
+      object <- py_to_tbl(object)
+      expected <- py_to_tbl(expected)
+      TRUE
+    }, error = function(e) {
+      FALSE
+    }
+  )
+
+  if (is_tbl) {
+    return(tblcheck::tbl_grade(object, expected, env = env))
+  }
+
+  py_grade_index(object, expected)
+  py_grade_columns(object, expected)
+  py_grade_values(object, expected)
 }

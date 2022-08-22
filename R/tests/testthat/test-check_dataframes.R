@@ -29,7 +29,7 @@ test_that("py_check_index() works", {
     pygradethis::py_check_index(.result, .solution)
   })
   testthat::expect_true(is_pygradethis_problem(check_index_incorrect))
-  testthat::expect_false(check_index_incorrect$correct)
+  testthat::expect_equal(check_index_incorrect$type, "wrong_index")
 })
 
 test_that("py_check_columns() works", {
@@ -62,7 +62,7 @@ test_that("py_check_columns() works", {
     pygradethis::py_check_columns(.result, .solution)
   })
   testthat::expect_true(is_pygradethis_problem(check_columns_incorrect))
-  testthat::expect_false(check_columns_incorrect$correct)
+  testthat::expect_equal(check_columns_incorrect$type, "wrong_columns")
 })
 
 test_that("py_check_values() works", {
@@ -96,7 +96,7 @@ test_that("py_check_values() works", {
     pygradethis::py_check_values(.result, .solution)
   })
   testthat::expect_true(is_pygradethis_problem(check_values_incorrect))
-  testthat::expect_false(check_values_incorrect$correct)
+  testthat::expect_equal(check_values_incorrect$type, "wrong_values")
 })
 
 test_that("py_check_dataframe() works", {
@@ -128,8 +128,8 @@ test_that("py_check_dataframe() works", {
     )
     pygradethis::py_check_dataframe(.result, .solution)
   })
-  testthat::expect_true(inherits(check_dataframe_incorrect, "gradethis_graded"))
-  testthat::expect_false(check_dataframe_incorrect$correct)
+  testthat::expect_true(tblcheck::is_tblcheck_problem(check_dataframe_incorrect))
+  testthat::expect_equal(check_dataframe_incorrect$type, "names")
 })
 
 test_that("py_check_series() works", {
@@ -161,6 +161,6 @@ test_that("py_check_series() works", {
     )
     pygradethis::py_check_series(.result, .solution)
   })
-  testthat::expect_true(pygradethis::is_pygradethis_problem(check_series_incorrect))
-  testthat::expect_false(check_series_incorrect$correct)
+  testthat::expect_true(is_pygradethis_problem(check_series_incorrect))
+  testthat::expect_equal(check_series_incorrect$type, "wrong_series")
 })
