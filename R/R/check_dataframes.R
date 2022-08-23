@@ -149,7 +149,7 @@ py_check_columns <- function(
     expected <- get(".solution", env)
   }
 
-  # extract and py_to_r column values
+  # extract column values
   obj_vals <- py_to_r(py_get_columns(object))
   exp_vals <- py_to_r(py_get_columns(expected))
 
@@ -161,6 +161,7 @@ py_check_columns <- function(
       expected = exp_vals
     ))
   }
+
   NULL
 }
 
@@ -184,7 +185,7 @@ py_check_columns <- function(
 py_grade_columns <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
-  # find problems with columns
+  # find problems with column names
   problem <- pygradethis::py_check_columns(object, expected, env)
 
   if (!is_pygradethis_problem(problem)) {

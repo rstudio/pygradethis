@@ -65,6 +65,16 @@ problem_message.wrong_index_problem <- function(problem, ...) {
 
 #' @export
 problem_message.wrong_columns_problem <- function(problem, ...) {
+  # check if we have a difference of types
+  actual_type <- get_friendly_class(problem$actual)
+  class(problem$actual) <- actual_type
+  expected_type <- get_friendly_class(problem$expected)
+  class(problem$expected) <- expected_type
+
+  # grade the types
+  tblcheck::tbl_grade_class(problem$actual, problem$expected)
+
+  # otherwise, just compare the values
   extra <- tblcheck::tblcheck_message(
     tblcheck::vec_check(problem$actual, problem$expected, env = env)
   )
@@ -86,7 +96,10 @@ problem_message.wrong_series_problem <- function(problem, ...) {
 
 #' @export
 problem_message.wrong_series_problem <- function(problem, ...) {
-  problem$message
+  extra <- tblcheck::tblcheck_message(
+    tblcheck::vec_check(problem$actual, problem$expected, env = env)
+  )
+  glue::glue("{problem$message} {extra}")
 }
 
 #' @export

@@ -65,6 +65,10 @@ is.np.array <- function(obj) {
   reticulate::py$builtins$isinstance(obj, reticulate::py$np$array)
 }
 
+get_friendly_class <- function(obj) {
+  reticulate::py$builtins$type(obj)$`__name__`
+}
+
 #' Wrapper of reticulate::py_to_r to convert objects from Python to R.
 #'
 #' We try to reasonable convert objects that `reticulate::py_to_r` either can't
@@ -106,8 +110,8 @@ py_to_r <- function(obj) {
 #' # ADD_EXAMPLES_HERE
 index_to_list <- function(obj) {
   # if MultiIndex don't unlist
-  if (is.MultiIndex(obj)) {
-    return(reticulate::py$builtins$list(obj$values))
+  if (pygradethis:::is.MultiIndex(obj)) {
+    return(reticulate::py$builtins$list(obj))
   }
   # unpack values
   # <>Index -> np.array -> list(list())
