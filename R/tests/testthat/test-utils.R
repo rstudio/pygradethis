@@ -76,7 +76,7 @@ testthat::test_that("py_to_tbl() translates DataFrame to tibble with single grou
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     py_df <- reticulate::py_eval(
-      'pd.DataFrame({"Animal": ["Falcon","Falcon","Parrot","Parrot"], "Max Speed": [380., 370., 24., 26.]}).groupby(["Animal"]).mean()', 
+      'pd.DataFrame({"Animal": ["Falcon", "Falcon", "Parrot", "Parrot"], "Max Speed": [380., 370., 24., 26.]}).groupby(["Animal"]).mean()', 
       convert = FALSE
     )
     pygradethis::py_to_tbl(py_df)

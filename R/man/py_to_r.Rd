@@ -13,6 +13,6 @@ py_to_r(obj)
 An R object, or Python object if we can't py_to_r
 }
 \description{
-We try to reasonable convert objects that `reticulate::py_to_r` either can't
-or produces a messy object (e.g. MultiIndex objects)
+`py_to_r` will attempt to reasonably convert objects that `reticulate::py_to_r` either can't
+or when it produces a messy object (e.g. DataFrames with a MultiIndex)
 }

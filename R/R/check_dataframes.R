@@ -313,7 +313,6 @@ py_check_series <- function(
   NULL
 }
 
-
 #' Checks that two Series are the same and returns
 #' a `gradethis::fail` if they don't.
 #'

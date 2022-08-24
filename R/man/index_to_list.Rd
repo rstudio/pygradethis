@@ -15,6 +15,3 @@ A list()
 \description{
 Helper funtion to unpack an Index and return the values
 }
-\examples{
-# ADD_EXAMPLES_HERE
-}

@@ -1,3 +1,5 @@
+# Mocking functions ----
+
 #' A helper function to mock a Python exercise in learnr.
 #'
 #' This is an internal function used for testing purposes.
@@ -37,6 +39,8 @@ evaluate_exercise_feedback <- function(ex, envir = NULL, evaluate_global_setup =
   res$feedback
 }
 
+# Type checking helpers ----
+
 is.DataFrame <- function(obj) {
   reticulate::py$builtins$isinstance(obj, reticulate::py$pd$DataFrame)
 }
@@ -69,10 +73,12 @@ get_friendly_class <- function(obj) {
   reticulate::py$builtins$type(obj)$`__name__`
 }
 
+# Python to R translation helpers ----
+
 #' Wrapper of reticulate::py_to_r to convert objects from Python to R.
 #'
-#' We try to reasonable convert objects that `reticulate::py_to_r` either can't
-#' or produces a messy object (e.g. MultiIndex objects)
+#' `py_to_r` will attempt to reasonably convert objects that `reticulate::py_to_r` either can't
+#' or when it produces a messy object (e.g. DataFrames with a MultiIndex)
 #'
 #' @param obj A Python object.
 #'
@@ -107,7 +113,6 @@ py_to_r <- function(obj) {
 #'
 #' @return A list()
 #' @examples
-#' # ADD_EXAMPLES_HERE
 index_to_list <- function(obj) {
   # if MultiIndex don't unlist
   if (pygradethis:::is.MultiIndex(obj)) {
@@ -126,7 +131,7 @@ index_to_list <- function(obj) {
 #' @export
 py_to_tbl <- function(data) {
   if (!is.DataFrame(data)) {
-    # # assign Python type to the object's class
+    # assign Python type to the object's class
     obj_class <- reticulate::py$builtins$type(data)$`__name__`
     data <- reticulate::py_to_r(data)
     class(data) <- obj_class
