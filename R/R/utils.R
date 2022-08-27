@@ -42,31 +42,31 @@ evaluate_exercise_feedback <- function(ex, envir = NULL, evaluate_global_setup =
 # Type checking helpers ----
 
 is.DataFrame <- function(obj) {
-  reticulate::py$builtins$isinstance(obj, reticulate::py$pd$DataFrame)
+  identical(get_friendly_class(obj), 'DataFrame')
 }
 
 is.Series <- function(obj) {
-  reticulate::py$builtins$isinstance(obj, reticulate::py$pd$Series)
+  identical(get_friendly_class(obj), 'Series')
 }
 
 is.Index <- function(obj) {
-  reticulate::py$builtins$isinstance(obj, reticulate::py$pd$Index)
+  identical(get_friendly_class(obj), 'Index')
 }
 
 is.RangeIndex <- function(obj) {
-  reticulate::py$builtins$isinstance(obj, reticulate::py$pd$RangeIndex)
+  identical(get_friendly_class(obj), 'RangeIndex')
 }
 
 is.CategoricalIndex <- function(obj) {
-  reticulate::py$builtins$isinstance(obj, reticulate::py$pd$CategoricalIndex)
+  identical(get_friendly_class(obj), 'CategoricalIndex')
 }
 
 is.MultiIndex <- function(obj) {
-  reticulate::py$builtins$isinstance(obj, reticulate::py$pd$MultiIndex)
+  identical(get_friendly_class(obj), 'MultiIndex')
 }
 
 is.np.array <- function(obj) {
-  reticulate::py$builtins$isinstance(obj, reticulate::py$np$array)
+  identical(get_friendly_class(obj), 'array')
 }
 
 get_friendly_class <- function(obj) {
