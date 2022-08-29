@@ -41,31 +41,31 @@ evaluate_exercise_feedback <- function(ex, envir = NULL, evaluate_global_setup =
 
 # Type checking helpers ----
 
-is.DataFrame <- function(obj) {
+is_DataFrame <- function(obj) {
   identical(get_friendly_class(obj), 'DataFrame')
 }
 
-is.Series <- function(obj) {
+is_Series <- function(obj) {
   identical(get_friendly_class(obj), 'Series')
 }
 
-is.Index <- function(obj) {
+is_Index <- function(obj) {
   identical(get_friendly_class(obj), 'Index')
 }
 
-is.RangeIndex <- function(obj) {
+is_RangeIndex <- function(obj) {
   identical(get_friendly_class(obj), 'RangeIndex')
 }
 
-is.CategoricalIndex <- function(obj) {
+is_CategoricalIndex <- function(obj) {
   identical(get_friendly_class(obj), 'CategoricalIndex')
 }
 
-is.MultiIndex <- function(obj) {
+is_MultiIndex <- function(obj) {
   identical(get_friendly_class(obj), 'MultiIndex')
 }
 
-is.np.array <- function(obj) {
+is_numpy_array <- function(obj) {
   identical(get_friendly_class(obj), 'array')
 }
 
@@ -87,14 +87,14 @@ get_friendly_class <- function(obj) {
 py_to_r <- function(obj) {
   return(
     tryCatch({
-      if (is.DataFrame(obj)) {
+      if (is_DataFrame(obj)) {
         # for a DataFrame try to convert to a tibble for tblcheck grading
         return(py_to_tbl(obj))
-      } else if (is.Series(obj)) {
+      } else if (is_Series(obj)) {
         return(reticulate::py_to_r(obj))
-      } else if (is.MultiIndex(obj)) {
+      } else if (is_MultiIndex(obj)) {
         return(index_to_list(obj))
-      } else if (is.Index(obj)) {
+      } else if (is_Index(obj) || is_RangeIndex(obj)) {
         return(index_to_list(obj))
       } else {
         return(reticulate::py_to_r(obj))
@@ -115,7 +115,7 @@ py_to_r <- function(obj) {
 #' @examples
 index_to_list <- function(obj) {
   # if MultiIndex don't unlist
-  if (pygradethis:::is.MultiIndex(obj)) {
+  if (pygradethis:::is_MultiIndex(obj)) {
     return(reticulate::py$builtins$list(obj))
   }
   # unpack values
@@ -130,7 +130,7 @@ index_to_list <- function(obj) {
 #' @return A tibble
 #' @export
 py_to_tbl <- function(data) {
-  if (!is.DataFrame(data)) {
+  if (!is_DataFrame(data)) {
     # assign Python type to the object's class
     obj_class <- reticulate::py$builtins$type(data)$`__name__`
     data <- reticulate::py_to_r(data)
@@ -146,7 +146,7 @@ py_to_tbl <- function(data) {
 # the Index/MultiIndex is flattened and converted to columns
 flatten_py_dataframe <- function(data) {
   # flatten the row Index/MultiIndex as a result of a .groupby().agg()
-  if (is.Index(data$index) || is.MultiIndex(data$index)) {
+  if (is_Index(data$index) || is_MultiIndex(data$index)) {
     # check if data should be grouped
     group_vars <- reticulate::py$builtins$list(data$index$names)
     has_groups <- all(vapply(group_vars, Negate(is.null), logical(1)))
