@@ -27,14 +27,14 @@ get_last_value <- inform_python_pygradethis_not_found
 
 .onLoad <- function(libname, pkgname) {
   # import `pygradethis` and the exercise checking function
-  if (reticulate::py_available()) {
+  if (reticulate::py_available(initialize = TRUE)) {
     tryCatch({
       pygradethis <<- reticulate::import("pygradethis", convert=FALSE, delay_load = TRUE)
       pygradethis_exercise_checker <<- pygradethis$pygradethis_exercise_checker$pygradethis_exercise_checker
       get_last_value <<- pygradethis$utils$get_last_value
     }, error = function(err) {
       message(
-        "An error occurred while trying to connect {pygradethis} in R to the Python companion package: ",
+        "An error occurred while trying to connect {pygradethis} in R to the Python companion package:\n",
         conditionMessage(err)
       )
     })
