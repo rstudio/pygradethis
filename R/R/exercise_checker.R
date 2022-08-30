@@ -138,6 +138,8 @@ py_gradethis_exercise_checker <- function(
       }
     )
   ))
+  py_envir_result <- get0(".__py__", envir = envir_result, ifnotfound = NULL)
+  envir_result <- pygradethis::get_py_envir(py_envir_result)
   # use `gradethis::gradethis_exercise_checker` with the custom solution(s) evaluator
   gradethis::gradethis_exercise_checker(
     label = label,

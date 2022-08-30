@@ -171,3 +171,23 @@ flatten_py_dataframe <- function(data) {
   attr(tbl, "pandas.index") <- NULL
   tbl
 }
+
+
+#' Convert variables within a Python module/environment.
+#'
+#' This takes in a Python dictionary representing the Python
+#' environment, converts each object (if possible) and returns
+#' a named list of R objects.
+#'
+#' @param envir A Python dictionary.
+#'
+#' @return A named list
+#' @export
+get_py_envir <- function(envir) {
+  if (is.null(envir)) {
+    return(envir)
+  }
+  Map(names(envir), f = function(obj_name) {
+    pygradethis::py_to_r(envir[obj_name])
+  })
+}
