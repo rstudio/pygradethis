@@ -191,3 +191,12 @@ get_py_envir <- function(envir) {
     pygradethis::py_to_r(envir[obj_name])
   })
 }
+
+is_py_object <- function(obj) {
+  tryCatch({
+    reticulate::py_to_r(obj)
+    TRUE
+  }, error = function(e) {
+    FALSE
+  })
+}

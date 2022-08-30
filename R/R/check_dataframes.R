@@ -1,3 +1,44 @@
+#' Get the Python result
+#'
+#' @param object The .result object.
+#' @param env The environment to look for the .result.
+#'
+#' @noRd
+#' @keywords internal
+get_python_result <- function(object = .result, env = parent.frame()) {
+  if (inherits(object, ".result")) {
+    result <- get(".result", env)
+    if (!is_py_object(result)) {
+      return(get0(
+        ".py_result",
+        envir = env,
+        ifnotfound = result
+      ))
+    }
+  }
+  object
+}
+
+#' Get the Python solution
+#'
+#' @param object The .solution object.
+#' @param env The environment to look for the .solution.
+#'
+#' @noRd
+#' @keywords internal
+get_python_solution <- function(object = .solution, env = parent.frame()) {
+  if (inherits(object, ".solution")) {
+    solution <- get(".solution", env)
+    if (!is_py_object(solution)) {
+      return(get0(
+        ".py_solution",
+        envir = env,
+        ifnotfound = solution
+      ))
+    }
+  }
+  object
+}
 
 #' Get the index of a pandas.DataFrame/pandas.Series
 #'
@@ -71,12 +112,8 @@ py_get_values <- function(data) {
 py_check_index <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
-  if (inherits(object, ".result")) {
-    object <- get(".result", env)
-  }
-  if (inherits(expected, ".solution")) {
-    expected <- get(".solution", env)
-  }
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
 
   left_vals <- py_to_r(py_get_index(object))
   right_vals <- py_to_r(py_get_index(expected))
@@ -112,7 +149,7 @@ py_grade_index <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
   # find problems with index
-  problem <- pygradethis::py_check_index(object, expected, env)
+  problem <- py_check_index(object, expected, env)
 
   if (!is_pygradethis_problem(problem)) {
     return(invisible())
@@ -142,12 +179,8 @@ py_grade_index <- function(
 py_check_columns <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
-  if (inherits(object, ".result")) {
-    object <- get(".result", env)
-  }
-  if (inherits(expected, ".solution")) {
-    expected <- get(".solution", env)
-  }
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
 
   # extract column values
   obj_vals <- py_to_r(py_get_columns(object))
@@ -164,7 +197,6 @@ py_check_columns <- function(
 
   NULL
 }
-
 
 #' Checks that the columns of two DataFrame/Series are the same and returns
 #' a `gradethis::fail` if they don't.
@@ -186,7 +218,7 @@ py_grade_columns <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
   # find problems with column names
-  problem <- pygradethis::py_check_columns(object, expected, env)
+  problem <- py_check_columns(object, expected, env)
 
   if (!is_pygradethis_problem(problem)) {
     return(invisible())
@@ -216,12 +248,8 @@ py_grade_columns <- function(
 py_check_values <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
-  if (inherits(object, ".result")) {
-    object <- get(".result", env)
-  }
-  if (inherits(expected, ".solution")) {
-    expected <- get(".solution", env)
-  }
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
 
   obj_vals <- py_to_r(py_get_values(object))
   exp_vals <- py_to_r(py_get_values(expected))
@@ -257,7 +285,7 @@ py_grade_values <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
   # find problems with values
-  problem <- pygradethis::py_check_values(object, expected, env)
+  problem <- py_check_values(object, expected, env)
 
   if (!is_pygradethis_problem(problem)) {
     return(invisible())
@@ -292,22 +320,22 @@ py_grade_values <- function(
 py_check_series <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
-  if (inherits(object, ".result")) {
-    object <- get(".result", env)
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
+
+  if (is_py_object(object)) {
+    object <- pygradethis::py_to_r(object)
   }
-  if (inherits(expected, ".solution")) {
-    expected <- get(".solution", env)
+  if (is_py_object(expected)) {
+    expected <- pygradethis::py_to_r(expected)
   }
 
-  obj_vector <- py_to_r(object)
-  sol_vector <- py_to_r(expected)
-
-  if (!identical(obj_vector, sol_vector)) {
+  if (!identical(object, expected)) {
     return(problem(
       type = "wrong_series",
       message = "The Series do not match the expected Series.",
-      actual = obj_vector,
-      expected = sol_vector
+      actual = object,
+      expected = expected
     ))
   }
   NULL
@@ -333,7 +361,7 @@ py_grade_series <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
   # find problems with a Series
-  problem <- pygradethis::py_check_series(object, expected, env)
+  problem <- py_check_series(object, expected, env)
 
   if (!is_pygradethis_problem(problem)) {
     return(invisible())
@@ -359,33 +387,27 @@ py_grade_series <- function(
 py_check_dataframe <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
-  if (inherits(object, ".result")) {
-    object <- get(".result", env)
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
+
+  if (is_py_object(object)) {
+    object <- pygradethis::py_to_r(object)
   }
-  if (inherits(expected, ".solution")) {
-    expected <- get(".solution", env)
+  if (is_py_object(expected)) {
+    expected <- pygradethis::py_to_r(expected)
   }
 
-  is_tbl <- tryCatch({
-      object <- py_to_tbl(object)
-      expected <- py_to_tbl(expected)
-      TRUE
-    }, error = function(e) {
-      FALSE
-    }
-  )
-
-  if (is_tbl) {
+  # if result and solution are already converted use tblcheck
+  if (!is_py_object(object) && !is_py_object(expected)) {
     return(tblcheck::tbl_check(object, expected, env = env))
-  } else {
-    return_if_problem(py_check_index(object, expected), env)
-    return_if_problem(py_check_columns(object, expected), env)
-    return_if_problem(py_check_values(object, expected), env)
   }
+
+  return_if_problem(py_check_index(object, expected), env)
+  return_if_problem(py_check_columns(object, expected), env)
+  return_if_problem(py_check_values(object, expected), env)
 
   NULL
 }
-
 
 #' Checks that two DataFrame are the same and returns
 #' a `gradethis::fail` if they don't.
@@ -406,26 +428,16 @@ py_check_dataframe <- function(
 py_grade_dataframe <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
-  if (inherits(object, ".result")) {
-    object <- get(".result", env)
-  }
-  if (inherits(expected, ".solution")) {
-    expected <- get(".solution", env)
-  }
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
 
-  is_tbl <- tryCatch({
-      object <- py_to_tbl(object)
-      expected <- py_to_tbl(expected)
-      TRUE
-    }, error = function(e) {
-      FALSE
-    }
-  )
-
-  if (is_tbl) {
+  # if result and solution are already converted use tblcheck
+  use_tblcheck <- !is_py_object(object) && !is_py_object(expected)
+  if (use_tblcheck) {
     return(tblcheck::tbl_grade(object, expected, env = env))
   }
 
+  # otherwise, grade using the raw Python result and solution
   py_grade_index(object, expected)
   py_grade_columns(object, expected)
   py_grade_values(object, expected)

@@ -153,7 +153,7 @@ test_that("py_check_dataframe() works", {
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
-      "pd.DataFrame({'a':[1, 2, 99]})",
+      "pd.DataFrame({'a':[1, 2, 3]})",
       convert = FALSE
     )
     .solution <- reticulate::py_eval(
@@ -164,6 +164,22 @@ test_that("py_check_dataframe() works", {
   })
   testthat::expect_true(tblcheck::is_tblcheck_problem(check_dataframe_incorrect))
   testthat::expect_equal(check_dataframe_incorrect$type, "names")
+
+  check_dataframe_incorrect <- callr::r_safe(function() {
+    library(reticulate)
+    reticulate::py_run_string("import pandas as pd; import numpy as np")
+    .result <- reticulate::py_eval(
+      "pd.DataFrame({'a':[1, 2, 99]})",
+      convert = FALSE
+    )
+    .solution <- reticulate::py_eval(
+      "pd.DataFrame({'a':[1, 2, 3]})",
+      convert = FALSE
+    )
+    pygradethis::py_check_dataframe(.result, .solution)
+  })
+  testthat::expect_true(tblcheck::is_tblcheck_problem(check_dataframe_incorrect))
+  testthat::expect_equal(check_dataframe_incorrect$type, "values")
 })
 
 test_that("py_check_series() works", {

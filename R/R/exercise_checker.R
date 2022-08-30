@@ -129,7 +129,10 @@ py_gradethis_exercise_checker <- function(
         tryCatch({
             envir_prep_py <- get0(".__py__", envir = envir, ifnotfound = NULL)
             solution_code <- paste0(as.character(solution_code), collapse = "\n")
-            pygradethis::get_last_value(solution_code, envir_prep_py)
+            solution <- pygradethis::get_last_value(solution_code, envir_prep_py)
+            # keep around raw Python solution object in case it's needed
+            assign(".py_solution", solution, envir = envir)
+            pygradethis::py_to_r(solution)
           },
           error = function(e) {
             e
@@ -138,7 +141,11 @@ py_gradethis_exercise_checker <- function(
       }
     )
   ))
+  # keep around raw Python environment and result in case we need them
   py_envir_result <- get0(".__py__", envir = envir_result, ifnotfound = NULL)
+  py_result <- last_value
+  # convert the result and Python environment to R
+  last_value <- pygradethis::py_to_r(last_value)
   envir_result <- pygradethis::get_py_envir(py_envir_result)
   # use `gradethis::gradethis_exercise_checker` with the custom solution(s) evaluator
   gradethis::gradethis_exercise_checker(
@@ -150,6 +157,8 @@ py_gradethis_exercise_checker <- function(
     evaluate_result = evaluate_result,
     envir_prep = envir_prep,
     last_value = last_value,
+    py_result = py_result,
+    py_envir_result = py_envir_result,
     ...
   )
 }
