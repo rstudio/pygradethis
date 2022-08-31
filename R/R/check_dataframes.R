@@ -2,42 +2,28 @@
 #'
 #' @param object The .result object.
 #' @param env The environment to look for the .result.
-#'
+#' @return A Python object
 #' @noRd
 #' @keywords internal
 get_python_result <- function(object = .result, env = parent.frame()) {
   if (inherits(object, ".result")) {
-    result <- get(".result", env)
-    if (!is_py_object(result)) {
-      return(get0(
-        ".py_result",
-        envir = env,
-        ifnotfound = result
-      ))
-    }
+    object <- get(".result", env)
   }
-  object
+  get0(".py_result", envir = env, ifnotfound = object)
 }
 
 #' Get the Python solution
 #'
-#' @param object The .solution object.
+#' @param expected The .solution object.
 #' @param env The environment to look for the .solution.
-#'
+#' @return A Python object
 #' @noRd
 #' @keywords internal
-get_python_solution <- function(object = .solution, env = parent.frame()) {
-  if (inherits(object, ".solution")) {
-    solution <- get(".solution", env)
-    if (!is_py_object(solution)) {
-      return(get0(
-        ".py_solution",
-        envir = env,
-        ifnotfound = solution
-      ))
-    }
+get_python_solution <- function(expected = .solution, env = parent.frame()) {
+  if (inherits(expected, ".solution")) {
+    expected <- get(".solution", env)
   }
-  object
+  get0(".py_solution", envir = env, ifnotfound = expected)
 }
 
 #' Get the index of a pandas.DataFrame/pandas.Series
@@ -149,7 +135,7 @@ py_grade_index <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
   # find problems with index
-  problem <- py_check_index(object, expected, env)
+  problem <- py_check_index(object, expected)
 
   if (!is_pygradethis_problem(problem)) {
     return(invisible())
@@ -218,7 +204,7 @@ py_grade_columns <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
   # find problems with column names
-  problem <- py_check_columns(object, expected, env)
+  problem <- py_check_columns(object, expected)
 
   if (!is_pygradethis_problem(problem)) {
     return(invisible())
@@ -285,7 +271,7 @@ py_grade_values <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
   # find problems with values
-  problem <- py_check_values(object, expected, env)
+  problem <- py_check_values(object, expected)
 
   if (!is_pygradethis_problem(problem)) {
     return(invisible())
@@ -361,7 +347,14 @@ py_grade_series <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
   # find problems with a Series
-  problem <- py_check_series(object, expected, env)
+  problem <- py_check_series(object, expected)
+
+  if (is_py_object(object)) {
+    object <- pygradethis::py_to_r(object)
+  }
+  if (is_py_object(expected)) {
+    expected <- pygradethis::py_to_r(expected)
+  }
 
   if (!is_pygradethis_problem(problem)) {
     return(invisible())
@@ -402,9 +395,9 @@ py_check_dataframe <- function(
     return(tblcheck::tbl_check(object, expected, env = env))
   }
 
-  return_if_problem(py_check_index(object, expected), env)
-  return_if_problem(py_check_columns(object, expected), env)
-  return_if_problem(py_check_values(object, expected), env)
+  return_if_problem(py_check_index(object, expected))
+  return_if_problem(py_check_columns(object, expected))
+  return_if_problem(py_check_values(object, expected))
 
   NULL
 }
@@ -430,6 +423,13 @@ py_grade_dataframe <- function(
 ) {
   object <- get_python_result(object, env)
   expected <- get_python_solution(expected, env)
+
+  if (is_py_object(object)) {
+    object <- pygradethis::py_to_r(object)
+  }
+  if (is_py_object(expected)) {
+    expected <- pygradethis::py_to_r(expected)
+  }
 
   # if result and solution are already converted use tblcheck
   use_tblcheck <- !is_py_object(object) && !is_py_object(expected)

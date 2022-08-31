@@ -94,6 +94,8 @@ py_to_r <- function(obj) {
         return(reticulate::py_to_r(obj))
       } else if (is_MultiIndex(obj)) {
         return(index_to_list(obj))
+      } else if (is_CategoricalIndex(obj)) {
+        return(index_to_list(obj))
       } else if (is_Index(obj) || is_RangeIndex(obj)) {
         return(index_to_list(obj))
       } else {
@@ -117,6 +119,10 @@ index_to_list <- function(obj) {
   # if MultiIndex don't unlist
   if (pygradethis:::is_MultiIndex(obj)) {
     return(reticulate::py$builtins$list(obj))
+  }
+  # if CategoricalIndex, need to unpack the categories first
+  if (pygradethis:::is_CategoricalIndex(obj)) {
+    return(reticulate::py$builtins$list(obj$categories))
   }
   # unpack values
   # <>Index -> np.array -> list(list())
@@ -145,6 +151,10 @@ py_to_tbl <- function(data) {
 # helper function that flattens a Python DataFrame ensuring that
 # the Index/MultiIndex is flattened and converted to columns
 flatten_py_dataframe <- function(data) {
+  # do not handle dataframes that have MultiIndex columns
+  if (is_MultiIndex(data$columns)) {
+    return(data)
+  }
   # flatten the row Index/MultiIndex as a result of a .groupby().agg()
   if (is_Index(data$index) || is_MultiIndex(data$index)) {
     # check if data should be grouped
@@ -172,7 +182,6 @@ flatten_py_dataframe <- function(data) {
   tbl
 }
 
-
 #' Convert variables within a Python module/environment.
 #'
 #' This takes in a Python dictionary representing the Python
@@ -192,6 +201,8 @@ get_py_envir <- function(envir) {
   })
 }
 
+# small helper function to determine if an object is a
+# Python object or not
 is_py_object <- function(obj) {
   tryCatch({
     reticulate::py_to_r(obj)

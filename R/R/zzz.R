@@ -39,7 +39,6 @@ get_last_value <- inform_python_pygradethis_not_found
       )
     })
   } else {
-    print(reticulate::py_available())
     inform_python_pygradethis_not_found(throw = message)
   }
 }

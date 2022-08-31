@@ -350,8 +350,9 @@ arrays = [
 ]
 tuples = list(zip(*arrays))
 index = pd.MultiIndex.from_tuples(tuples, names=["first", "second"])
-result = pd.DataFrame(np.random.randn(3, 8), index=["A", "B", "C"], columns=index)
-solution = pd.DataFrame(np.random.randn(3, 8), index=["A", "B", "C"])
+values = np.random.randn(3, 8)
+result = pd.DataFrame(values, index=["A", "B", "C"], columns=index)
+solution = pd.DataFrame(values, index=["A", "B", "C"])
 ')
     .result <- py_eval('result')
     .solution <- py_eval('solution')
@@ -394,6 +395,49 @@ test_that("py_grade_values() works", {
   testthat::expect_false(grade_values_incorrect$correct)
 })
 
+test_that("py_grade_dataframe() works on MultiIndex", {
+  grade_dataframe_correct <- callr::r_safe(function() {
+    library(reticulate)
+    reticulate::py_run_string('import pandas as pd; import numpy as np')
+    py_env <- reticulate::py_run_string('
+arrays = [
+  np.array(["bar", "bar", "baz", "baz", "foo", "foo", "qux", "qux"]),
+  np.array(["one", "two", "one", "two", "one", "two", "one", "two"]),
+]
+tuples = list(zip(*arrays))
+index = pd.MultiIndex.from_tuples(tuples, names=["first", "second"])
+values = np.random.randn(3, 8)
+result = pd.DataFrame(values, index=["A", "B", "C"], columns=index)
+solution = pd.DataFrame(values, index=["A", "B", "C"], columns=index)
+')
+    .result <- py_eval('result')
+    .solution <- py_eval('solution')
+    pygradethis::py_grade_dataframe(.result, .solution)
+  })
+  testthat::expect_null(grade_dataframe_correct)
+
+  # this should've been yield a fail message.
+  grade_dataframe_incorrect <- callr::r_safe(function() {
+    library(reticulate)
+    reticulate::py_run_string('import pandas as pd; import numpy as np')
+    py_env <- reticulate::py_run_string('
+arrays = [
+  np.array(["bar", "bar", "baz", "baz", "foo", "foo", "qux", "qux"]),
+  np.array(["one", "two", "one", "two", "one", "two", "one", "two"]),
+]
+tuples = list(zip(*arrays))
+index = pd.MultiIndex.from_tuples(tuples, names=["first", "second"])
+values = np.random.randn(3, 8)
+result = pd.DataFrame(values, index=["A", "B", "C"], columns=index)
+solution = pd.DataFrame(values, index=["A", "B", "C"])
+')
+    .result <- py_eval('result')
+    .solution <- py_eval('solution')
+    pygradethis::py_grade_dataframe(.result, .solution)
+  })
+  testthat::expect_null(grade_dataframe_incorrect)
+})
+
 test_that("py_grade_dataframe() works", {
   grade_dataframe_correct <- callr::r_safe(function() {
     library(reticulate)
@@ -426,7 +470,6 @@ test_that("py_grade_dataframe() works", {
   testthat::expect_true(inherits(grade_dataframe_incorrect, "gradethis_graded"))
   testthat::expect_false(grade_dataframe_incorrect$correct)
 })
-
 
 test_that("py_grade_series() works", {
   grade_series_correct <- callr::r_safe(function() {
