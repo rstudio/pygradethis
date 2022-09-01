@@ -22,3 +22,5 @@ test_that("Basic exercise checking flow works", {
   expect_failure(expect_null(feedback))
   expect_s3_class(feedback, c("list", "gradethis_graded"))
 })
+
+# TODO add tests for the `py_gradethis_exercise_checker`

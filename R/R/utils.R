@@ -1,3 +1,4 @@
+# Mocking functions ----
 
 #' A helper function to mock a Python exercise in learnr.
 #'
@@ -8,7 +9,7 @@
 #'   exercise.
 #' @param check Code provided within the "-check" chunk for the exercise.
 #' @param ... Extra grading arguments
-#' 
+#'
 #' @return The mocked exercise
 mock_py_exercise <- function(user_code, solution_code, check, ...) {
   # TODO: this currently will not work for the tblcheck grading of Python dataframes.
@@ -17,13 +18,14 @@ mock_py_exercise <- function(user_code, solution_code, check, ...) {
     solution_code = solution_code,
     engine = "python",
     check = check,
+    # NOTE: we might want to make this a parameter as well to swap gradethis shim for testing
     exercise.checker = learnr:::dput_to_string(pygradethis::exercise_checker),
     ...
   )
 }
 
 #' A helper function to test evaluation of a mocked Python exercise through learnr
-#' 
+#'
 #' This is an internal function used for testing purposes.
 #'
 #' @param ex A mocked Python exercise
@@ -37,30 +39,94 @@ evaluate_exercise_feedback <- function(ex, envir = NULL, evaluate_global_setup =
   res$feedback
 }
 
-# helper function that flattens a Python DataFrame ensuring that
-# the Index/MultiIndex is flattened and converted to columns
-flatten_py_dataframe <- function(data) {
-  # flatten the row Index
-  data <- data$reset_index()
-  # convert to tible
-  tbl <- tryCatch(
-    tibble::as_tibble(data),
-    error = function(e) {
-      # if conversion to tibble fails, first convert to R data.frame
-      tibble::as_tibble(reticulate::py_to_r(data))
+# Type checking helpers ----
+
+is_DataFrame <- function(obj) {
+  identical(get_friendly_class(obj), 'DataFrame')
+}
+
+is_Series <- function(obj) {
+  identical(get_friendly_class(obj), 'Series')
+}
+
+is_Index <- function(obj) {
+  identical(get_friendly_class(obj), 'Index')
+}
+
+is_RangeIndex <- function(obj) {
+  identical(get_friendly_class(obj), 'RangeIndex')
+}
+
+is_CategoricalIndex <- function(obj) {
+  identical(get_friendly_class(obj), 'CategoricalIndex')
+}
+
+is_MultiIndex <- function(obj) {
+  identical(get_friendly_class(obj), 'MultiIndex')
+}
+
+is_numpy_array <- function(obj) {
+  identical(get_friendly_class(obj), 'array')
+}
+
+get_friendly_class <- function(obj) {
+  reticulate::py$builtins$type(obj)$`__name__`
+}
+
+# Python to R translation helpers ----
+
+#' Wrapper of reticulate::py_to_r to convert objects from Python to R.
+#'
+#' `py_to_r` will attempt to reasonably convert objects that `reticulate::py_to_r` either can't
+#' or when it produces a messy object (e.g. DataFrames with a MultiIndex)
+#'
+#' @param obj A Python object.
+#'
+#' @return An R object, or Python object if we can't py_to_r
+#' @export
+py_to_r <- function(obj) {
+  return(
+    tryCatch({
+      if (is_DataFrame(obj)) {
+        # for a DataFrame try to convert to a tibble for tblcheck grading
+        return(py_to_tbl(obj))
+      } else if (is_Series(obj)) {
+        return(reticulate::py_to_r(obj))
+      } else if (is_MultiIndex(obj)) {
+        return(index_to_list(obj))
+      } else if (is_CategoricalIndex(obj)) {
+        return(index_to_list(obj))
+      } else if (is_Index(obj) || is_RangeIndex(obj)) {
+        return(index_to_list(obj))
+      } else {
+        return(reticulate::py_to_r(obj))
+      }
+    }, error = function(e) {
+      # if anything fails above, just return the Python object
+      obj
     }
+    )
   )
-  # for a regular DataFrame we will end up with an "index" column
-  # so we remove that
-  if ("index" %in% names(tbl)) {
-    tbl <- dplyr::select(tbl, -index)
+}
+
+#' Helper funtion to unpack an Index and return the values
+#'
+#' @param obj A type of Index
+#'
+#' @return A list()
+#' @examples
+index_to_list <- function(obj) {
+  # if MultiIndex don't unlist
+  if (pygradethis:::is_MultiIndex(obj)) {
+    return(reticulate::py$builtins$list(obj))
   }
-  # set the base class
-  class(tbl) <- append("py_tbl_df", class(tbl))
-  # NOTE: "pandas.index" will have a pointer address that will be unique so
-  # comparing identical tibbles won't work unless this is stripped off
-  attr(tbl, "pandas.index") <- NULL
-  tbl
+  # if CategoricalIndex, need to unpack the categories first
+  if (pygradethis:::is_CategoricalIndex(obj)) {
+    return(reticulate::py$builtins$list(obj$categories))
+  }
+  # unpack values
+  # <>Index -> np.array -> list(list())
+  unlist(reticulate::py$builtins$list(obj$values))
 }
 
 #' Converts a Python pandas.DataFrame into an R tibble
@@ -70,29 +136,78 @@ flatten_py_dataframe <- function(data) {
 #' @return A tibble
 #' @export
 py_to_tbl <- function(data) {
-  if (!any(class(data) %in% "pandas.core.frame.DataFrame")) {
+  if (!is_DataFrame(data)) {
     # assign Python type to the object's class
     obj_class <- reticulate::py$builtins$type(data)$`__name__`
     data <- reticulate::py_to_r(data)
     class(data) <- obj_class
     return(data)
   }
-  reticulate::py_run_string("import builtins")
-  # check if data should be grouped
-  index_names <- reticulate::py$builtins$list(data$index$names)
-  has_groups <- all(vapply(index_names, Negate(is.null), logical(1)))
+  reticulate::py_run_string("import builtins", convert = FALSE)
   # flatten Index/MultiIndex
-  tbl <- flatten_py_dataframe(data)
-  # construct a tibble that has groups if needed
-  if (has_groups) {
-    # NOTE: the index names is a FrozenList so we have to cast it with list()
-    # flatten MultiIndex into regular columns
-    group_vars <- reticulate::py$builtins$list(data$index$names)
-    if (length(group_vars) > 0) {
-      tbl <- dplyr::group_by(tbl, dplyr::across(group_vars))
-    }
-    class(tbl) <- append(c("py_grouped_df", "py_tbl_df"), class(tbl))
-    return(tbl)
+  flatten_py_dataframe(data)
+}
+
+# helper function that flattens a Python DataFrame ensuring that
+# the Index/MultiIndex is flattened and converted to columns
+flatten_py_dataframe <- function(data) {
+  # do not handle dataframes that have MultiIndex columns
+  if (is_MultiIndex(data$columns)) {
+    return(data)
   }
+  # flatten the row Index/MultiIndex as a result of a .groupby().agg()
+  if (is_Index(data$index) || is_MultiIndex(data$index)) {
+    # check if data should be grouped
+    group_vars <- reticulate::py$builtins$list(data$index$names)
+    has_groups <- all(vapply(group_vars, Negate(is.null), logical(1)))
+    if (has_groups) {
+      data <- data$reset_index()
+      # convert to tibble
+      tbl <- tibble::as_tibble(reticulate::py_to_r(data))
+      tbl <- dplyr::group_by(tbl, dplyr::across(group_vars))
+      class(tbl) <- append(c("py_grouped_df", "py_tbl_df"), class(tbl))
+      attr(tbl, "pandas.index") <- NULL
+      return(tbl)
+    }
+  }
+  # otherwise just drop Index
+  data <- data$reset_index(drop = TRUE)
+  # convert to tibble
+  tbl <- tibble::as_tibble(reticulate::py_to_r(data))
+  # set the base class
+  class(tbl) <- append("py_tbl_df", class(tbl))
+  # NOTE: "pandas.index" will have a pointer address that will be unique so
+  # comparing identical tibbles won't work unless this is stripped off
+  attr(tbl, "pandas.index") <- NULL
   tbl
+}
+
+#' Convert variables within a Python module/environment.
+#'
+#' This takes in a Python dictionary representing the Python
+#' environment, converts each object (if possible) and returns
+#' a named list of R objects.
+#'
+#' @param envir A Python dictionary.
+#'
+#' @return A named list
+#' @export
+get_py_envir <- function(envir) {
+  if (is.null(envir)) {
+    return(envir)
+  }
+  Map(names(envir), f = function(obj_name) {
+    pygradethis::py_to_r(envir[obj_name])
+  })
+}
+
+# small helper function to determine if an object is a
+# Python object or not
+is_py_object <- function(obj) {
+  tryCatch({
+    reticulate::py_to_r(obj)
+    TRUE
+  }, error = function(e) {
+    FALSE
+  })
 }

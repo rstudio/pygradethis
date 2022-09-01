@@ -23,6 +23,8 @@ LazyData: true
 Imports:
   reticulate,
   learnr,
+  gradethis (>= 0.2.9.9000),
+  dplyr,
   tibble
 Config/reticulate:
   list(
