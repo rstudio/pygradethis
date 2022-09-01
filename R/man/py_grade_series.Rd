@@ -26,6 +26,11 @@ a `gradethis::fail` if they don't.
 reticulate::py_run_string('import pandas as pd; import numpy as np')
 .result = reticulate::py_eval("pd.Series(data=[1, 2])", F)
 .solution = reticulate::py_eval("pd.Series(data=[1, 2, 3])", F)
-py_grade_series() # a gradethis::fail()
+py_grade_series()
+
+# <gradethis_graded: [Incorrect]
+# The Series do not match the expected Series. Your result should
+# contain 3 values, but it has 2 values. I expected your result to
+# include the value `3`.
 }
 }

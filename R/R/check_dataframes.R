@@ -36,7 +36,9 @@ get_python_solution <- function(expected = .solution, env = parent.frame()) {
 #' \dontrun{
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' py_get_index(.result) # RangeIndex(start=0, stop=3, step=1)
+#' py_get_index(.result) 
+#'
+#' # RangeIndex(start=0, stop=3, step=1)
 #' }
 py_get_index <- function(data) {
   data$index
@@ -52,7 +54,9 @@ py_get_index <- function(data) {
 #' \dontrun{
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' py_get_columns(.result) # Index(['a'], dtype='object')
+#' py_get_columns(.result)
+#'
+#' # Index(['a'], dtype='object')
 #' }
 py_get_columns <- function(data) {
   data$columns
@@ -69,6 +73,7 @@ py_get_columns <- function(data) {
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
 #' py_get_values(.result)
+#'
 #' #      [,1]
 #' # [1,]    1
 #' # [2,]    2
@@ -93,7 +98,22 @@ py_get_values <- function(data) {
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2]})")
 #' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' py_check_index() # FALSE
+#' py_check_index()
+#'
+#' # $type
+#' # [1] "wrong_index"
+#' #
+#' # $expected
+#' # [1] 0 1 2
+#' #
+#' # $actual
+#' # [1] 0 1
+#' #
+#' # $message
+#' # [1] "The index does not match the expected."
+#' #
+#' # attr(,"class")
+#' # [1] "wrong_index_problem" "pygradethis_problem" "gradethis_problem"
 #' }
 py_check_index <- function(
   object = .result, expected = .solution, env = parent.frame()
@@ -127,9 +147,14 @@ py_check_index <- function(
 #' @examples
 #' \dontrun{
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
-#' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2]})")
-#' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' py_grade_index() # a gradethis::fail()
+#' .result <- reticulate::py_eval("pd.DataFrame({'a':[1, 2]})")
+#' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1, 2, 3]})")
+#' py_grade_index()
+#'
+#' # <gradethis_graded: [Incorrect]
+#' # The index does not match the expected. Your result should contain 3
+#' # values, but it has 2 values. I expected your result to include the
+#' # value `2`.
 #' }
 py_grade_index <- function(
   object = .result, expected = .solution, env = parent.frame()
@@ -160,7 +185,22 @@ py_grade_index <- function(
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
 #' .solution <- reticulate::py_eval("pd.DataFrame({'b':[1,2,3]})")
-#' py_check_columns() # FALSE
+#' py_check_columns()
+#'
+#' # $type
+#' # [1] "wrong_columns"
+#' #
+#' # $expected
+#' # [1] "b"
+#' #
+#' # $actual
+#' # [1] "a"
+#' #
+#' # $message
+#' # [1] "The column names do not match the expected columns."
+#' #
+#' # attr(,"class")
+#' # [1] "wrong_columns_problem" "pygradethis_problem"   "gradethis_problem"
 #' }
 py_check_columns <- function(
   object = .result, expected = .solution, env = parent.frame()
@@ -198,8 +238,12 @@ py_check_columns <- function(
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
 #' .solution <- reticulate::py_eval("pd.DataFrame({'b':[1,2,3]})")
-#' py_grade_columns() # a gradethis::fail()
-#' }
+#' py_grade_columns()
+#'
+#' # <gradethis_graded: [Incorrect]
+#' # The column names do not match the expected columns. The first value
+#' # of your result should be `b`, not `a`.
+#' # }
 py_grade_columns <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
@@ -229,7 +273,28 @@ py_grade_columns <- function(
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,99]})")
 #' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' py_check_values() # FALSE
+#' py_check_values()
+#'
+#' # $type
+#' # [1] "wrong_values"
+#' #
+#' # $expected
+#' #      [,1]
+#' # [1,]    1
+#' # [2,]    2
+#' # [3,]    3
+#' #
+#' # $actual
+#' #      [,1]
+#' # [1,]    1
+#' # [2,]    2
+#' # [3,]   99
+#' #
+#' # $message
+#' # [1] "The DataFrame values do not match the expected values."
+#' #
+#' # attr(,"class")
+#' # [1] "wrong_values_problem" "pygradethis_problem"  "gradethis_problem"
 #' }
 py_check_values <- function(
   object = .result, expected = .solution, env = parent.frame()
@@ -265,7 +330,12 @@ py_check_values <- function(
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,99]})")
 #' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' py_grade_values() # a gradethis::fail()
+#' py_grade_values()
+#'
+#' # <gradethis_graded: [Incorrect]
+#' # The DataFrame values do not match the expected values. The first 3
+#' # values of your result should be `1`, `2`, and `3`, not `1`, `2`, and
+#' # `99`.
 #' }
 py_grade_values <- function(
   object = .result, expected = .solution, env = parent.frame()
@@ -296,12 +366,46 @@ py_grade_values <- function(
 #' # Plain Series
 #' .result = reticulate::py_eval("pd.Series(data=[1, 2])", F)
 #' .solution = reticulate::py_eval("pd.Series(data=[1, 2, 3])", F)
-#' py_check_series() # FALSE
+#' py_check_series()
+#'
+#' # $type
+#' # [1] "wrong_series"
+#' #
+#' # $expected
+#' # 0 1 2
+#' # 1 2 3
+#' #
+#' # $actual
+#' # 0 1
+#' # 1 2
+#' #
+#' # $message
+#' # [1] "The Series do not match the expected Series."
+#' #
+#' # attr(,"class")
+#' # [1] "wrong_series_problem" "pygradethis_problem"  "gradethis_problem" 
 #'
 #' # Series w/ Index
 #' .result = reticulate::py_eval("pd.Series(data={'a': 1, 'b': 2, 'd': 3})", F)
 #' .solution =  reticulate::py_eval("pd.Series(data={'a': 1, 'b': 2, 'c': 3})", F)
-#' py_check_series() # FALSE
+#' py_check_series()
+#'
+#' # $type
+#' # [1] "wrong_series"
+#' #
+#' # $expected
+#' # a b c
+#' # 1 2 3
+#' #
+#' # $actual
+#' # a b d
+#' # 1 2 3
+#' #
+#' # $message
+#' # [1] "The Series do not match the expected Series."
+#' #
+#' # attr(,"class")
+#' # [1] "wrong_series_problem" "pygradethis_problem"  "gradethis_problem" 
 #' }
 py_check_series <- function(
   object = .result, expected = .solution, env = parent.frame()
@@ -341,20 +445,18 @@ py_check_series <- function(
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result = reticulate::py_eval("pd.Series(data=[1, 2])", F)
 #' .solution = reticulate::py_eval("pd.Series(data=[1, 2, 3])", F)
-#' py_grade_series() # a gradethis::fail()
+#' py_grade_series()
+#'
+#' # <gradethis_graded: [Incorrect]
+#' # The Series do not match the expected Series. Your result should
+#' # contain 3 values, but it has 2 values. I expected your result to
+#' # include the value `3`.
 #' }
 py_grade_series <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
   # find problems with a Series
   problem <- py_check_series(object, expected)
-
-  if (is_py_object(object)) {
-    object <- pygradethis::py_to_r(object)
-  }
-  if (is_py_object(expected)) {
-    expected <- pygradethis::py_to_r(expected)
-  }
 
   if (!is_pygradethis_problem(problem)) {
     return(invisible())
@@ -416,29 +518,22 @@ py_check_dataframe <- function(
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,99]})")
 #' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' py_grade_dataframe() # a gradethis::fail()
+#' py_grade_dataframe()
+#'
+#' # <gradethis_graded: [Incorrect]
+#' # The DataFrame values do not match the expected values. The first 3
+#' # values of your result should be `1`, `2`, and `3`, not `1`, `2`, and
+#' # `99`.
 #' }
 py_grade_dataframe <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
-  object <- get_python_result(object, env)
-  expected <- get_python_solution(expected, env)
+  # check for any dataframe problems
+  problem <- py_check_dataframe(object, expected)
 
-  if (is_py_object(object)) {
-    object <- pygradethis::py_to_r(object)
-  }
-  if (is_py_object(expected)) {
-    expected <- pygradethis::py_to_r(expected)
+  if (!is_pygradethis_problem(problem) && !tblcheck::is_tblcheck_problem(problem)) {
+    return(invisible())
   }
 
-  # if result and solution are already converted use tblcheck
-  use_tblcheck <- !is_py_object(object) && !is_py_object(expected)
-  if (use_tblcheck) {
-    return(tblcheck::tbl_grade(object, expected, env = env))
-  }
-
-  # otherwise, grade using the raw Python result and solution
-  py_grade_index(object, expected)
-  py_grade_columns(object, expected)
-  py_grade_values(object, expected)
+  tblcheck::problem_grade(problem)
 }

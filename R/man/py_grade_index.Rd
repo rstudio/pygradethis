@@ -24,8 +24,13 @@ and return a `gradethis::fail` if they don't.
 \examples{
 \dontrun{
 reticulate::py_run_string('import pandas as pd; import numpy as np')
-.result <- reticulate::py_eval("pd.DataFrame({'a':[1,2]})")
-.solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-py_grade_index() # a gradethis::fail()
+.result <- reticulate::py_eval("pd.DataFrame({'a':[1, 2]})")
+.solution <- reticulate::py_eval("pd.DataFrame({'a':[1, 2, 3]})")
+py_grade_index()
+
+# <gradethis_graded: [Incorrect]
+# The index does not match the expected. Your result should contain 3
+# values, but it has 2 values. I expected your result to include the
+# value `2`.
 }
 }

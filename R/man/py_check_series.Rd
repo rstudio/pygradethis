@@ -25,11 +25,45 @@ reticulate::py_run_string('import pandas as pd; import numpy as np')
 # Plain Series
 .result = reticulate::py_eval("pd.Series(data=[1, 2])", F)
 .solution = reticulate::py_eval("pd.Series(data=[1, 2, 3])", F)
-py_check_series() # FALSE
+py_check_series()
+
+# $type
+# [1] "wrong_series"
+#
+# $expected
+# 0 1 2
+# 1 2 3
+#
+# $actual
+# 0 1
+# 1 2
+#
+# $message
+# [1] "The Series do not match the expected Series."
+#
+# attr(,"class")
+# [1] "wrong_series_problem" "pygradethis_problem"  "gradethis_problem" 
 
 # Series w/ Index
 .result = reticulate::py_eval("pd.Series(data={'a': 1, 'b': 2, 'd': 3})", F)
 .solution =  reticulate::py_eval("pd.Series(data={'a': 1, 'b': 2, 'c': 3})", F)
-py_check_series() # FALSE
+py_check_series()
+
+# $type
+# [1] "wrong_series"
+#
+# $expected
+# a b c
+# 1 2 3
+#
+# $actual
+# a b d
+# 1 2 3
+#
+# $message
+# [1] "The Series do not match the expected Series."
+#
+# attr(,"class")
+# [1] "wrong_series_problem" "pygradethis_problem"  "gradethis_problem" 
 }
 }

@@ -25,6 +25,21 @@ and checks that they are identical.
 reticulate::py_run_string('import pandas as pd; import numpy as np')
 .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
 .solution <- reticulate::py_eval("pd.DataFrame({'b':[1,2,3]})")
-py_check_columns() # FALSE
+py_check_columns()
+
+# $type
+# [1] "wrong_columns"
+#
+# $expected
+# [1] "b"
+#
+# $actual
+# [1] "a"
+#
+# $message
+# [1] "The column names do not match the expected columns."
+#
+# attr(,"class")
+# [1] "wrong_columns_problem" "pygradethis_problem"   "gradethis_problem"
 }
 }

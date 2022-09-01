@@ -24,6 +24,21 @@ Extracts the values out of the Index to do the check.
 reticulate::py_run_string('import pandas as pd; import numpy as np')
 .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2]})")
 .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-py_check_index() # FALSE
+py_check_index()
+
+# $type
+# [1] "wrong_index"
+#
+# $expected
+# [1] 0 1 2
+#
+# $actual
+# [1] 0 1
+#
+# $message
+# [1] "The index does not match the expected."
+#
+# attr(,"class")
+# [1] "wrong_index_problem" "pygradethis_problem" "gradethis_problem"
 }
 }

@@ -66,19 +66,20 @@ problem_message.wrong_index_problem <- function(problem, ...) {
 #' @export
 problem_message.wrong_columns_problem <- function(problem, ...) {
   # check if we have a difference of types
-  actual_type <- get_friendly_class(problem$actual)
-  class(problem$actual) <- actual_type
-  expected_type <- get_friendly_class(problem$expected)
-  class(problem$expected) <- expected_type
+  class(problem$actual) <- get_friendly_class(problem$actual)
+  class(problem$expected) <- get_friendly_class(problem$expected)
 
-  # grade the types
-  tblcheck::tbl_grade_class(problem$actual, problem$expected)
+  # if there's a class problem return feedback for that
+  class_problem <- tblcheck::tbl_check_class(problem$actual, problem$expected, env = env)
+  if (tblcheck::is_tblcheck_problem(class_problem)) {
+    return(
+      glue::glue("{problem$message} {tblcheck::problem_message(class_problem)}")
+    )
+  }
 
-  # otherwise, just compare the values
-  extra <- tblcheck::tblcheck_message(
-    tblcheck::vec_check(problem$actual, problem$expected, env = env)
-  )
-  glue::glue("{problem$message} {extra}")
+  # otherwise, just provide the incorrect values feedback
+  values_problem <- tblcheck::vec_check(problem$actual, problem$expected, env = env)
+  glue::glue("{problem$message} {tblcheck::problem_message(values_problem)}")
 }
 
 #' @export

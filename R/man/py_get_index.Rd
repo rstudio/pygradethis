@@ -19,6 +19,8 @@ Get the index of a pandas.DataFrame/pandas.Series
 \dontrun{
 reticulate::py_run_string('import pandas as pd; import numpy as np')
 .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-py_get_index(.result) # RangeIndex(start=0, stop=3, step=1)
+py_get_index(.result) 
+
+# RangeIndex(start=0, stop=3, step=1)
 }
 }

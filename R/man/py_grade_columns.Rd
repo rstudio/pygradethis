@@ -26,6 +26,10 @@ a `gradethis::fail` if they don't.
 reticulate::py_run_string('import pandas as pd; import numpy as np')
 .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
 .solution <- reticulate::py_eval("pd.DataFrame({'b':[1,2,3]})")
-py_grade_columns() # a gradethis::fail()
-}
+py_grade_columns()
+
+# <gradethis_graded: [Incorrect]
+# The column names do not match the expected columns. The first value
+# of your result should be `b`, not `a`.
+# }
 }
