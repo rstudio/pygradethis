@@ -528,6 +528,9 @@ py_check_dataframe <- function(
 py_grade_dataframe <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
+
   # check for any dataframe problems
   problem <- py_check_dataframe(object, expected)
 

@@ -33,6 +33,40 @@ is_pygradethis_problem <- function(x, type = NULL) {
   (is.null(type) || inherits(x, paste0(type, "_problem")))
 }
 
+catch_internal_problem <- function(expr, ...) {
+  tryCatch(expr, ..., error = function(err) {
+    message("An error occurred in the grading code: ", err$message)
+    pygradethis::problem("pygradethis_internal", error = unclass(err))
+  })
+}
+
+return_if_internal_problem <- function(expr, ..., env = parent.frame()) {
+  prob <- catch_internal_problem(expr, ...)
+  return_if_problem(prob, env = env)
+}
+
+#' @export
+problem_grade.pygradethis_internal_problem <- function(
+  problem, max_diffs = 3, env = parent.frame(), ...
+) {
+  # move error up to top-level of grade
+  error <- problem$error
+  problem$error <- NULL
+
+  gradethis::graded(
+    message = paste(
+      "Uh-oh! We can't provide feedback at this time. Don't worry, it's not",
+      "your fault! There's an issue behind-the-scenes with this exercise."
+    ),
+    correct = logical(0),
+    type = "warning",
+    location = "replace",
+    problem = problem,
+    error = error
+  )
+}
+
+
 #' Helper function to return early from `py_check_*` functions
 #'
 #' This is especially useful when returning from checking functions that
