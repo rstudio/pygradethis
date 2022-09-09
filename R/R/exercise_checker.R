@@ -126,14 +126,22 @@ py_gradethis_exercise_checker <- function(
   withr::local_options(list(
     gradethis.exercise_checker.solution_eval_fn = list(
       python = function(code, envir) {
-        pygradethis:::return_if_internal_problem({
-          envir_prep_py <- get0(".__py__", envir = envir, ifnotfound = NULL)
-          solution_code <- paste0(as.character(solution_code), collapse = "\n")
-          solution <- pygradethis::get_last_value(solution_code, envir_prep_py)
-          # keep around raw Python solution object in case it's needed
-          assign(".py_solution", solution, envir = envir)
-          pygradethis::py_to_r(solution)
-        })
+        # run solution code to return final object, while checking for 
+        # problems with the code
+        py_solution <-
+          pygradethis:::catch_internal_problem({
+            envir_prep_py <- get0(".__py__", envir = envir, ifnotfound = NULL)
+            solution_code <- paste0(as.character(solution_code), collapse = "\n")
+            pygradethis::get_last_value(solution_code, envir_prep_py)
+          })
+        # if there are problems, it's an internal pygradethis problem and
+        # we return early with the appropriate message
+        if (pygradethis:::is_pygradethis_problem(py_solution)) {
+          return(tblcheck::problem_grade(py_solution))
+        }
+        # keep around raw Python solution object in case it's needed
+        assign(".py_solution", py_solution, envir = envir)
+        pygradethis::py_to_r(py_solution)
       }
     )
   ))

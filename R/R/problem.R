@@ -36,7 +36,7 @@ is_pygradethis_problem <- function(x, type = NULL) {
 catch_internal_problem <- function(expr, ...) {
   tryCatch(expr, ..., error = function(err) {
     message("An error occurred in the grading code: ", err$message)
-    pygradethis::problem("pygradethis_internal", error = unclass(err))
+    pygradethis::problem("pygradethis_internal", error = err$message)
   })
 }
 
@@ -65,7 +65,6 @@ problem_grade.pygradethis_internal_problem <- function(
     error = error
   )
 }
-
 
 #' Helper function to return early from `py_check_*` functions
 #'
