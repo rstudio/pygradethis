@@ -159,6 +159,9 @@ py_check_index <- function(
 py_grade_index <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
+
   # find problems with index
   problem <- py_check_index(object, expected)
 
@@ -247,6 +250,9 @@ py_check_columns <- function(
 py_grade_columns <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
+
   # find problems with column names
   problem <- py_check_columns(object, expected)
 
@@ -340,6 +346,9 @@ py_check_values <- function(
 py_grade_values <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
+
   # find problems with values
   problem <- py_check_values(object, expected)
 
