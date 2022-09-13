@@ -32,7 +32,7 @@ Config/reticulate:
       list(package = "pygradethis")
     )
   )
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 URL: https://rstudio.github.io/learnr/
 Suggests: 
     testthat (>= 3.0.0)

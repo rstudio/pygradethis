@@ -455,6 +455,9 @@ py_check_series <- function(
 py_grade_series <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
+
   # find problems with a Series
   problem <- py_check_series(object, expected)
 
