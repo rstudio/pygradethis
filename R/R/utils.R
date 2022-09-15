@@ -174,7 +174,6 @@ py_to_r <- function(obj) {
 #' @param obj A type of Index
 #'
 #' @return A list()
-#' @examples
 index_to_list <- function(obj) {
   # if MultiIndex don't unlist
   if (pygradethis:::is_MultiIndex(obj)) {
