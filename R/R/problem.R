@@ -33,6 +33,22 @@ is_pygradethis_problem <- function(x, type = NULL) {
   (is.null(type) || inherits(x, paste0(type, "_problem")))
 }
 
+#' Helper function to return early from `py_check_*` functions
+#'
+#' This is especially useful when returning from checking functions that
+#' combine multiple checks
+#'
+#' @param problem A `pygradethis_problem` object.
+#' @param env The environment from which to return.
+#'
+#' @keywords internal
+return_if_problem <- function(problem, env = parent.frame()) {
+  if (is_pygradethis_problem(problem)) {
+    rlang::return_from(env, problem)
+  }
+  NULL
+}
+
 catch_internal_problem <- function(expr, ...) {
   tryCatch(expr, ..., error = function(err) {
     message("An error occurred in the grading code: ", err$message)
@@ -64,23 +80,6 @@ problem_grade.pygradethis_internal_problem <- function(
     problem = problem,
     error = error
   )
-}
-
-#' Helper function to return early from `py_check_*` functions
-#'
-#' This is especially useful when returning from checking functions that
-#' combine multiple checks
-#'
-#' @param problem A `pygradethis_problem` object.
-#' @param env The environment from which to return.
-#'
-#' @keywords internal
-#' @noRd
-return_if_problem <- function(problem, env = parent.frame()) {
-  if (is_pygradethis_problem(problem)) {
-    rlang::return_from(env, problem)
-  }
-  NULL
 }
 
 #' @export

@@ -41,34 +41,94 @@ evaluate_exercise_feedback <- function(ex, envir = NULL, evaluate_global_setup =
 
 # Type checking helpers ----
 
+#' Checks if the Python object is a pandas.DataFrame
+#'
+#' @param obj Python object.
+#'
+#' @return TRUE if so, FALSE otherwise
+#' @export
 is_DataFrame <- function(obj) {
   identical(get_friendly_class(obj), 'DataFrame')
 }
 
+#' Checks if the Python object is a pandas.Series
+#'
+#' @param obj Python object.
+#'
+#' @return TRUE if so, FALSE otherwise
+#' @export
 is_Series <- function(obj) {
   identical(get_friendly_class(obj), 'Series')
 }
 
+#' Checks if the Python object is a pandas.Index
+#'
+#' @param obj Python object.
+#'
+#' @return TRUE if so, FALSE otherwise
+#' @export
 is_Index <- function(obj) {
   identical(get_friendly_class(obj), 'Index')
 }
 
+#' Checks if the Python object is a function
+#'
+#' @param obj Python object.
+#'
+#' @return TRUE if so, FALSE otherwise
+#' @export
 is_RangeIndex <- function(obj) {
   identical(get_friendly_class(obj), 'RangeIndex')
 }
 
+#' Checks if the Python object is a pandas.CategoricalIndex
+#'
+#' @param obj Python object.
+#'
+#' @return TRUE if so, FALSE otherwise
+#' @export
 is_CategoricalIndex <- function(obj) {
   identical(get_friendly_class(obj), 'CategoricalIndex')
 }
 
+#' Checks if the Python object is a function
+#'
+#' @param obj Python object.
+#'
+#' @return TRUE if so, FALSE otherwise
+#' @export
 is_MultiIndex <- function(obj) {
   identical(get_friendly_class(obj), 'MultiIndex')
 }
 
+#' Checks if the Python object is a numpy.array
+#'
+#' @param obj Python object.
+#'
+#' @return TRUE if so, FALSE otherwise
+#' @export
 is_numpy_array <- function(obj) {
   identical(get_friendly_class(obj), 'array')
 }
 
+
+#' Checks if the Python object is a function
+#'
+#' @param obj Python object.
+#'
+#' @return TRUE if so, FALSE otherwise
+#' @export
+is_function <- function(obj) {
+  identical(get_friendly_class(obj), 'function')
+}
+
+#' Get a friendly single string representation of a Python
+#' object's class
+#'
+#' @param obj Python object.
+#'
+#' @return character
+#' @export
 get_friendly_class <- function(obj) {
   reticulate::py$builtins$type(obj)$`__name__`
 }

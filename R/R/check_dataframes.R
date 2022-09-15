@@ -3,7 +3,6 @@
 #' @param object The .result object.
 #' @param env The environment to look for the .result.
 #' @return A Python object
-#' @noRd
 #' @keywords internal
 get_python_result <- function(object = .result, env = parent.frame()) {
   if (inherits(object, ".result")) {
@@ -17,7 +16,6 @@ get_python_result <- function(object = .result, env = parent.frame()) {
 #' @param expected The .solution object.
 #' @param env The environment to look for the .solution.
 #' @return A Python object
-#' @noRd
 #' @keywords internal
 get_python_solution <- function(expected = .solution, env = parent.frame()) {
   if (inherits(expected, ".solution")) {
@@ -159,6 +157,9 @@ py_check_index <- function(
 py_grade_index <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
+
   # find problems with index
   problem <- py_check_index(object, expected)
 
@@ -247,6 +248,9 @@ py_check_columns <- function(
 py_grade_columns <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
+
   # find problems with column names
   problem <- py_check_columns(object, expected)
 
@@ -340,6 +344,9 @@ py_check_values <- function(
 py_grade_values <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
+
   # find problems with values
   problem <- py_check_values(object, expected)
 
@@ -455,6 +462,9 @@ py_check_series <- function(
 py_grade_series <- function(
   object = .result, expected = .solution, env = parent.frame()
 ) {
+  object <- get_python_result(object, env)
+  expected <- get_python_solution(expected, env)
+
   # find problems with a Series
   problem <- py_check_series(object, expected)
 
