@@ -44,15 +44,15 @@ def parse_code(input: Union[str, List[str]]) -> str:
         else:
             raise SyntaxError("Problem parsing your code!")
 
-def get_last_value(script: str, globals: dict = globals()) -> Any:
+def get_last_value(script: str, envir: dict) -> Any:
     """Evaluate Python code and return the value of the last line of code.
 
     Parameters
     ----------
     script : str
         A string of Python code
-    globals : dict, optional
-        A dictionary for the environment in which to evaluate code, by default globals()
+    envir : dict
+        A dictionary for the environment in which to evaluate code
 
     Returns
     -------
@@ -70,9 +70,9 @@ def get_last_value(script: str, globals: dict = globals()) -> Any:
     # iteratively walk through AST and execute statements and expressions while storing the last value
     last_value = None
     for s in stmts:
-        if isinstance(s, ast.Expr):
-            last_value = eval(compile(ast.Expression(body=s.value), filename="<ast>", mode="eval"), globals)
-        else:
-            exec(compile(ast.Module(body=[s], type_ignores=[]), filename="<ast>", mode="exec"), globals)
-            last_value = NONE
+      if isinstance(s, ast.Expr):
+        last_value = eval(compile(ast.Expression(body=s.value), filename="<ast>", mode="eval"), envir)
+      else:
+        exec(compile(ast.Module(body=[s], type_ignores=[]), filename="<ast>", mode="exec"), envir)
+        last_value = NONE
     return last_value

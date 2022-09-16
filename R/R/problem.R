@@ -42,12 +42,44 @@ is_pygradethis_problem <- function(x, type = NULL) {
 #' @param env The environment from which to return.
 #'
 #' @keywords internal
-#' @noRd
 return_if_problem <- function(problem, env = parent.frame()) {
   if (is_pygradethis_problem(problem)) {
     rlang::return_from(env, problem)
   }
   NULL
+}
+
+catch_internal_problem <- function(expr, ...) {
+  tryCatch(expr, ..., error = function(err) {
+    message("An error occurred in the grading code: ", err$message)
+    pygradethis::problem("pygradethis_internal", error = err$message)
+  })
+}
+
+return_if_internal_problem <- function(expr, ..., env = parent.frame()) {
+  prob <- catch_internal_problem(expr, ...)
+  return_if_problem(prob, env = env)
+}
+
+#' @export
+problem_grade.pygradethis_internal_problem <- function(
+  problem, max_diffs = 3, env = parent.frame(), ...
+) {
+  # move error up to top-level of grade
+  error <- problem$error
+  problem$error <- NULL
+
+  gradethis::graded(
+    message = paste(
+      "Uh-oh! We can't provide feedback at this time. Don't worry, it's not",
+      "your fault! There's an issue behind-the-scenes with this exercise."
+    ),
+    correct = logical(0),
+    type = "warning",
+    location = "replace",
+    problem = problem,
+    error = error
+  )
 }
 
 #' @export
