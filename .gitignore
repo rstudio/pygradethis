@@ -38,6 +38,7 @@ python/docs/_build/
 .RData
 .Ruserdata
 .tar.gz
+/*.Rcheck/
 Untitled
 issues
 
