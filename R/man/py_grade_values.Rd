@@ -26,7 +26,7 @@ a `gradethis::fail` if they don't.
 reticulate::py_run_string('import pandas as pd; import numpy as np')
 .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,99]})")
 .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-py_grade_values()
+pygradethis::py_grade_values()
 
 # <gradethis_graded: [Incorrect]
 # The DataFrame values do not match the expected values. The first 3
