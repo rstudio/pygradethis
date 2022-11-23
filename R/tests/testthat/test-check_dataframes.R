@@ -1,4 +1,4 @@
-
+#
 ### Checking ----
 
 test_that("py_check_index() works", {
@@ -518,4 +518,104 @@ test_that("py_grade_series() works", {
   })
   testthat::expect_true(inherits(grade_series_incorrect, "gradethis_graded"))
   testthat::expect_false(grade_series_incorrect$correct)
+})
+
+test_that("py_grade_series() handles incorrect types", {
+  grade_series_bad_obj_type <- callr::r_safe(function() {
+    library(reticulate)
+    reticulate::py_run_string("import pandas as pd; import numpy as np")
+    .result <- reticulate::py_eval(
+      "'bad input'",
+      convert = FALSE
+    )
+    .solution <- reticulate::py_eval(
+      "pd.Series([1, 2, 3])",
+      convert = FALSE
+    )
+    pygradethis::py_grade_series(.result, .solution)
+  })
+  testthat::expect_true(inherits(grade_series_bad_obj_type, "gradethis_graded"))
+  testthat::expect_equal(grade_series_bad_obj_type$correct, logical())
+
+  grade_series_bad_exp_type <- callr::r_safe(function() {
+    library(reticulate)
+    reticulate::py_run_string("import pandas as pd; import numpy as np")
+    .result <- reticulate::py_eval(
+      "pd.Series([1, 2, 3])",
+      convert = FALSE
+    )
+    .solution <- reticulate::py_eval(
+      "'bad input'",
+      convert = FALSE
+    )
+    pygradethis::py_grade_series(.result, .solution)
+  })
+  testthat::expect_true(inherits(grade_series_bad_exp_type, "gradethis_graded"))
+  testthat::expect_equal(grade_series_bad_exp_type$correct, logical())
+
+  grade_series_bad_inputs <- callr::r_safe(function() {
+    library(reticulate)
+    reticulate::py_run_string("import pandas as pd; import numpy as np")
+    .result <- reticulate::py_eval(
+      "'bad input'",
+      convert = FALSE
+    )
+    .solution <- reticulate::py_eval(
+      "'bad input'",
+      convert = FALSE
+    )
+    pygradethis::py_grade_series(.result, .solution)
+  })
+  testthat::expect_true(inherits(grade_series_bad_inputs, "gradethis_graded"))
+  testthat::expect_equal(grade_series_bad_inputs$correct, logical())
+})
+
+test_that("py_grade_dataframe() handles incorrect types", {
+  grade_dataframe_bad_obj_type <- callr::r_safe(function() {
+    library(reticulate)
+    reticulate::py_run_string("import pandas as pd; import numpy as np")
+    .result <- reticulate::py_eval(
+      "'bad input'",
+      convert = FALSE
+    )
+    .solution <- reticulate::py_eval(
+      "pd.DataFrame({'a':[1, 2, 3]})",
+      convert = FALSE
+    )
+    pygradethis::py_grade_dataframe(.result, .solution)
+  })
+  testthat::expect_true(inherits(grade_dataframe_bad_obj_type, "gradethis_graded"))
+  testthat::expect_equal(grade_dataframe_bad_obj_type$correct, logical())
+
+  grade_dataframe_bad_exp_type <- callr::r_safe(function() {
+    library(reticulate)
+    reticulate::py_run_string("import pandas as pd; import numpy as np")
+    .result <- reticulate::py_eval(
+      "pd.DataFrame({'a':[1, 2, 3]})",
+      convert = FALSE
+    )
+    .solution <- reticulate::py_eval(
+      "'bad input'",
+      convert = FALSE
+    )
+    pygradethis::py_grade_dataframe(.result, .solution)
+  })
+  testthat::expect_true(inherits(grade_dataframe_bad_exp_type, "gradethis_graded"))
+  testthat::expect_equal(grade_dataframe_bad_exp_type$correct, logical())
+
+  grade_dataframe_bad_inputs <- callr::r_safe(function() {
+    library(reticulate)
+    reticulate::py_run_string("import pandas as pd; import numpy as np")
+    .result <- reticulate::py_eval(
+      "'bad input'",
+      convert = FALSE
+    )
+    .solution <- reticulate::py_eval(
+      "'bad input'",
+      convert = FALSE
+    )
+    pygradethis::py_grade_dataframe(.result, .solution)
+  })
+  testthat::expect_true(inherits(grade_dataframe_bad_inputs, "gradethis_graded"))
+  testthat::expect_equal(grade_dataframe_bad_inputs$correct, logical())
 })
