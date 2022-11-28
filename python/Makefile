@@ -1,13 +1,15 @@
 .PHONY: clean clean-build clean-pyc clean-test coverage dist docs help install lint lint/flake8
 .DEFAULT_GOAL := help
 
-# This tries to grab
+# This tries to grab the currently defined Python path based on the
+# `PGT_VENV_PATH` environment variable. If not set, it will grab
+# the current Python via pipenv.
 get-venv:
 ifdef PGT_VENV_PATH
 	@echo "PGT_VENV_PATH is defined as $(PGT_VENV_PATH)"
 else
-	PGT_VENV_PATH := ~/.venvs/pygradethis
-	@echo "PGT_VENV_PATH is not defined, defaulting to $(PGT_VENV_PATH)"
+	PGT_VENV_PATH := $(shell pipenv --py)
+	@echo "PGT_VENV_PATH is not defined, defaulting to the current Python: $(PGT_VENV_PATH)"
 endif
 
 define BROWSER_PYSCRIPT

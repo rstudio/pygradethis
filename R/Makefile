@@ -27,7 +27,7 @@ build: clean
 # NOTE: R_LIB_PATH is an environment variable that points to the path of an R library
 # if that is not set, this installs the package in the system R library (R_LIB_PATH_FALLBACK)
 .PHONY: install
-install: docs build
+install: clean docs build
 ifeq ($(local), true)
 	R CMD INSTALL -l $(or $(R_LIB_PATH), $(R_LIB_PATH_FALLBACK)) $(PACKAGE)_$(VERSION).tar.gz
 else
