@@ -483,7 +483,7 @@ test_that("py_grade_series() works", {
       "pd.Series([1, 2, 3])",
       convert = FALSE
     )
-    pygradethis::py_check_series(.result, .solution)
+    pygradethis::py_grade_series(.result, .solution)
   })
   testthat::expect_null(grade_series_correct)
 
@@ -549,7 +549,7 @@ test_that("py_grade_index() handles incorrect types", {
       "'bad input'",
       convert = FALSE
     )
-    pygradethis::py_grade_values(.result, .solution)
+    pygradethis::py_grade_index(.result, .solution)
   })
   testthat::expect_true(inherits(grade_index_bad_exp_type, "gradethis_graded"))
   testthat::expect_equal(grade_index_bad_exp_type$correct, logical())
@@ -565,7 +565,7 @@ test_that("py_grade_index() handles incorrect types", {
       "'bad input'",
       convert = FALSE
     )
-    pygradethis::py_grade_values(.result, .solution)
+    pygradethis::py_grade_index(.result, .solution)
   })
   testthat::expect_true(inherits(grade_index_bad_inputs, "gradethis_graded"))
   testthat::expect_equal(grade_index_bad_inputs$correct, logical())
