@@ -107,9 +107,6 @@ $(PGT_VENV_PATH)/bin/activate: get-venv setup.cfg
 	python3 -m venv $(PGT_VENV_PATH)
 	source $(PGT_VENV_PATH)/bin/activate
 
-# venv is a shortcut target
-venv: $(PGT_VENV_PATH)/bin/activate ## activate a virtual environment in PGT_VENV_PATH
-
 dev-install: get-venv ## install project locally with editable mode for development
 	@echo "virtual env path: $(PGT_VENV_PATH)"
 	$(PGT_VENV_PATH)/bin/pip install -e .
