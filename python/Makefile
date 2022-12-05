@@ -1,6 +1,16 @@
 .PHONY: clean clean-build clean-pyc clean-test coverage dist docs help install lint lint/flake8
 .DEFAULT_GOAL := help
-VENV_PATH := ~/.venvs/pygradethis
+
+# This tries to grab the currently defined Python path based on the
+# `PGT_VENV_PATH` environment variable. If not set, it will grab
+# the current Python via pipenv.
+get-venv:
+ifdef PGT_VENV_PATH
+	@echo "PGT_VENV_PATH is defined as $(PGT_VENV_PATH)"
+else
+	PGT_VENV_PATH := $(shell pipenv --py)
+	@echo "PGT_VENV_PATH is not defined, defaulting to the current Python: $(PGT_VENV_PATH)"
+endif
 
 define BROWSER_PYSCRIPT
 import os, webbrowser, sys
@@ -93,13 +103,10 @@ install-dev: ## install the dev dependencies
 install-extras: ## install extra dependencies
 	python -m pip install -e .[extras]
 
-$(VENV_PATH)/bin/activate: setup.cfg 
-	python3 -m venv $(VENV_PATH)
-	source $(VENV_PATH)/bin/activate
+$(PGT_VENV_PATH)/bin/activate: get-venv setup.cfg 
+	python3 -m venv $(PGT_VENV_PATH)
+	source $(PGT_VENV_PATH)/bin/activate
 
-# venv is a shortcut target
-venv: $(VENV_PATH)/bin/activate ## activate a virtual environment in VENV_PATH
-
-dev-install: ## install project locally with editable mode for development
-	@echo "virtual env path: $(VENV_PATH)"
-	$(VENV_PATH)/bin/pip install -e .
+dev-install: get-venv ## install project locally with editable mode for development
+	@echo "virtual env path: $(PGT_VENV_PATH)"
+	$(PGT_VENV_PATH)/bin/pip install -e .

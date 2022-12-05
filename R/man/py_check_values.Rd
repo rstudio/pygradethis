@@ -25,7 +25,7 @@ and checks that they are identical.
 reticulate::py_run_string('import pandas as pd; import numpy as np')
 .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,99]})")
 .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-py_check_values()
+pygradethis::py_check_values()
 
 # $type
 # [1] "wrong_values"

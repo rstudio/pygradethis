@@ -19,7 +19,7 @@ Get the columns of a pandas.DataFrame/pandas.Series
 \dontrun{
 reticulate::py_run_string('import pandas as pd; import numpy as np')
 .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-py_get_columns(.result)
+pygradethis::py_get_columns(.result)
 
 # Index(['a'], dtype='object')
 }

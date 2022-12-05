@@ -25,7 +25,7 @@ reticulate::py_run_string('import pandas as pd; import numpy as np')
 # Plain Series
 .result = reticulate::py_eval("pd.Series(data=[1, 2])", F)
 .solution = reticulate::py_eval("pd.Series(data=[1, 2, 3])", F)
-py_check_series()
+pygradethis::py_check_series()
 
 # $type
 # [1] "wrong_series"
@@ -47,7 +47,7 @@ py_check_series()
 # Series w/ Index
 .result = reticulate::py_eval("pd.Series(data={'a': 1, 'b': 2, 'd': 3})", F)
 .solution =  reticulate::py_eval("pd.Series(data={'a': 1, 'b': 2, 'c': 3})", F)
-py_check_series()
+pygradethis::py_check_series()
 
 # $type
 # [1] "wrong_series"

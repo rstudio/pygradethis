@@ -34,7 +34,7 @@ get_python_solution <- function(expected = .solution, env = parent.frame()) {
 #' \dontrun{
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' py_get_index(.result) 
+#' pygradethis::py_get_index(.result) 
 #'
 #' # RangeIndex(start=0, stop=3, step=1)
 #' }
@@ -52,7 +52,7 @@ py_get_index <- function(data) {
 #' \dontrun{
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' py_get_columns(.result)
+#' pygradethis::py_get_columns(.result)
 #'
 #' # Index(['a'], dtype='object')
 #' }
@@ -70,7 +70,7 @@ py_get_columns <- function(data) {
 #' \dontrun{
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' py_get_values(.result)
+#' pygradethis::py_get_values(.result)
 #'
 #' #      [,1]
 #' # [1,]    1
@@ -96,7 +96,7 @@ py_get_values <- function(data) {
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2]})")
 #' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' py_check_index()
+#' pygradethis::py_check_index()
 #'
 #' # $type
 #' # [1] "wrong_index"
@@ -119,8 +119,17 @@ py_check_index <- function(
   object <- get_python_result(object, env)
   expected <- get_python_solution(expected, env)
 
-  left_vals <- py_to_r(py_get_index(object))
-  right_vals <- py_to_r(py_get_index(expected))
+  left_vals <- NULL
+  right_vals <- NULL
+
+  # validate input types / catch any errors to get values
+  return_if_internal_problem({
+    if (!pygradethis::is_DataFrame(expected)) {
+      stop("The expected object must be of type `DataFrame`")
+    }
+    left_vals <- py_to_r(py_get_index(object))
+    right_vals <- py_to_r(py_get_index(expected))
+  })
 
   if (!identical(left_vals, right_vals)) {
     return(problem(
@@ -186,7 +195,7 @@ py_grade_index <- function(
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
 #' .solution <- reticulate::py_eval("pd.DataFrame({'b':[1,2,3]})")
-#' py_check_columns()
+#' pygradethis::py_check_columns()
 #'
 #' # $type
 #' # [1] "wrong_columns"
@@ -209,9 +218,17 @@ py_check_columns <- function(
   object <- get_python_result(object, env)
   expected <- get_python_solution(expected, env)
 
-  # extract column values
-  obj_vals <- py_to_r(py_get_columns(object))
-  exp_vals <- py_to_r(py_get_columns(expected))
+  obj_vals <- NULL
+  exp_vals <- NULL
+
+  # validate input types / catch any errors to get values
+  return_if_internal_problem({
+    if (!pygradethis::is_DataFrame(expected)) {
+      stop("The expected object must be of type `DataFrame`")
+    }
+    obj_vals <- py_to_r(py_get_columns(object))
+    exp_vals <- py_to_r(py_get_columns(expected))
+  })
 
   if (!identical(obj_vals, exp_vals)) {
     return(problem(
@@ -239,7 +256,7 @@ py_check_columns <- function(
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
 #' .solution <- reticulate::py_eval("pd.DataFrame({'b':[1,2,3]})")
-#' py_grade_columns()
+#' pygradethis::py_grade_columns()
 #'
 #' # <gradethis_graded: [Incorrect]
 #' # The column names do not match the expected columns. The first value
@@ -277,7 +294,7 @@ py_grade_columns <- function(
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,99]})")
 #' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' py_check_values()
+#' pygradethis::py_check_values()
 #'
 #' # $type
 #' # [1] "wrong_values"
@@ -306,8 +323,17 @@ py_check_values <- function(
   object <- get_python_result(object, env)
   expected <- get_python_solution(expected, env)
 
-  obj_vals <- py_to_r(py_get_values(object))
-  exp_vals <- py_to_r(py_get_values(expected))
+  obj_vals <- NULL
+  exp_vals <- NULL
+
+  # validate input types
+  return_if_internal_problem({
+    if (!pygradethis::is_DataFrame(expected)) {
+      stop("The expected object must be of type `DataFrame`")
+    }
+    obj_vals <- py_to_r(py_get_values(object))
+    exp_vals <- py_to_r(py_get_values(expected))
+  })
 
   if (!identical(obj_vals, exp_vals)) {
     return(problem(
@@ -334,7 +360,7 @@ py_check_values <- function(
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,99]})")
 #' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' py_grade_values()
+#' pygradethis::py_grade_values()
 #'
 #' # <gradethis_graded: [Incorrect]
 #' # The DataFrame values do not match the expected values. The first 3
@@ -373,7 +399,7 @@ py_grade_values <- function(
 #' # Plain Series
 #' .result = reticulate::py_eval("pd.Series(data=[1, 2])", F)
 #' .solution = reticulate::py_eval("pd.Series(data=[1, 2, 3])", F)
-#' py_check_series()
+#' pygradethis::py_check_series()
 #'
 #' # $type
 #' # [1] "wrong_series"
@@ -395,7 +421,7 @@ py_grade_values <- function(
 #' # Series w/ Index
 #' .result = reticulate::py_eval("pd.Series(data={'a': 1, 'b': 2, 'd': 3})", F)
 #' .solution =  reticulate::py_eval("pd.Series(data={'a': 1, 'b': 2, 'c': 3})", F)
-#' py_check_series()
+#' pygradethis::py_check_series()
 #'
 #' # $type
 #' # [1] "wrong_series"
@@ -420,6 +446,16 @@ py_check_series <- function(
   object <- get_python_result(object, env)
   expected <- get_python_solution(expected, env)
 
+  # validate input types
+  return_if_internal_problem({
+    # NOTE: to not break things much, we're using `stop()` instead of `checkmate::assert` 
+    # we can use checkmate but changing is_Series() to throw an error when it's False 
+    # will break old grading code
+    if (!pygradethis::is_Series(expected)) {
+      stop("The expected object must be of type `Series`")
+    }
+  })
+
   if (is_py_object(object)) {
     object <- pygradethis::py_to_r(object)
   }
@@ -435,6 +471,7 @@ py_check_series <- function(
       expected = expected
     ))
   }
+  
   NULL
 }
 
@@ -452,7 +489,7 @@ py_check_series <- function(
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result = reticulate::py_eval("pd.Series(data=[1, 2])", F)
 #' .solution = reticulate::py_eval("pd.Series(data=[1, 2, 3])", F)
-#' py_grade_series()
+#' pygradethis::py_grade_series()
 #'
 #' # <gradethis_graded: [Incorrect]
 #' # The Series do not match the expected Series. Your result should
@@ -495,6 +532,13 @@ py_check_dataframe <- function(
   object <- get_python_result(object, env)
   expected <- get_python_solution(expected, env)
 
+  # validate input types
+  return_if_internal_problem({
+    if (!pygradethis::is_DataFrame(expected)) {
+      stop("The expected object must be of type `DataFrame`")
+    }
+  })
+
   if (is_py_object(object)) {
     object <- pygradethis::py_to_r(object)
   }
@@ -528,7 +572,7 @@ py_check_dataframe <- function(
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,99]})")
 #' .solution <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' py_grade_dataframe()
+#' pygradethis::py_grade_dataframe()
 #'
 #' # <gradethis_graded: [Incorrect]
 #' # The DataFrame values do not match the expected values. The first 3
