@@ -147,20 +147,23 @@ get_friendly_class <- function(obj) {
 py_to_r <- function(obj) {
   return(
     tryCatch({
+      py_obj <- NULL
       if (is_DataFrame(obj)) {
         # for a DataFrame try to convert to a tibble for tblcheck grading
-        return(py_to_tbl(obj))
+        py_obj <- py_to_tbl(obj)
       } else if (is_Series(obj)) {
-        return(reticulate::py_to_r(obj))
+        py_obj <- reticulate::py_to_r(obj)
       } else if (is_MultiIndex(obj)) {
-        return(index_to_list(obj))
+        py_obj <- index_to_list(obj)
       } else if (is_CategoricalIndex(obj)) {
-        return(index_to_list(obj))
+        py_obj <- index_to_list(obj)
       } else if (is_Index(obj) || is_RangeIndex(obj)) {
-        return(index_to_list(obj))
+        py_obj <- index_to_list(obj)
       } else {
-        return(reticulate::py_to_r(obj))
+        py_obj <- reticulate::py_to_r(obj)
+        class(py_obj) <- get_friendly_class(obj)
       }
+      return(py_obj)
     }, error = function(e) {
       # if anything fails above, just return the Python object
       obj
@@ -269,4 +272,11 @@ is_py_object <- function(obj) {
   }, error = function(e) {
     FALSE
   })
+}
+
+# Misc ----
+
+md_code <- function(x) {
+	if (!length(x)) return(x)
+	paste0("`", trimws(format(x, digits = 3)), "`")
 }
