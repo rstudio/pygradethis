@@ -89,10 +89,16 @@ problem_message.pygradethis_problem <- function(problem, ...) {
 
 #' @export
 problem_message.wrong_index_problem <- function(problem, ...) {
-  extra <- tblcheck::tblcheck_message(
-    tblcheck::vec_check(problem$actual, problem$expected, env = env)
-  )
-  glue::glue("{problem$message} {extra}")
+  # if there are values for both actual and expected give some
+  # more feedback on what the difference is
+  extra <- NULL
+  if (!is.null(problem$actual) && !is.null(problem$expected)) {
+    extra <- tblcheck::tblcheck_message(
+      tblcheck::vec_check(problem$actual, problem$expected, env = env)
+    )
+  }
+
+  glue::glue("{problem$message} {extra}", .null = "")
 }
 
 #' @export
@@ -116,10 +122,15 @@ problem_message.wrong_columns_problem <- function(problem, ...) {
 
 #' @export
 problem_message.wrong_values_problem <- function(problem, ...) {
-  extra <- tblcheck::tblcheck_message(
-    tblcheck::vec_check(problem$actual, problem$expected, env = env)
-  )
-  glue::glue("{problem$message} {extra}")
+  # if there are values for both actual and expected give some
+  # more feedback on what the difference is
+  extra <- NULL
+  if (!is.null(problem$actual) && !is.null(problem$expected)) {
+    extra <- tblcheck::tblcheck_message(
+      tblcheck::vec_check(problem$actual, problem$expected, env = env)
+    )
+  }
+  glue::glue("{problem$message} {extra}", .null = "")
 }
 
 #' @export
@@ -129,10 +140,13 @@ problem_message.wrong_series_problem <- function(problem, ...) {
 
 #' @export
 problem_message.wrong_series_problem <- function(problem, ...) {
-  extra <- tblcheck::tblcheck_message(
-    tblcheck::vec_check(problem$actual, problem$expected, env = env)
-  )
-  glue::glue("{problem$message} {extra}")
+  extra <- NULL
+  if (!is.null(problem$actual) && !is.null(problem$expected)) {
+    extra <- tblcheck::tblcheck_message(
+      tblcheck::vec_check(problem$actual, problem$expected, env = env)
+    )
+  }
+  glue::glue("{problem$message} {extra}", .null = "")
 }
 
 #' @export

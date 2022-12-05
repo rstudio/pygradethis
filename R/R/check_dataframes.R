@@ -119,18 +119,17 @@ py_check_index <- function(
   object <- get_python_result(object, env)
   expected <- get_python_solution(expected, env)
 
-  # validate input types
+  left_vals <- NULL
+  right_vals <- NULL
+
+  # validate input types / catch any errors to get values
   return_if_internal_problem({
-    if (!pygradethis::is_DataFrame(object)) {
-      stop("The object must be of type `DataFrame`")
-    }
     if (!pygradethis::is_DataFrame(expected)) {
       stop("The expected object must be of type `DataFrame`")
     }
+    left_vals <- py_to_r(py_get_index(object))
+    right_vals <- py_to_r(py_get_index(expected))
   })
-
-  left_vals <- py_to_r(py_get_index(object))
-  right_vals <- py_to_r(py_get_index(expected))
 
   if (!identical(left_vals, right_vals)) {
     return(problem(
@@ -219,19 +218,17 @@ py_check_columns <- function(
   object <- get_python_result(object, env)
   expected <- get_python_solution(expected, env)
 
-  # validate input types
+  obj_vals <- NULL
+  exp_vals <- NULL
+
+  # validate input types / catch any errors to get values
   return_if_internal_problem({
-    if (!pygradethis::is_DataFrame(object)) {
-      stop("The object must be of type `DataFrame`")
-    }
     if (!pygradethis::is_DataFrame(expected)) {
       stop("The expected object must be of type `DataFrame`")
     }
+    obj_vals <- py_to_r(py_get_columns(object))
+    exp_vals <- py_to_r(py_get_columns(expected))
   })
-
-  # extract column values
-  obj_vals <- py_to_r(py_get_columns(object))
-  exp_vals <- py_to_r(py_get_columns(expected))
 
   if (!identical(obj_vals, exp_vals)) {
     return(problem(
@@ -326,18 +323,17 @@ py_check_values <- function(
   object <- get_python_result(object, env)
   expected <- get_python_solution(expected, env)
 
+  obj_vals <- NULL
+  exp_vals <- NULL
+
   # validate input types
   return_if_internal_problem({
-    if (!pygradethis::is_DataFrame(object)) {
-      stop("The object must be of type `DataFrame`")
-    }
     if (!pygradethis::is_DataFrame(expected)) {
       stop("The expected object must be of type `DataFrame`")
     }
+    obj_vals <- py_to_r(py_get_values(object))
+    exp_vals <- py_to_r(py_get_values(expected))
   })
-
-  obj_vals <- py_to_r(py_get_values(object))
-  exp_vals <- py_to_r(py_get_values(expected))
 
   if (!identical(obj_vals, exp_vals)) {
     return(problem(
@@ -455,9 +451,6 @@ py_check_series <- function(
     # NOTE: to not break things much, we're using `stop()` instead of `checkmate::assert` 
     # we can use checkmate but changing is_Series() to throw an error when it's False 
     # will break old grading code
-    if (!pygradethis::is_Series(object)) {
-      stop("The object must be of type `Series`")
-    }
     if (!pygradethis::is_Series(expected)) {
       stop("The expected object must be of type `Series`")
     }
@@ -478,6 +471,7 @@ py_check_series <- function(
       expected = expected
     ))
   }
+  
   NULL
 }
 
@@ -540,9 +534,6 @@ py_check_dataframe <- function(
 
   # validate input types
   return_if_internal_problem({
-    if (!pygradethis::is_DataFrame(object)) {
-      stop("The object must be of type `DataFrame`")
-    }
     if (!pygradethis::is_DataFrame(expected)) {
       stop("The expected object must be of type `DataFrame`")
     }
@@ -554,7 +545,6 @@ py_check_dataframe <- function(
   if (is_py_object(expected)) {
     expected <- pygradethis::py_to_r(expected)
   }
-
 
   # if result and solution are already converted use tblcheck
   if (!is_py_object(object) && !is_py_object(expected)) {
