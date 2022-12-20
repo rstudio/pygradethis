@@ -277,6 +277,6 @@ is_py_object <- function(obj) {
 # Misc ----
 
 md_code <- function(x) {
-	if (!length(x)) return(x)
-	paste0("`", trimws(format(x, digits = 3)), "`")
+  if (!length(x)) return(x)
+  paste0("`", trimws(format(x, digits = 3)), "`")
 }
