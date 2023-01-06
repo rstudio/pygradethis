@@ -25,6 +25,7 @@ Imports:
   learnr,
   dplyr,
   tibble,
+  glue,
   gradethis (>= 0.2.9.9000),
   tblcheck
 Config/reticulate:
