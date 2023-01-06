@@ -74,3 +74,10 @@ setMethod("friendly_class", signature("dict"), function(object) {
   if (!setequal(class(object), "dict")) return(callNextMethod())
   "a dictionary (class `dict`)"
 })
+
+setOldClass(c("set"))
+#' @rdname friendly_class
+setMethod("friendly_class", signature("set"), function(object) {
+  if (!setequal(class(object), "set")) return(callNextMethod())
+  "a set (class `set`)"
+})

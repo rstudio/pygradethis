@@ -1,5 +1,3 @@
-library(dplyr)
-
 test_that("py_to_r() translates DataFrames", {
   # NOTE: to be safe, we isolate reticulate calls to a fresh R process
   py_tbl_df <- callr::r_safe(function() {
@@ -85,7 +83,7 @@ testthat::test_that("py_to_tbl() translates DataFrame to tibble with single grou
       ~Animal, ~`Max Speed`,
       "Falcon",   375,
       "Parrot",   25
-  ) %>% group_by(Animal)
+  ) %>% dplyr::group_by(Animal)
   class(expected_tbl) <- c("py_grouped_df", "py_tbl_df", class(expected_tbl))
   testthat::expect_equal(py_tbl_df, expected_tbl)
 })
@@ -116,7 +114,7 @@ testthat::test_that("py_to_tbl() translates DataFrame to tibble with multiple gr
       "bird", "Psittaciformes", 24.0,
       "mammal", "Carnivora", 69.1,
       "mammal", "Primates", NaN
-  ) %>% group_by(class, order)
+  ) %>% dplyr::group_by(class, order)
   class(expected_tbl) <- c('py_grouped_df', 'py_tbl_df', class(expected_tbl))
   testthat::expect_equal(py_tbl_df, expected_tbl)
 })
