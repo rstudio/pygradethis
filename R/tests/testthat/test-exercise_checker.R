@@ -1,5 +1,3 @@
-library(reticulate)
-
 #### Basic flow tests
 
 test_that("Basic exercise checking flow works", {

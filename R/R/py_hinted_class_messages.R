@@ -1,13 +1,6 @@
 #' @importFrom tblcheck hinted_class_message
 NULL
 
-#' @rdname friendly_class
-setMethod("friendly_class", signature("ANY"), function(object) {
-  class <- get_friendly_class(object)
-  class_str <- knitr::combine_words(md_code(class))
-  glue::glue("an object with class {class_str}")
-})
-
 setOldClass("py_tbl_df")
 setOldClass("py_grouped_df")
 #' @rdname hinted_class_message
