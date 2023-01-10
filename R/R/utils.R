@@ -274,6 +274,18 @@ is_py_object <- function(obj) {
   })
 }
 
+#' A wrapper around `identical()` to compare R objects that were
+#' converted from Python.
+#'
+#' @param x any R object
+#' @param y any R object
+#'
+#' @return TRUE/FALSE
+#' @export
+py_identical <- function(x, y) {
+  identical(unclass(x), y)
+}
+
 # Misc ----
 
 md_code <- function(x) {
