@@ -283,7 +283,7 @@ is_py_object <- function(obj) {
 #' @return TRUE/FALSE
 #' @export
 py_identical <- function(x, y) {
-  identical(unclass(x), y)
+  identical(unclass(x), unclass(y))
 }
 
 # Misc ----
