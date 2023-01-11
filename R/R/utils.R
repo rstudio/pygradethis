@@ -111,6 +111,15 @@ is_numpy_array <- function(obj) {
   identical(get_friendly_class(obj), 'array')
 }
 
+#' Checks if the Python object is a set
+#'
+#' @param obj Python object.
+#'
+#' @return TRUE if so, FALSE otherwise
+#' @export
+is_set <- function(obj) {
+  identical(get_friendly_class(obj), 'set')
+}
 
 #' Checks if the Python object is a function
 #'
@@ -131,6 +140,10 @@ is_function <- function(obj) {
 #' @export
 get_friendly_class <- function(obj) {
   reticulate::py$builtins$type(obj)$`__name__`
+}
+
+get_py_type <- function(obj) {
+  c(paste0("py_", get_friendly_class(obj)), "pygradethis")
 }
 
 # Python to R translation helpers ----
@@ -159,9 +172,12 @@ py_to_r <- function(obj) {
         py_obj <- index_to_list(obj)
       } else if (is_Index(obj) || is_RangeIndex(obj)) {
         py_obj <- index_to_list(obj)
+      } else if (is_set(obj)) {
+        py_obj <- reticulate::py$builtins$list(obj)
+        class(py_obj) <- get_py_type(obj)
       } else {
         py_obj <- reticulate::py_to_r(obj)
-        class(py_obj) <- get_friendly_class(obj)
+        class(py_obj) <- get_py_type(obj)
       }
       return(py_obj)
     }, error = function(e) {
@@ -274,16 +290,68 @@ is_py_object <- function(obj) {
   })
 }
 
-#' A wrapper around `identical()` to compare R objects that were
-#' converted from Python.
-#'
-#' @param x any R object
-#' @param y any R object
-#'
-#' @return TRUE/FALSE
+# identical() S3 generic + methods ----
+
 #' @export
-py_identical <- function(x, y) {
-  identical(unclass(x), y)
+identical <- function(x, y, ...) UseMethod("identical", x)
+
+#' @export
+identical.default <- function(x, y, ...) {
+  base::identical(x, y, ...)
+}
+
+#' @export
+identical.py_int <- function(x, y, ...) {
+  base::identical(as.integer(x), y, ...)
+}
+
+#' @export
+identical.py_float <- function(x, y, ...) {
+  base::identical(as.numeric(x), y, ...)
+}
+
+#' @export
+identical.py_complex <- function(x, y, ...) {
+  base::identical(as.complex(x), y, ...)
+}
+
+#' @export
+identical.py_bool <- function(x, y, ...) {
+  base::identical(as.logical(x), y, ...)
+}
+
+#' @export
+identical.py_str <- function(x, y, ...) {
+  base::identical(as.character(x), y, ...)
+}
+
+#' @export
+identical.py_tuple <- function(x, y, ...) {
+  base::identical(unclass(x), y, ...)
+}
+
+#' @export
+identical.py_set <- function(x, y, ...) {
+  base::identical(unclass(x), y, ...)
+}
+
+#' @export
+identical.py_dict <- function(x, y, ...) {
+  base::identical(unclass(x), y, ...)
+}
+
+#' @export
+identical.py_list <- function(x, y, ...) {
+  # Note: we can arrive here if we have a set because
+  # we convert a set to a list to compare
+  base::identical(unclass(x), y, ...)
+}
+
+#' @export
+identical.pygradethis <- function(x, y, ...) {
+  # Note: for now we don't have any special logic to handle the 
+  # fallback but it's here in case we need something in the future
+  NextMethod()
 }
 
 # Misc ----

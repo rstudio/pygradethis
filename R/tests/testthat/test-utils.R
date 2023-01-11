@@ -118,3 +118,39 @@ testthat::test_that("py_to_tbl() translates DataFrame to tibble with multiple gr
   class(expected_tbl) <- c('py_grouped_df', 'py_tbl_df', class(expected_tbl))
   testthat::expect_equal(py_tbl_df, expected_tbl)
 })
+
+testthat::test_that("identical() works for Python types", {
+  an_int <- pygradethis::py_to_r(reticulate::py_eval("1", convert=F))
+  testthat::expect_true(identical(an_int, 1L))
+
+  a_complex <- pygradethis::py_to_r(reticulate::py_eval("1 + 1j", convert=F))
+  testthat::expect_true(identical(a_complex, complex(real=1, imaginary=1)))
+
+  a_float <- pygradethis::py_to_r(reticulate::py_eval("1.0", convert=F))
+  testthat::expect_true(identical(a_float, 1.0))
+
+  a_bool <- pygradethis::py_to_r(reticulate::py_eval("True", convert=F))
+  testthat::expect_true(identical(a_bool, TRUE))
+
+  a_str <- pygradethis::py_to_r(reticulate::py_eval("'hello world'", convert=F))
+  testthat::expect_true(identical(a_str, "hello world"))
+
+  a_list <- pygradethis::py_to_r(reticulate::py_eval("[1, 2]", F))
+  testthat::expect_true(identical(a_list, c(1L, 2L)))
+
+  # Note: sometimes we have to unclass for e.g. the tuple type
+  a_tuple <- pygradethis::py_to_r(reticulate::py_eval("(1,1)", convert=F))
+  testthat::expect_true(identical(a_tuple, list(1L, 1L)))
+
+  a_dict <- pygradethis::py_to_r(reticulate::py_eval("{'a': 1, 'b': 'foo'}", F))
+  testthat::expect_true(identical(a_dict, list(a = 1L, b = "foo")))
+
+  a_set <- pygradethis::py_to_r(reticulate::py_eval("{1, 2}", F))
+  testthat::expect_true(identical(a_set, c(1L, 2L)))
+
+  # any other type that we don't have a corresponding identical() method
+  # will go through the identical.default()
+  other_type <- pygradethis::py_to_r(reticulate::py_eval("1", F))
+  class(other_type) <- c("foo", "pygradethis")
+  testthat::expect_false(identical(other_type, 1L))
+})
