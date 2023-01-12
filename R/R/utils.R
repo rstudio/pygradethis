@@ -380,7 +380,6 @@ compare_proxy.py_str <- function(x, path) {
   list(object = as.character(x), path = paste0("as.character(", path, ")"))
 }
 
-#' @export
 compare_sequences <- function(x, path) {
   list(object = unclass(x), path = paste0("unclass(", path, ")"))
 }
