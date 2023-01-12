@@ -302,31 +302,31 @@ identical.default <- function(x, y, ...) {
 
 #' @export
 identical.py_int <- function(x, y, ...) {
-  base::identical(as.integer(x), y, ...)
+  base::identical(as.integer(x), unclass(y), ...)
 }
 
 #' @export
 identical.py_float <- function(x, y, ...) {
-  base::identical(as.numeric(x), y, ...)
+  base::identical(as.numeric(x), unclass(y), ...)
 }
 
 #' @export
 identical.py_complex <- function(x, y, ...) {
-  base::identical(as.complex(x), y, ...)
+  base::identical(as.complex(x), unclass(y), ...)
 }
 
 #' @export
 identical.py_bool <- function(x, y, ...) {
-  base::identical(as.logical(x), y, ...)
+  base::identical(as.logical(x), unclass(y), ...)
 }
 
 #' @export
 identical.py_str <- function(x, y, ...) {
-  base::identical(as.character(x), y, ...)
+  base::identical(as.character(x), unclass(y), ...)
 }
 
 identical_sequences <- function(x, y, ...) {
-  base::identical(unclass(x), y, ...)
+  base::identical(unclass(x), unclass(y), ...)
 }
 
 #' @export
@@ -340,7 +340,7 @@ identical.py_list <- identical_sequences
 
 #' @export
 identical.pygradethis <- function(x, y, ...) {
-  base::identical(unclass(x), y, ...)
+  base::identical(unclass(x), unclass(y), ...)
 }
 
 # waldo compare proxies ----

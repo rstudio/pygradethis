@@ -149,10 +149,10 @@ testthat::test_that("identical() works for Python types", {
   testthat::expect_true(identical(a_set, c(1L, 2L)))
 
   # any other type that we don't have a corresponding identical() method
-  # will go through the identical.default()
+  # will go through the identical.default() which will unclass objects
   other_type <- pygradethis::py_to_r(reticulate::py_eval("1", F))
   class(other_type) <- c("foo", "pygradethis")
-  testthat::expect_false(identical(other_type, 1L))
+  testthat::expect_true(identical(other_type, 1L))
 })
 
 testthat::test_that("waldo::compare() works for Python types", {
