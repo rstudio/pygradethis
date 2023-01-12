@@ -325,27 +325,18 @@ identical.py_str <- function(x, y, ...) {
   base::identical(as.character(x), y, ...)
 }
 
-#' @export
-identical.py_tuple <- function(x, y, ...) {
+identical_sequences <- function(x, y, ...) {
   base::identical(unclass(x), y, ...)
 }
 
 #' @export
-identical.py_set <- function(x, y, ...) {
-  base::identical(unclass(x), y, ...)
-}
-
+identical.py_tuple <- identical_sequences
 #' @export
-identical.py_dict <- function(x, y, ...) {
-  base::identical(unclass(x), y, ...)
-}
-
+identical.py_set <- identical_sequences
 #' @export
-identical.py_list <- function(x, y, ...) {
-  # Note: we can arrive here if we have a set because
-  # we convert a set to a list to compare
-  base::identical(unclass(x), y, ...)
-}
+identical.py_dict <- identical_sequences
+#' @export
+identical.py_list <- identical_sequences
 
 #' @export
 identical.pygradethis <- function(x, y, ...) {
@@ -353,6 +344,56 @@ identical.pygradethis <- function(x, y, ...) {
   # fallback but it's here in case we need something in the future
   NextMethod()
 }
+
+# waldo compare proxies ----
+
+#' @importFrom waldo compare_proxy
+NULL
+
+#' @export
+compare_proxy.pygradethis <- function(x, path) {
+  NextMethod()
+}
+
+#' @export
+compare_proxy.py_int <- function(x, path) {
+  list(object = as.integer(x), path = paste0("as.integer(", path, ")"))
+}
+
+#' @export
+compare_proxy.py_float <- function(x, path) {
+  list(object = as.numeric(x), path = paste0("as.numeric(", path, ")"))
+}
+
+#' @export
+compare_proxy.py_complex <- function(x, path) {
+  list(object = as.complex(x), path = paste0("as.complex(", path, ")"))
+}
+
+#' @export
+compare_proxy.py_bool <- function(x, path) {
+  list(object = as.logical(x), path = paste0("as.logical(", path, ")"))
+}
+
+#' @export
+compare_proxy.py_str <- function(x, path) {
+  list(object = as.character(x), path = paste0("as.character(", path, ")"))
+}
+
+#' @export
+compare_sequences <- function(x, path) {
+  list(object = unclass(x), path = paste0("unclass(", path, ")"))
+}
+
+#' @export
+compare_proxy.py_list <- compare_sequences
+#' @export
+compare_proxy.py_tuple <- compare_sequences
+#' @export
+compare_proxy.py_set <- compare_sequences
+#' @export
+compare_proxy.py_dict <- compare_sequences
+
 
 # Misc ----
 
