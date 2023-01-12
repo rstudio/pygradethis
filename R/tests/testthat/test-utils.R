@@ -118,3 +118,117 @@ testthat::test_that("py_to_tbl() translates DataFrame to tibble with multiple gr
   class(expected_tbl) <- c('py_grouped_df', 'py_tbl_df', class(expected_tbl))
   testthat::expect_equal(py_tbl_df, expected_tbl)
 })
+
+testthat::test_that("identical() works for Python types", {
+  an_int <- pygradethis::py_to_r(reticulate::py_eval("1", convert=F))
+  testthat::expect_true(identical(an_int, 1L))
+
+  a_complex <- pygradethis::py_to_r(reticulate::py_eval("1 + 1j", convert=F))
+  testthat::expect_true(identical(a_complex, complex(real=1, imaginary=1)))
+
+  a_float <- pygradethis::py_to_r(reticulate::py_eval("1.0", convert=F))
+  testthat::expect_true(identical(a_float, 1.0))
+
+  a_bool <- pygradethis::py_to_r(reticulate::py_eval("True", convert=F))
+  testthat::expect_true(identical(a_bool, TRUE))
+
+  a_str <- pygradethis::py_to_r(reticulate::py_eval("'hello world'", convert=F))
+  testthat::expect_true(identical(a_str, "hello world"))
+
+  a_list <- pygradethis::py_to_r(reticulate::py_eval("[1, 2]", F))
+  testthat::expect_true(identical(a_list, c(1L, 2L)))
+
+  # Note: sometimes we have to unclass for e.g. the tuple type
+  a_tuple <- pygradethis::py_to_r(reticulate::py_eval("(1,1)", convert=F))
+  testthat::expect_true(identical(a_tuple, list(1L, 1L)))
+
+  a_dict <- pygradethis::py_to_r(reticulate::py_eval("{'a': 1, 'b': 'foo'}", F))
+  testthat::expect_true(identical(a_dict, list(a = 1L, b = "foo")))
+
+  a_set <- pygradethis::py_to_r(reticulate::py_eval("{1, 2}", F))
+  testthat::expect_true(identical(a_set, c(1L, 2L)))
+
+  # any other type that we don't have a corresponding identical() method
+  # will go through the identical.default() which will unclass objects
+  other_type <- pygradethis::py_to_r(reticulate::py_eval("1", F))
+  class(other_type) <- c("foo", "pygradethis")
+  testthat::expect_true(identical(other_type, 1L))
+})
+
+testthat::test_that("waldo::compare() works for Python types", {
+  an_int <- pygradethis::py_to_r(reticulate::py_eval("1", convert=F))
+  testthat::expect_length(waldo::compare(an_int, 1L), 0)
+
+  a_complex <- pygradethis::py_to_r(reticulate::py_eval("1 + 1j", convert=F))
+  testthat::expect_length(waldo::compare(a_complex, complex(real=1, imaginary=1)), 0)
+
+  a_float <- pygradethis::py_to_r(reticulate::py_eval("1.0", convert=F))
+  testthat::expect_length(waldo::compare(a_float, 1.0), 0)
+
+  a_bool <- pygradethis::py_to_r(reticulate::py_eval("True", convert=F))
+  testthat::expect_length(waldo::compare(a_bool, TRUE), 0)
+
+  a_str <- pygradethis::py_to_r(reticulate::py_eval("'hello world'", convert=F))
+  testthat::expect_length(waldo::compare(a_str, "hello world"), 0)
+
+  a_list <- pygradethis::py_to_r(reticulate::py_eval("[1, 2]", F))
+  testthat::expect_length(waldo::compare(a_list, c(1L, 2L)), 0)
+
+  # Note: sometimes we have to unclass for e.g. the tuple type
+  a_tuple <- pygradethis::py_to_r(reticulate::py_eval("(1,1)", convert=F))
+  testthat::expect_length(waldo::compare(a_tuple, list(1L, 1L)), 0)
+
+  a_dict <- pygradethis::py_to_r(reticulate::py_eval("{'a': 1, 'b': 'foo'}", F))
+  testthat::expect_length(waldo::compare(a_dict, list(a = 1L, b = "foo")), 0)
+
+  a_set <- pygradethis::py_to_r(reticulate::py_eval("{1, 2}", F))
+  testthat::expect_length(waldo::compare(a_set, c(1L, 2L)), 0)
+
+  other_type <- pygradethis::py_to_r(reticulate::py_eval("1", F))
+  class(other_type) <- c("foo", "pygradethis")
+  testthat::expect_length(waldo::compare(other_type, 1L), 1)
+})
+
+testthat::test_that("pass_if_equal() and fail_if_equal() works with Python types", {
+  # pass_if_equal()
+  ex_pass_if_equal_correct <- learnr::mock_exercise(
+    user_code = "56 + 44",
+    solution_code = "56 + 44",
+    engine = "python",
+    check = "gradethis::grade_this({\n  gradethis::pass_if_equal(message='yay!')\n  gradethis::fail('boo!')\n})",
+    exercise.checker = "pygradethis::py_gradethis_exercise_checker"
+  )
+  res <- learnr:::evaluate_exercise(ex_pass_if_equal_correct, new.env())
+  testthat::expect_match(res$feedback$message, "yay!")
+
+  ex_pass_if_equal_incorrect <- learnr::mock_exercise(
+    user_code = "56",
+    solution_code = "56 + 44",
+    engine = "python",
+    check = "gradethis::grade_this({\n  gradethis::pass_if_equal(message='yay!')\n  gradethis::fail('boo!')\n})",
+    exercise.checker = "pygradethis::py_gradethis_exercise_checker"
+  )
+  res <- learnr:::evaluate_exercise(ex_pass_if_equal_incorrect, new.env())
+  testthat::expect_match(res$feedback$message, "boo!")
+
+  # fail_if_equal()
+  ex_fail_if_equal_incorrect <- learnr::mock_exercise(
+    user_code = "56",
+    solution_code = "56 + 44",
+    engine = "python",
+    check = "gradethis::grade_this({\n  gradethis::fail_if_equal(y = 56, message='boo!')\n  gradethis::pass('yay!')\n})",
+    exercise.checker = "pygradethis::py_gradethis_exercise_checker"
+  )
+  res <- learnr:::evaluate_exercise(ex_fail_if_equal_incorrect, new.env())
+  testthat::expect_match(res$feedback$message, "boo!")
+
+  ex_fail_if_equal_correct <- learnr::mock_exercise(
+    user_code = "56 + 44",
+    solution_code = "56 + 44",
+    engine = "python",
+    check = "gradethis::grade_this({\n  gradethis::fail_if_equal(y = 56, message='boo!')\n  gradethis::pass('yay!')\n})",
+    exercise.checker = "pygradethis::py_gradethis_exercise_checker"
+  )
+  res <- learnr:::evaluate_exercise(ex_fail_if_equal_correct, new.env())
+  testthat::expect_match(res$feedback$message, "yay!")
+})

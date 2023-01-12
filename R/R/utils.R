@@ -111,6 +111,15 @@ is_numpy_array <- function(obj) {
   identical(get_friendly_class(obj), 'array')
 }
 
+#' Checks if the Python object is a set
+#'
+#' @param obj Python object.
+#'
+#' @return TRUE if so, FALSE otherwise
+#' @export
+is_set <- function(obj) {
+  identical(get_friendly_class(obj), 'set')
+}
 
 #' Checks if the Python object is a function
 #'
@@ -131,6 +140,10 @@ is_function <- function(obj) {
 #' @export
 get_friendly_class <- function(obj) {
   reticulate::py$builtins$type(obj)$`__name__`
+}
+
+get_py_type <- function(obj) {
+  c(paste0("py_", get_friendly_class(obj)), "pygradethis")
 }
 
 # Python to R translation helpers ----
@@ -159,9 +172,12 @@ py_to_r <- function(obj) {
         py_obj <- index_to_list(obj)
       } else if (is_Index(obj) || is_RangeIndex(obj)) {
         py_obj <- index_to_list(obj)
+      } else if (is_set(obj)) {
+        py_obj <- reticulate::py$builtins$list(obj)
+        class(py_obj) <- get_py_type(obj)
       } else {
         py_obj <- reticulate::py_to_r(obj)
-        class(py_obj) <- get_friendly_class(obj)
+        class(py_obj) <- get_py_type(obj)
       }
       return(py_obj)
     }, error = function(e) {
@@ -273,6 +289,107 @@ is_py_object <- function(obj) {
     FALSE
   })
 }
+
+# identical() S3 generic + methods ----
+
+#' @export
+identical <- function(x, y, ...) UseMethod("identical", x)
+
+#' @export
+identical.default <- function(x, y, ...) {
+  base::identical(x, y, ...)
+}
+
+#' @export
+identical.py_int <- function(x, y, ...) {
+  base::identical(as.integer(x), unclass(y), ...)
+}
+
+#' @export
+identical.py_float <- function(x, y, ...) {
+  base::identical(as.numeric(x), unclass(y), ...)
+}
+
+#' @export
+identical.py_complex <- function(x, y, ...) {
+  base::identical(as.complex(x), unclass(y), ...)
+}
+
+#' @export
+identical.py_bool <- function(x, y, ...) {
+  base::identical(as.logical(x), unclass(y), ...)
+}
+
+#' @export
+identical.py_str <- function(x, y, ...) {
+  base::identical(as.character(x), unclass(y), ...)
+}
+
+identical_sequences <- function(x, y, ...) {
+  base::identical(unclass(x), unclass(y), ...)
+}
+
+#' @export
+identical.py_tuple <- identical_sequences
+#' @export
+identical.py_set <- identical_sequences
+#' @export
+identical.py_dict <- identical_sequences
+#' @export
+identical.py_list <- identical_sequences
+
+#' @export
+identical.pygradethis <- function(x, y, ...) {
+  base::identical(unclass(x), unclass(y), ...)
+}
+
+# waldo compare proxies ----
+
+#' @importFrom waldo compare_proxy
+NULL
+
+#' @export
+compare_proxy.pygradethis <- function(x, path) {
+  NextMethod()
+}
+
+#' @export
+compare_proxy.py_int <- function(x, path) {
+  list(object = as.integer(x), path = paste0("as.integer(", path, ")"))
+}
+
+#' @export
+compare_proxy.py_float <- function(x, path) {
+  list(object = as.numeric(x), path = paste0("as.numeric(", path, ")"))
+}
+
+#' @export
+compare_proxy.py_complex <- function(x, path) {
+  list(object = as.complex(x), path = paste0("as.complex(", path, ")"))
+}
+
+#' @export
+compare_proxy.py_bool <- function(x, path) {
+  list(object = as.logical(x), path = paste0("as.logical(", path, ")"))
+}
+
+#' @export
+compare_proxy.py_str <- function(x, path) {
+  list(object = as.character(x), path = paste0("as.character(", path, ")"))
+}
+
+compare_sequences <- function(x, path) {
+  list(object = unclass(x), path = paste0("unclass(", path, ")"))
+}
+
+#' @export
+compare_proxy.py_list <- compare_sequences
+#' @export
+compare_proxy.py_tuple <- compare_sequences
+#' @export
+compare_proxy.py_set <- compare_sequences
+#' @export
+compare_proxy.py_dict <- compare_sequences
 
 # Misc ----
 

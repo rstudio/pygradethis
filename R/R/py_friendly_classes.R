@@ -26,58 +26,58 @@ setMethod("friendly_class", signature("py_grouped_df"), function(object) {
 	"a DataFrame with row labels (i.e. index)"
 })
 
-setOldClass(c("int"))
+setOldClass(c("py_int", "pygradethis"))
 #' @rdname friendly_class
-setMethod("friendly_class", signature("int"), function(object) {
-  if (!setequal(class(object), "int")) return(callNextMethod())
+setMethod("friendly_class", signature("py_int"), function(object) {
+  if (!setequal(class(object), c("py_int", "pygradethis"))) return(callNextMethod())
   "an integer (class `int`)"
 })
 
-setOldClass(c("float"))
+setOldClass(c("py_float", "pygradethis"))
 #' @rdname friendly_class
-setMethod("friendly_class", signature("float"), function(object) {
-  if (!setequal(class(object), "float")) return(callNextMethod())
+setMethod("friendly_class", signature("py_float"), function(object) {
+  if (!setequal(class(object), c("py_float", "pygradethis"))) return(callNextMethod())
   "a floating point number (class `float`)"
 })
 
-setOldClass(c("complex"))
+setOldClass(c("py_complex", "pygradethis"))
 #' @rdname friendly_class
-setMethod("friendly_class", signature("complex"), function(object) {
-  if (!setequal(class(object), "complex")) return(callNextMethod())
+setMethod("friendly_class", signature("py_complex"), function(object) {
+  if (!setequal(class(object), c("py_complex", "pygradethis"))) return(callNextMethod())
   "a complex number (class `complex`)"
 })
 
-setOldClass(c("bool"))
+setOldClass(c("py_bool", "pygradethis"))
 #' @rdname friendly_class
-setMethod("friendly_class", signature("bool"), function(object) {
-  if (!setequal(class(object), "bool")) return(callNextMethod())
+setMethod("friendly_class", signature("py_bool"), function(object) {
+  if (!setequal(class(object), c("py_bool", "pygradethis"))) return(callNextMethod())
   "a boolean (class `bool`)"
 })
 
-setOldClass(c("str"))
+setOldClass(c("py_str", "pygradethis"))
 #' @rdname friendly_class
-setMethod("friendly_class", signature("str"), function(object) {
-  if (!setequal(class(object), "str")) return(callNextMethod())
+setMethod("friendly_class", signature("py_str"), function(object) {
+  if (!setequal(class(object), c("py_str", "pygradethis"))) return(callNextMethod())
   "a string (class `str`)"
 })
 
-setOldClass(c("tuple"))
+setOldClass(c("py_tuple", "pygradethis"))
 #' @rdname friendly_class
-setMethod("friendly_class", signature("tuple"), function(object) {
-  if (!setequal(class(object), "tuple")) return(callNextMethod())
+setMethod("friendly_class", signature("py_tuple"), function(object) {
+  if (!setequal(class(object), c("py_tuple", "pygradethis"))) return(callNextMethod())
   "a tuple (class `tuple`)"
 })
 
-setOldClass(c("dict"))
+setOldClass(c("py_dict", "pygradethis"))
 #' @rdname friendly_class
-setMethod("friendly_class", signature("dict"), function(object) {
-  if (!setequal(class(object), "dict")) return(callNextMethod())
+setMethod("friendly_class", signature("py_dict"), function(object) {
+  if (!setequal(class(object), c("py_dict", "pygradethis"))) return(callNextMethod())
   "a dictionary (class `dict`)"
 })
 
-setOldClass(c("set"))
+setOldClass(c("py_set", "pygradethis"))
 #' @rdname friendly_class
-setMethod("friendly_class", signature("set"), function(object) {
-  if (!setequal(class(object), "set")) return(callNextMethod())
+setMethod("friendly_class", signature("py_set"), function(object) {
+  if (!setequal(class(object), c("py_set", "pygradethis"))) return(callNextMethod())
   "a set (class `set`)"
 })
