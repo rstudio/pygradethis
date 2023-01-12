@@ -340,9 +340,7 @@ identical.py_list <- identical_sequences
 
 #' @export
 identical.pygradethis <- function(x, y, ...) {
-  # Note: for now we don't have any special logic to handle the 
-  # fallback but it's here in case we need something in the future
-  NextMethod()
+  base::identical(unclass(x), y, ...)
 }
 
 # waldo compare proxies ----
@@ -392,7 +390,6 @@ compare_proxy.py_tuple <- compare_sequences
 compare_proxy.py_set <- compare_sequences
 #' @export
 compare_proxy.py_dict <- compare_sequences
-
 
 # Misc ----
 
