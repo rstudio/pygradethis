@@ -12,6 +12,12 @@ inform_python_pygradethis_not_found <- function(..., throw = stop) {
 #' @export
 pygradethis <- NULL
 
+#' The `pygradecode` module that contains code checking functions.
+#'
+#' @return the `pygradecode` Python module
+#' @export
+pygradecode <- NULL
+
 #' The `exercise.checker` pygradethis_exercise_checker to use in learnr
 #'
 #' @return the `pygradethis_exercise_checker` Python function
@@ -24,6 +30,15 @@ pygradethis_exercise_checker <- inform_python_pygradethis_not_found
 #' @export
 get_last_value <- inform_python_pygradethis_not_found
 
+#' Get the module containing find functions for functions.
+#'
+#' This will provide access to particular flavors of find_*() functions
+#' to get function and method calls.
+#'
+#' @return the Python module pygradecode.find_functions
+#' @export
+find_functions <- inform_python_pygradethis_not_found
+
 .onLoad <- function(libname, pkgname) {
   # import `pygradethis` and the exercise checking function
   if (reticulate::py_available(initialize = TRUE)) {
@@ -31,6 +46,8 @@ get_last_value <- inform_python_pygradethis_not_found
       pygradethis <<- reticulate::import("pygradethis", convert=FALSE, delay_load = TRUE)
       pygradethis_exercise_checker <<- pygradethis$pygradethis_exercise_checker$pygradethis_exercise_checker
       get_last_value <<- pygradethis$utils$get_last_value
+      pygradecode <<- reticulate::import("pygradecode", convert=FALSE, delay_load = TRUE)
+      find_functions <<- pygradecode$find_functions
       reticulate::py_run_string('import builtins', convert = FALSE)
     }, error = function(err) {
       message(

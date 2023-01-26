@@ -150,6 +150,11 @@ problem_message.wrong_series_problem <- function(problem, ...) {
 }
 
 #' @export
+problem_message.pygradecode_problem <- function(problem, ...) {
+  problem$message
+}
+
+#' @export
 problem_grade.pygradethis_problem <- function(
     problem, max_diffs = 3, env = parent.frame(), ...
 ) {
@@ -163,4 +168,11 @@ problem_grade.pygradethis_problem <- function(
     env = env,
     ...
   )
+}
+
+#' @export
+problem_grade.pygradecode_problem <- function(
+    problem, max_diffs = 3, env = parent.frame(), ...
+) {
+  problem_grade.pygradethis_problem(problem, max_diffs, env)
 }
