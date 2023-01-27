@@ -1,0 +1,10 @@
+website:
+  sidebar:
+    contents:
+    - reference/index.qmd
+    - contents:
+      - reference/standardize_arguments.qmd
+      - reference/Graded.qmd
+      - reference/python_condition.qmd
+      section: Some functions
+    id: reference

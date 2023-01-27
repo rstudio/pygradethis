@@ -1,0 +1,29 @@
+project:
+  type: website
+  resources:
+    - objects.json
+
+metadata-files:
+  - _sidebar.yml
+
+website:
+  title: pygradethis
+  navbar:
+    left:
+      - file: reference/index.qmd
+        text: Reference
+  sidebar:
+    - id: dummy
+
+quartodoc:
+  style: pkgdown
+  dir: reference
+  sidebar: _sidebar.yml
+  package: pygradethis
+  sections:
+    - title: Some functions
+      desc: Functions to inspect docstrings.
+      contents:
+        - check_functions.standardize_arguments
+        - conditions.Graded
+        - conditions.python_condition
