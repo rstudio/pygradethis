@@ -3,9 +3,10 @@ from typing import Union
 from lxml.etree import Element
 from .ast_to_xml import xml
 from .xml_classes import GradeCodeFound
+from .find_utils import uses
 
 def find_functions(code: str, match: str = None) -> Union[Element, None]:
-  """Find function calls within code.
+  """Find function calls in the code.
 
   Parameters
   ----------
@@ -83,14 +84,16 @@ def uses_function(code: str, match: str = None) -> bool:
 
   Examples
   --------
+  >>> source = 'sum([1,2,3])'
+  >>> uses_function(source, "sum")
+  True
   >>> uses_function(source, "round")
   False
   """
-  found = find_functions(code, match)
-  return len(found.elements) > 0
+  return uses(find_functions, code, match)
 
 def find_function_defs(code: str, match: str = None) -> Union[Element, None]:
-  """Find function definitions within code.
+  """Find function definitions in the code.
 
   Parameters
   ----------
@@ -106,16 +109,14 @@ def find_function_defs(code: str, match: str = None) -> Union[Element, None]:
   
   Examples
   --------
-  >>> source = '\ndef foo():\n  return "foo"\n\ndef bar():\n  return "bar"\n'
+  >>> source = 'def foo():\n  return "foo"\n\ndef bar():\n  return "bar"\n'
   >>> find_function_defs(source)
   ── pygradecode found ──
-
   def foo():
     return "foo"
 
   def bar():
     return "bar"
-
 
   ── Result 1 ──
   def foo():
@@ -137,8 +138,38 @@ def find_function_defs(code: str, match: str = None) -> Union[Element, None]:
 
   return GradeCodeFound(code, query_result)
 
+def uses_function_def(code: str, match: str = None) -> bool:
+  """Check if the code defines functions.
+
+  Parameters
+  ----------
+  code : str
+      the source code
+  match : str, optional
+      function name(s), by default None
+
+  Returns
+  -------
+  bool
+      True if found, False otherwise
+
+  Examples
+  --------
+  >>> source = 'def foo():\n  return "foo"'
+  >>> uses_function_def(source)
+  True
+  >>> uses_function_def(source, "foo")
+  True
+  >>> uses_function_def(source, "boo")
+  False
+  >>> source = 'foo = lambda x: "foo"'
+  >>> uses_function_def(source)
+  False
+  """
+  return uses(find_function_defs, code, match)
+
 def find_lambdas(code: str) -> list[Element]:
-  """Find lambdas within code.
+  """Check if there are lambdas in the code.
 
   Parameters
   ----------
@@ -172,3 +203,27 @@ def find_lambdas(code: str) -> list[Element]:
   query_result = xml_tree.xpath("//Lambda")
 
   return GradeCodeFound(code, query_result)
+
+def uses_lambda(code: str) -> bool:
+  """Find lambdas within code.
+
+  Parameters
+  ----------
+  code : str
+      the source code
+
+  Returns
+  -------
+  bool
+      True if found, False otherwise
+
+  Examples
+  --------
+  >>> source = 'add_two = lambda x: x + 2'
+  >>> uses_lambda(source)
+  True
+  >>> source = 'def add_two():\n  return x + 2'
+  >>> uses_lambda(source)
+  False
+  """
+  return uses(find_lambdas, code)
