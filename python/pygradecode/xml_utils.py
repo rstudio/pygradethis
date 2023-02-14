@@ -1,4 +1,5 @@
-from .ast_to_xml import Element, etree
+from lxml import etree
+from lxml.etree import Element
 
 ### XML Print methods
 

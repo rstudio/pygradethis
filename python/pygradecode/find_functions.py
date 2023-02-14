@@ -1,7 +1,93 @@
 from typing import Union
 
-from .ast_to_xml import xml, Element
-from .xml_classes import FoundElements
+from lxml.etree import Element
+from .ast_to_xml import xml
+from .xml_classes import GradeCodeFound
+
+def find_functions(code: str, match: str = None) -> Union[Element, None]:
+  """Find function calls within code.
+
+  Parameters
+  ----------
+  code : str
+      the source code
+  match : str, optional
+      a particular function name, by default None
+
+  Returns
+  -------
+  list[Element]
+      list of XML elements corresponding to function definitions
+  
+  Examples
+  --------
+  >>> source = 'sum([1,2,3])\nsum([1,2,3])\nlen([1,2,3])'
+  >>> find_functions(source)
+  ── pygradecode found ──
+  sum([1,2])
+  sum([1,2,3])
+  len([1,2,3])
+
+  ── Result 1 ──
+  sum([1,2])
+
+  ── Result 2 ──
+  sum([1,2,3])
+
+  ── Result 3 ──
+  len([1,2,3])
+  >>> find_functions(source, "sum")
+  ── pygradecode found ──
+  sum([1,2])
+  sum([1,2,3])
+  len([1,2,3])
+
+  ── Result 1 ──
+  sum([1,2])
+
+  ── Result 2 ──
+  sum([1,2,3])
+  """
+  if not isinstance(code, str):
+    return GradeCodeFound("", [])
+
+  xml_tree = xml(code)
+  xpath = "//Call/func/Name"
+  
+  if match is not None:
+    xpath = f'//Call//func/Name/id[.="{match}"]'
+    query_result = xml_tree.xpath(xpath)
+    if len(query_result) > 0:
+      # grab the parent of the id element in order to view the source text
+      # since id is not an ast.AST
+      query_result = [r.getparent() for r in query_result]
+  else:
+    query_result = xml_tree.xpath(xpath)
+
+  return GradeCodeFound(code, query_result)
+
+def uses_function(code: str, match: str = None) -> bool:
+  """Check if the code uses functions.
+
+  Parameters
+  ----------
+  code : str
+      the source code
+  match : str, optional
+      function name(s), by default None
+
+  Returns
+  -------
+  bool
+      True if found, False otherwise
+
+  Examples
+  --------
+  >>> uses_function(source, "round")
+  False
+  """
+  found = find_functions(code, match)
+  return len(found.elements) > 0
 
 def find_function_defs(code: str, match: str = None) -> Union[Element, None]:
   """Find function definitions within code.
@@ -20,7 +106,6 @@ def find_function_defs(code: str, match: str = None) -> Union[Element, None]:
   
   Examples
   --------
-
   >>> source = '\ndef foo():\n  return "foo"\n\ndef bar():\n  return "bar"\n'
   >>> find_function_defs(source)
   ── pygradecode found ──
@@ -41,7 +126,7 @@ def find_function_defs(code: str, match: str = None) -> Union[Element, None]:
     return "bar"
   """
   if not isinstance(code, str):
-    return FoundElements("", [])
+    return GradeCodeFound("", [])
 
   xml_tree = xml(code)
   xpath = "//FunctionDef"
@@ -49,8 +134,8 @@ def find_function_defs(code: str, match: str = None) -> Union[Element, None]:
     xpath = f"//FunctionDef[name='{match}']"
   
   query_result = xml_tree.xpath(xpath)
-  
-  return FoundElements(code, query_result)
+
+  return GradeCodeFound(code, query_result)
 
 def find_lambdas(code: str) -> list[Element]:
   """Find lambdas within code.
@@ -67,7 +152,6 @@ def find_lambdas(code: str) -> list[Element]:
 
   Examples
   --------
-
   >>> source = "add_two = lambda x: x + 1\nadd_two(1)"
   >>> find_lambdas(source)
   ── pygradecode found ──
@@ -82,9 +166,9 @@ def find_lambdas(code: str) -> list[Element]:
   add_two = lambda x: x + 2
   """
   if not isinstance(code, str):
-    return FoundElements("", [])
+    return GradeCodeFound("", [])
 
   xml_tree = xml(code)
   query_result = xml_tree.xpath("//Lambda")
 
-  return FoundElements(code, query_result)
+  return GradeCodeFound(code, query_result)

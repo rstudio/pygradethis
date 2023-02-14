@@ -3,7 +3,6 @@ import textwrap
 
 from typing import Union, List
 
-from lxml import etree
 from lxml.etree import Element, SubElement
 
 ATTRS = ("lineno", "col_offset", "end_lineno", "end_col_offset")
