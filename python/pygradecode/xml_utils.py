@@ -1,5 +1,72 @@
+import textwrap
+from typing import Union, List
+
 from lxml import etree
-from lxml.etree import Element
+from lxml.etree import _Element as Element
+
+def get_source_lines(src_lines: list[str], node: Element, dedent: bool = True) -> str:
+  code = "\n".join(src_lines)
+
+  # attempt to extract source code lines relevant to the target node
+  try:
+    # extract ranges
+    start_lineno = int(node.attrib["lineno"]) - 1
+    end_lineno = int(node.attrib["end_lineno"])
+    
+    # turn the relevant lines it into one string
+    code = "\n".join(src_lines[start_lineno:end_lineno])
+    if dedent:
+      code = textwrap.dedent(code)
+  except (AttributeError, KeyError):
+    # if unsuccessful, we will return the entire code itself
+    pass
+
+  return code
+
+def get_source(
+  code: str, xpath: str = None, target_node: Element = None
+) -> Union[List[str], str]:
+  """Return the source code for a particular XPath query or a target XML element.
+
+  Parameters
+  ----------
+  code : str
+      the source code
+  xpath : str, optional
+      an XPath query, by default None
+  target_node : Element, optional
+      a target XML element, by default None
+
+  Returns
+  -------
+  list[str] | str
+      Return a list of source code if there are multiple instances for an 
+      XPath query or, return a single piece of source code for a given target XML 
+      element node.
+  """
+  xml_tree = xml(code)
+
+  src_lines = code.splitlines()
+
+  if target_node is not None:
+    return get_source_lines(src_lines, target_node)
+
+  if xpath is not None:
+    sources = []
+    for node in xml_tree.xpath(xpath):
+      code = get_source_lines(src_lines, node)
+      sources.append((code, node.attrib))
+    return sources
+  
+  return code
+
+def get_node_source(code: str, target_node: Element) -> str:
+  target_code = get_source_lines(code.splitlines(), target_node)
+
+  start_col = int(target_node.attrib['col_offset'])
+  end_col = int(target_node.attrib['end_col_offset'])
+
+  return target_code[start_col:end_col]
 
 ### XML Print methods
 
