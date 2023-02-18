@@ -1,10 +1,13 @@
 import ast
+from typing import Optional
 
-from lxml.etree import Element, SubElement
+from lxml.etree import _Element as Element
+from lxml.etree import Element as element
+from lxml.etree import SubElement
 
 ATTRS = ("lineno", "col_offset", "end_lineno", "end_col_offset")
 
-def ast_node_attrs(ast_node):
+def ast_node_attrs(ast_node: ast.AST):
   attrs = {}
   for key in ATTRS:
     try:
@@ -13,11 +16,11 @@ def ast_node_attrs(ast_node):
       continue
   return attrs
 
-def visit_node(ast_node: ast.AST, parent_xml_node: Element = None) -> Element:
+def visit_node(ast_node: ast.AST, parent_xml_node: Optional[Element] = None) -> Element:
   xml_node_name = ast_node.__class__.__name__
 
   if parent_xml_node is None:
-    xml_node = Element(xml_node_name)
+    xml_node = element(xml_node_name)
   else:
     xml_node = SubElement(parent_xml_node, xml_node_name)
 
@@ -45,7 +48,7 @@ def visit_node(ast_node: ast.AST, parent_xml_node: Element = None) -> Element:
 
   return xml_node
 
-def xml(src: str) -> list[Element]:
+def xml(src: str) -> Element:
   """Return an XML tree of Python source code representing the AST.
 
   Parameters

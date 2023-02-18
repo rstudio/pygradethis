@@ -1,10 +1,15 @@
 import textwrap
-from typing import Union, List
+from typing import Union
 
+from .ast_to_xml import xml
 from lxml import etree
 from lxml.etree import _Element as Element
 
-def get_source_lines(src_lines: list[str], node: Element, dedent: bool = True) -> str:
+def get_source_lines(
+  src_lines: list[str],
+  node: Element,
+  dedent: bool = True
+) -> str:
   code = "\n".join(src_lines)
 
   # attempt to extract source code lines relevant to the target node
@@ -24,8 +29,8 @@ def get_source_lines(src_lines: list[str], node: Element, dedent: bool = True) -
   return code
 
 def get_source(
-  code: str, xpath: str = None, target_node: Element = None
-) -> Union[List[str], str]:
+  code: str, node: Element, xpath: str = ""
+) -> Union[list[str], str]:
   """Return the source code for a particular XPath query or a target XML element.
 
   Parameters
@@ -34,7 +39,7 @@ def get_source(
       the source code
   xpath : str, optional
       an XPath query, by default None
-  target_node : Element, optional
+  node : Element, optional
       a target XML element, by default None
 
   Returns
@@ -48,23 +53,23 @@ def get_source(
 
   src_lines = code.splitlines()
 
-  if target_node is not None:
-    return get_source_lines(src_lines, target_node)
+  if node is not None:
+    return get_source_lines(src_lines, node)
 
-  if xpath is not None:
+  if xpath != "":
     sources = []
     for node in xml_tree.xpath(xpath):
       code = get_source_lines(src_lines, node)
-      sources.append((code, node.attrib))
+      sources.append(code)
     return sources
   
   return code
 
-def get_node_source(code: str, target_node: Element) -> str:
-  target_code = get_source_lines(code.splitlines(), target_node)
+def get_node_source(code: str, node: Element) -> str:
+  target_code = get_source_lines(code.splitlines(), node)
 
-  start_col = int(target_node.attrib['col_offset'])
-  end_col = int(target_node.attrib['end_col_offset'])
+  start_col = int(node.attrib['col_offset'])
+  end_col = int(node.attrib['end_col_offset'])
 
   return target_code[start_col:end_col]
 

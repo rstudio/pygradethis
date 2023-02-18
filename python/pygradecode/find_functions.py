@@ -1,11 +1,10 @@
-from typing import Union
-
 from lxml.etree import _Element as Element
+
 from .ast_to_xml import xml
 from .xml_classes import GradeCodeFound
 from .find_utils import uses
 
-def find_functions(code: str, match: str = None) -> Union[Element, None]:
+def find_functions(code: str, match: str = "") -> GradeCodeFound:
   """Find function calls in the code.
 
   Parameters
@@ -54,20 +53,21 @@ def find_functions(code: str, match: str = None) -> Union[Element, None]:
 
   xml_tree = xml(code)
   xpath = "//Call/func/Name"
+  query_result = []
   
-  if match is not None:
+  if match != "":
     xpath = f'//Call//func/Name/id[.="{match}"]'
-    query_result = xml_tree.xpath(xpath)
-    if len(query_result) > 0:
+    id_nodes = xml_tree.xpath(xpath)
+    if len(id_nodes) > 0:
       # grab the parent of the id element in order to view the source text
       # since id is not an ast.AST
-      query_result = [r.getparent() for r in query_result]
+      query_result  = [get_call_from_id(n) for n in id_nodes]
   else:
     query_result = xml_tree.xpath(xpath)
 
   return GradeCodeFound(code, query_result)
 
-def uses_function(code: str, match: str = None) -> bool:
+def uses_function(code: str, match: str = "") -> bool:
   """Check if the code uses functions.
 
   Parameters
@@ -92,7 +92,7 @@ def uses_function(code: str, match: str = None) -> bool:
   """
   return uses(find_functions, code, match)
 
-def find_lambdas(code: str) -> list[Element]:
+def find_lambdas(code: str) -> GradeCodeFound:
   """Check if there are lambdas in the code.
 
   Parameters
@@ -151,3 +151,12 @@ def uses_lambda(code: str) -> bool:
   False
   """
   return uses(find_lambdas, code)
+
+# helper function to get the function <Call> given the <id> of function
+def get_call_from_id(node):
+  # return current node if it is a Call
+  if node.tag == 'Call':
+    return node
+  
+  # recurse on parent
+  return get_call_from_id(node.getparent())

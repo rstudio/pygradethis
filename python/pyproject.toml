@@ -1,3 +1,8 @@
 [build-system]
 requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
 build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+# rules: https://beta.ruff.rs/docs/rules/
+# F403: from {name} import * used; unable to detect undefined names
+ignore = ["F403"]
