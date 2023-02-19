@@ -22,31 +22,44 @@ def find_arguments(code: str, match: str = "") -> GradeCodeFound:
   
   Examples
   --------
-  >>> code = 'sum([1,2,3])\nlen([1,2,3])'
-  >>> find_arguments(code, 'sum')
+  >>> code = "sum([1, round(2.5), 3])\nprint('Hello', 'World!', sep=', ')"
+  >>> find_arguments(code)
   ── pygradecode found ──
-  sum([1,2,3])
-  len([1,2,3])
+  sum([1, round(2.5), 3])
+  print('Hello', 'World!', sep=', ')
 
   ── Result 1 ──
-  sum([1,2])
+  [1, round(2.5), 3]
 
   ── Result 2 ──
-  sum([1,2,3])
+  2.5
 
   ── Result 3 ──
-  len([1,2,3])
-  >>> find_arguments(code, "sum")
+  'Hello'
+
+  ── Result 4 ──
+  'World!'
+
+  ── Result 5 ──
+  sep=', '
+  >>> find_arguments(code, 'sum')
   ── pygradecode found ──
-  sum([1,2])
-  sum([1,2,3])
-  len([1,2,3])
+  sum([1, round(2.5), 3])
+  print('Hello', 'World!', sep=', ')
+
+  Found 1 result
 
   ── Result 1 ──
-  sum([1,2])
+  [1, round(2.5), 3]
+  >>> find_arguments(code, 'round')
+  ── pygradecode found ──
+  sum([1, round(2.5), 3])
+  print('Hello', 'World!', sep=', ')
 
-  ── Result 2 ──
-  sum([1,2,3])
+  Found 1 result
+
+  ── Result 1 ──
+  2.5
   """
   if not isinstance(code, str):
     return GradeCodeFound()
@@ -66,13 +79,13 @@ def find_arguments(code: str, match: str = "") -> GradeCodeFound:
       # for every Call node, we want to combine the args / keywords because
       # these are 2 separate nodes in Python
       query_result = [
-        x_tree.xpath(".//args/*|.//keywords/*")
+        x_tree.xpath("./args/*|./keywords/*")
         for x_tree in call_nodes
       ]
       query_result = list(itertools.chain(*query_result))
   else:
     query_result = [
-      x_tree.xpath(".//args/*|.//keywords/*")
+      x_tree.xpath("./args/*|./keywords/*")
       for x_tree in xml_tree.xpath("//Call")
     ]
     query_result = list(itertools.chain(*query_result))
