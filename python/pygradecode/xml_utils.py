@@ -1,9 +1,11 @@
 import textwrap
 from typing import Union
 
-from .ast_to_xml import xml
 from lxml import etree
 from lxml.etree import _Element as Element
+
+from .ast_to_xml import xml
+from .find_utils import get_ancestor_node
 
 def get_source_lines(
   src_lines: list[str],
@@ -68,9 +70,13 @@ def get_source(
 def get_node_source(code: str, node: Element) -> str:
   target_code = get_source_lines(code.splitlines(), node)
 
-  start_col = int(node.attrib['col_offset'])
-  end_col = int(node.attrib['end_col_offset'])
-
+  try:
+    node_with_location = get_ancestor_node(node)
+    start_col = int(node_with_location.attrib['col_offset'])
+    end_col = int(node_with_location.attrib['end_col_offset'])
+  except Exception:
+    return code
+    
   return target_code[start_col:end_col]
 
 ### XML Print methods

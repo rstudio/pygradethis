@@ -3,6 +3,7 @@ from lxml.etree import _Element as Element
 
 from .ast_to_xml import xml
 from .find_functions import get_call_from_id
+from .find_utils import uses
 from .xml_classes import GradeCodeFound
 
 def find_arguments(code: str, match: str = "") -> GradeCodeFound:
@@ -13,12 +14,12 @@ def find_arguments(code: str, match: str = "") -> GradeCodeFound:
   code : str
       the source code
   match : str, optional
-      a particular function name, by default None
+      a particular argument name, by default None
 
   Returns
   -------
   list[Element]
-      list of XML elements corresponding to function definitions
+      list of XML elements corresponding to function arguments
   
   Examples
   --------
@@ -66,7 +67,11 @@ def find_arguments(code: str, match: str = "") -> GradeCodeFound:
 
   xml_tree = xml(code)
   query_result: list[Element] = []
-  
+
+  # TODO instead of matching on a function, we should be matching on an argument name
+  # OR
+  # TODO If `match` is an empty string, find unnamed arguments
+
   if match != "":
     # we have to drill down to <id> node to check if a particular function name exists
     xpath = f'//Call//func/Name/id[.="{match}"]'
@@ -91,3 +96,28 @@ def find_arguments(code: str, match: str = "") -> GradeCodeFound:
     query_result = list(itertools.chain(*query_result))
 
   return GradeCodeFound(code, query_result)
+
+def uses_argument(code: str, match: str = "") -> bool:
+  """Check if the code has arguments.
+
+  Parameters
+  ----------
+  code : str
+      the source code
+  match : str, optional
+      argument name(s), by default None
+
+  Returns
+  -------
+  bool
+      True if found, False otherwise
+
+  Examples
+  --------
+  >>> code = "print('Hello', 'World!', sep=', ')"
+  >>> uses_argument(code, "sum")
+  True
+  >>> uses_argument(code, "round")
+  False
+  """
+  return uses(find_arguments, code, match)
