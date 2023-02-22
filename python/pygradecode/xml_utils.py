@@ -76,8 +76,14 @@ def get_node_source(code: str, node: Element) -> str:
     end_col = int(node_with_location.attrib['end_col_offset'])
   except Exception:
     return code
+
+  unescaped = (
+    target_code[start_col:end_col]
+      .encode('raw_unicode_escape')
+      # .decode('unicode_escape')
+  )
     
-  return target_code[start_col:end_col]
+  return unescaped
 
 ### XML Print methods
 
