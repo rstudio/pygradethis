@@ -1,5 +1,5 @@
 from .ast_to_xml import xml
-from .xml_classes import GradeCodeFound
+from .grade_code_found import GradeCodeFound
 from .find_utils import uses
 
 def find_functions(code: str, match: str = "") -> GradeCodeFound:
@@ -48,22 +48,28 @@ def find_functions(code: str, match: str = "") -> GradeCodeFound:
   """
   if not isinstance(code, str):
     return GradeCodeFound()
+  
+  gcf = GradeCodeFound(code)
+
+  request_type = 'functions'
+  request = match
 
   xml_tree = xml(code)
   xpath = "//Call/func/Name"
-  query_result = []
   
-  if match != "":
-    xpath = f'//Call//func/Name/id[.="{match}"]'
+  result = []
+  
+  if request != "":
+    xpath = f'//Call//func/Name/id[.="{request}"]'
     id_nodes = xml_tree.xpath(xpath)
     if len(id_nodes) > 0:
       # grab the parent of the id element in order to view the source text
       # since id is not an ast.AST
-      query_result  = [get_call_from_id(n) for n in id_nodes]
+      result  = [get_call_from_id(n) for n in id_nodes]
   else:
-    query_result = xml_tree.xpath(xpath)
+    result = xml_tree.xpath(xpath)
 
-  return GradeCodeFound(code, query_result)
+  return gcf.push(request_type=request_type, request=request, result=result)
 
 def uses_function(code: str, match: str = "") -> bool:
   """Check if the code uses functions.
@@ -122,9 +128,11 @@ def find_lambdas(code: str) -> GradeCodeFound:
     return GradeCodeFound()
 
   xml_tree = xml(code)
-  query_result = xml_tree.xpath("//Lambda")
+  
+  result = xml_tree.xpath("//Lambda")
 
-  return GradeCodeFound(code, query_result)
+  return GradeCodeFound(code, 
+  result)
 
 def uses_lambda(code: str) -> bool:
   """Find lambdas within code.

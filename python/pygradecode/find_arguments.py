@@ -4,7 +4,7 @@ from lxml.etree import _Element as Element
 from .ast_to_xml import xml
 from .find_functions import get_call_from_id
 from .find_utils import uses
-from .xml_classes import GradeCodeFound
+from .grade_code_found import GradeCodeFound
 
 def find_arguments(code: str, match: str = "") -> GradeCodeFound:
   """Find arguments of function calls in the code.
