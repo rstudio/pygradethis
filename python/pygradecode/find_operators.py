@@ -44,6 +44,11 @@ def get_operator(op: str) -> str:
 def find_operators(code: str, match: str = "") -> GradeCodeFound:
   """Find operators in the code.
 
+  NOTE: currently, the output is not super helpful because we're
+  printing the first ancestor which has the location attributes
+  to return source text. In the future, this will be solved by
+  incorporating `rich` to bold/underline within the original code text.
+
   Parameters
   ----------
   code : str
@@ -55,7 +60,7 @@ def find_operators(code: str, match: str = "") -> GradeCodeFound:
   -------
   list[Element]
       list of XML elements corresponding to operators
-  
+
   Examples
   --------
   >>> code = "-1 + 2 * 3 // 4"
@@ -74,6 +79,10 @@ def find_operators(code: str, match: str = "") -> GradeCodeFound:
 
   ── Result 4 ──
   2 * 3 // 4
+  >>> result = find_operators(code) # store output
+  >>> result.elementss              # to view elements
+[<Element USub at 0x10352b280>, <Element Add at 0x10352b440>,
+ <Element Mult at 0x10352b5c0>, <Element FloorDiv at 0x10352b380>]
   >>> find_operators(code, "-")
   ── pygradecode found ──
   -1 + 2 * 3 // 4
@@ -82,6 +91,9 @@ def find_operators(code: str, match: str = "") -> GradeCodeFound:
 
   ── Result 1 ──
   -1
+  >>> x = find_operators(code, "-") # store output
+  >>> x.elements                    # to view elements
+  [<Element USub at 0x10352afc0>]
   >>> find_operators(code, "//")
   ── pygradecode found ──
   -1 + 2 * 3 // 4
