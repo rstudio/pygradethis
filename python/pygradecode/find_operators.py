@@ -2,7 +2,7 @@ from lxml.etree import _Element as Element
 
 from .ast_to_xml import xml
 from .find_utils import uses
-from .xml_classes import GradeCodeFound
+from .grade_code_found import GradeCodeFound
 
 # operator symbol to ast node name
 OPERATORS = {
