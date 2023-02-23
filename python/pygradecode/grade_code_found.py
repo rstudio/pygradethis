@@ -59,16 +59,16 @@ class GradeCodeFound:
       return "No request has been made yet on the code"
 
     # code
-    print(f"── pygradecode found ──\n{self.code.strip()}\n")
+    intro_str = f"── pygradecode found ──\n{self.code.strip()}\n"
 
     # type of request and specific request (if any)
-    print(f"── Request ──\n{last_type} {last_request}")
-    print(
+    request_str = f"── Request ──\n{last_type} {last_request}"
+    num_results_str = (
       f"Found {len(last_result)} {'result' if len(last_result) == 1 else 'results'}.\n"
     )
 
     # result
-    output = []
+    output = [intro_str, request_str, num_results_str]
     for i, element_source in enumerate(self.get_result_source(last_result)):
       output.append(f"── Result {i + 1} ──\n{element_source}\n")
     return "\n".join(output)

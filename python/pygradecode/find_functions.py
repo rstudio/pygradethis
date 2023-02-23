@@ -1,3 +1,4 @@
+from copy import copy
 from typing import Union
 
 from .ast_to_xml import xml
@@ -51,14 +52,13 @@ def find_functions(code: Union[str, GradeCodeFound], match: str = "") -> GradeCo
   if not isinstance(code, str) and not isinstance(code, GradeCodeFound):
     raise Exception("`code` should be a `str` or `GradeCodeFound`")
   
-  gcf = code if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
+  gcf = copy(code) if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
+  xml_tree = xml(gcf.code) if isinstance(code, GradeCodeFound) else xml(code)
 
   request_type = 'functions'
   request = match
-
-  xml_tree = xml(gcf.code) if isinstance(code, GradeCodeFound) else xml(code)
-  
   result = []
+
   if request != "":
     xpath = f'//Call//func/Name/id[.="{request}"]'
     id_nodes = xml_tree.xpath(xpath)
@@ -127,10 +127,11 @@ def find_lambdas(code: str) -> GradeCodeFound:
   if not isinstance(code, str) and not isinstance(code, GradeCodeFound):
     raise Exception("`code` should be a `str` or `GradeCodeFound`")
   
-  gcf = code if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
+  gcf = copy(code) if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
   xml_tree = xml(gcf.code) if isinstance(code, GradeCodeFound) else xml(code)
 
   request_type = 'lambda'
+  result = []
 
   if gcf.has_previous_request():
     result = flatten_list([r.xpath(".//Lambda") for r in gcf.last_result])
