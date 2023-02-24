@@ -88,7 +88,7 @@ problem_message.wrong_index_problem <- function(problem, ...) {
   # more feedback on what the difference is
   extra <- NULL
   if (!is.null(problem$actual) && !is.null(problem$expected)) {
-    extra <- tblcheck::tblcheck_message(
+    extra <- tblcheck::problem_message(
       tblcheck::vec_check(problem$actual, problem$expected, env = env)
     )
   }
@@ -128,7 +128,7 @@ problem_message.wrong_values_problem <- function(problem, ...) {
   # more feedback on what the difference is
   extra <- NULL
   if (!is.null(problem$actual) && !is.null(problem$expected)) {
-    extra <- tblcheck::tblcheck_message(
+    extra <- tblcheck::problem_message(
       tblcheck::vec_check(problem$actual, problem$expected, env = env)
     )
   }
@@ -139,7 +139,7 @@ problem_message.wrong_values_problem <- function(problem, ...) {
 problem_message.wrong_series_problem <- function(problem, ...) {
   extra <- NULL
   if (!is.null(problem$actual) && !is.null(problem$expected)) {
-    extra <- tblcheck::tblcheck_message(
+    extra <- tblcheck::problem_message(
       tblcheck::vec_check(problem$actual, problem$expected, env = env)
     )
   }

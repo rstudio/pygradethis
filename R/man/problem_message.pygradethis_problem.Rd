@@ -2,10 +2,10 @@
 % Please edit documentation in R/problem.R
 \name{problem_message.pygradethis_problem}
 \alias{problem_message.pygradethis_problem}
-\title{Generic with the code}
+\title{Generic problem with the result}
 \usage{
 \method{problem_message}{pygradethis_problem}(problem, ...)
 }
 \description{
-Generic with the code
+Generic problem with the result
 }

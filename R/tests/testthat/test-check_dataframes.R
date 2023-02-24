@@ -1,7 +1,7 @@
 ### Checking ----
 
 test_that("py_check_index() works", {
-  check_index_correct <- callr::r_safe(function() {
+  check_index_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- reticulate::py_eval(
@@ -16,7 +16,7 @@ test_that("py_check_index() works", {
   })
   testthat::expect_null(check_index_correct)
 
-  check_index_incorrect <- callr::r_safe(function() {
+  check_index_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- reticulate::py_eval(
@@ -34,7 +34,7 @@ test_that("py_check_index() works", {
 })
 
 test_that("py_check_columns() works on DataFrame with no Index", {
-  check_columns_correct <- callr::r_safe(function() {
+  check_columns_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -49,7 +49,7 @@ test_that("py_check_columns() works on DataFrame with no Index", {
   })
   testthat::expect_null(check_columns_correct)
 
-  check_columns_incorrect <- callr::r_safe(function() {
+  check_columns_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -67,7 +67,7 @@ test_that("py_check_columns() works on DataFrame with no Index", {
 })
 
 test_that("py_check_columns() ignores columns with an Index", {
-  check_columns_incorrect <- callr::r_safe(function() {
+  check_columns_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- reticulate::py_eval(
@@ -84,7 +84,7 @@ test_that("py_check_columns() ignores columns with an Index", {
 })
 
 test_that("py_check_values() works", {
-  check_values_correct <- callr::r_safe(function() {
+  check_values_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -99,7 +99,7 @@ test_that("py_check_values() works", {
   })
   testthat::expect_null(check_values_correct)
 
-  check_values_incorrect <- callr::r_safe(function() {
+  check_values_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -115,7 +115,7 @@ test_that("py_check_values() works", {
   testthat::expect_true(is_pygradethis_problem(check_values_incorrect))
   testthat::expect_equal(check_values_incorrect$type, "wrong_values")
 
-  check_values_incorrect <- callr::r_safe(function() {
+  check_values_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -133,7 +133,7 @@ test_that("py_check_values() works", {
 })
 
 test_that("py_check_dataframe() works", {
-  check_dataframe_correct <- callr::r_safe(function() {
+  check_dataframe_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -148,7 +148,7 @@ test_that("py_check_dataframe() works", {
   })
   testthat::expect_null(check_dataframe_correct)
 
-  check_dataframe_incorrect <- callr::r_safe(function() {
+  check_dataframe_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -164,7 +164,7 @@ test_that("py_check_dataframe() works", {
   testthat::expect_true(tblcheck::is_tblcheck_problem(check_dataframe_incorrect))
   testthat::expect_equal(check_dataframe_incorrect$type, "names")
 
-  check_dataframe_incorrect <- callr::r_safe(function() {
+  check_dataframe_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -182,7 +182,7 @@ test_that("py_check_dataframe() works", {
 })
 
 test_that("py_check_series() works", {
-  check_series_correct <- callr::r_safe(function() {
+  check_series_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -197,7 +197,7 @@ test_that("py_check_series() works", {
   })
   testthat::expect_null(check_series_correct)
 
-  check_series_incorrect <- callr::r_safe(function() {
+  check_series_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -217,7 +217,7 @@ test_that("py_check_series() works", {
 ### Grading ----
 
 test_that("py_grade_index() works on DataFrame with no Index", {
-  grade_index_correct <- callr::r_safe(function() {
+  grade_index_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- reticulate::py_eval(
@@ -232,7 +232,7 @@ test_that("py_grade_index() works on DataFrame with no Index", {
   })
   testthat::expect_null(grade_index_correct)
 
-  grade_index_incorrect <- callr::r_safe(function() {
+  grade_index_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- reticulate::py_eval(
@@ -250,7 +250,7 @@ test_that("py_grade_index() works on DataFrame with no Index", {
 })
 
 test_that("py_grade_index() works on DataFrame with an Index", {
-  grade_index_correct <- callr::r_safe(function() {
+  grade_index_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- py_eval('pd.DataFrame(np.random.randn(3, 8), index=["A", "B", "C"])')
@@ -259,7 +259,7 @@ test_that("py_grade_index() works on DataFrame with an Index", {
   })
   testthat::expect_null(grade_index_correct)
 
-  grade_index_incorrect <- callr::r_safe(function() {
+  grade_index_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- py_eval('pd.DataFrame(np.random.randn(3, 8), index=["A", "B", "C"])')
@@ -271,7 +271,7 @@ test_that("py_grade_index() works on DataFrame with an Index", {
 })
 
 test_that("py_grade_columns() works on DataFrame columns", {
-  grade_columns_correct <- callr::r_safe(function() {
+  grade_columns_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- reticulate::py_eval(
@@ -287,7 +287,7 @@ test_that("py_grade_columns() works on DataFrame columns", {
   testthat::expect_null(grade_columns_correct)
 
   # we currently ignore Index
-  grade_columns_correct <- callr::r_safe(function() {
+  grade_columns_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- reticulate::py_eval(
@@ -302,7 +302,7 @@ test_that("py_grade_columns() works on DataFrame columns", {
   })
   testthat::expect_null(grade_columns_correct)
 
-  grade_columns_incorrect <- callr::r_safe(function() {
+  grade_columns_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- reticulate::py_eval(
@@ -320,7 +320,7 @@ test_that("py_grade_columns() works on DataFrame columns", {
 })
 
 test_that("py_grade_columns() works on MultiIndex columns", {
-  grade_columns_correct <- callr::r_safe(function() {
+  grade_columns_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     py_env <- reticulate::py_run_string('
@@ -339,7 +339,7 @@ solution = pd.DataFrame(np.random.randn(3, 8), index=["A", "B", "C"], columns=in
   })
   testthat::expect_null(grade_columns_correct)
 
-  grade_columns_incorrect <- callr::r_safe(function() {
+  grade_columns_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     py_env <- reticulate::py_run_string('
@@ -362,7 +362,7 @@ solution = pd.DataFrame(values, index=["A", "B", "C"])
 })
 
 test_that("py_grade_values() works", {
-  grade_values_correct <- callr::r_safe(function() {
+  grade_values_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- reticulate::py_eval(
@@ -377,7 +377,7 @@ test_that("py_grade_values() works", {
   })
   testthat::expect_null(grade_values_correct)
 
-  grade_values_incorrect <- callr::r_safe(function() {
+  grade_values_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- reticulate::py_eval(
@@ -395,7 +395,7 @@ test_that("py_grade_values() works", {
 })
 
 test_that("py_grade_dataframe() works on MultiIndex", {
-  grade_dataframe_correct <- callr::r_safe(function() {
+  grade_dataframe_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     reticulate::py_run_string('
@@ -416,7 +416,7 @@ solution = pd.DataFrame(values, index=["A", "B", "C"], columns=index)
   testthat::expect_null(grade_dataframe_correct)
 
   # this should've been yield a fail message.
-  grade_dataframe_incorrect <- callr::r_safe(function() {
+  grade_dataframe_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     reticulate::py_run_string('
@@ -439,7 +439,7 @@ solution = pd.DataFrame(values, index=["A", "B", "C"])
 })
 
 test_that("py_grade_dataframe() works", {
-  grade_dataframe_correct <- callr::r_safe(function() {
+  grade_dataframe_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -454,7 +454,7 @@ test_that("py_grade_dataframe() works", {
   })
   testthat::expect_null(grade_dataframe_correct)
 
-  grade_dataframe_incorrect <- callr::r_safe(function() {
+  grade_dataframe_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -472,7 +472,7 @@ test_that("py_grade_dataframe() works", {
 })
 
 test_that("py_grade_series() works", {
-  grade_series_correct <- callr::r_safe(function() {
+  grade_series_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -487,7 +487,7 @@ test_that("py_grade_series() works", {
   })
   testthat::expect_null(grade_series_correct)
 
-  grade_series_correct <- callr::r_safe(function() {
+  grade_series_correct <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -502,7 +502,7 @@ test_that("py_grade_series() works", {
   })
   testthat::expect_null(grade_series_correct)
 
-  grade_series_incorrect <- callr::r_safe(function() {
+  grade_series_incorrect <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -522,7 +522,7 @@ test_that("py_grade_series() works", {
 ### Catching issues ----
 
 test_that("py_grade_index() handles incorrect types", {
-  grade_index_bad_obj_type <- callr::r_safe(function() {
+  grade_index_bad_obj_type <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- reticulate::py_eval(
@@ -535,10 +535,11 @@ test_that("py_grade_index() handles incorrect types", {
     )
     pygradethis::py_grade_index(.result, .solution)
   })
+  testthat::expect_match(grade_index_bad_obj_type$message, "I expected a `DataFrame` but the object was a `str`.")
   testthat::expect_true(inherits(grade_index_bad_obj_type, "gradethis_graded"))
   testthat::expect_false(grade_index_bad_obj_type$correct)
 
-  grade_index_bad_exp_type <- callr::r_safe(function() {
+  grade_index_bad_exp_type <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- reticulate::py_eval(
@@ -556,7 +557,7 @@ test_that("py_grade_index() handles incorrect types", {
 })
 
 test_that("py_grade_values() handles incorrect types", {
-  grade_values_bad_obj_type <- callr::r_safe(function() {
+  grade_values_bad_obj_type <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- reticulate::py_eval(
@@ -569,10 +570,11 @@ test_that("py_grade_values() handles incorrect types", {
     )
     pygradethis::py_grade_values(.result, .solution)
   })
+  testthat::expect_match(grade_values_bad_obj_type$message, "I expected a `DataFrame` but the object was a `str`.")
   testthat::expect_true(inherits(grade_values_bad_obj_type, "gradethis_graded"))
-  testthat::expect_equal(grade_values_bad_obj_type$correct, logical())
+  testthat::expect_false(grade_values_bad_obj_type$correct)
 
-  grade_values_bad_exp_type <- callr::r_safe(function() {
+  grade_values_bad_exp_type <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     .result <- reticulate::py_eval(
@@ -590,7 +592,7 @@ test_that("py_grade_values() handles incorrect types", {
 })
 
 test_that("py_grade_series() handles incorrect types", {
-  grade_series_bad_obj_type <- callr::r_safe(function() {
+  grade_series_bad_obj_type <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -603,10 +605,11 @@ test_that("py_grade_series() handles incorrect types", {
     )
     pygradethis::py_grade_series(.result, .solution)
   })
+  testthat::expect_match(grade_series_bad_obj_type$message, "I expected a `Series` but the object was a `str`.")
   testthat::expect_true(inherits(grade_series_bad_obj_type, "gradethis_graded"))
   testthat::expect_false(grade_series_bad_obj_type$correct)
 
-  grade_series_bad_exp_type <- callr::r_safe(function() {
+  grade_series_bad_exp_type <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
@@ -624,8 +627,7 @@ test_that("py_grade_series() handles incorrect types", {
 })
 
 test_that("py_grade_dataframe() handles incorrect types", {
-  grade_dataframe_bad_obj_type <- callr::r_safe(function() {
-    library(reticulate)
+  grade_dataframe_bad_obj_type <- with_py_clear_env({
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
       "'bad input'",
@@ -640,8 +642,7 @@ test_that("py_grade_dataframe() handles incorrect types", {
   testthat::expect_true(inherits(grade_dataframe_bad_obj_type, "gradethis_graded"))
   testthat::expect_false(grade_dataframe_bad_obj_type$correct)
 
-  grade_dataframe_bad_exp_type <- callr::r_safe(function() {
-    library(reticulate)
+  grade_dataframe_bad_exp_type <- with_py_clear_env({
     reticulate::py_run_string("import pandas as pd; import numpy as np")
     .result <- reticulate::py_eval(
       "pd.DataFrame({'a':[1, 2, 3]})",
