@@ -81,7 +81,6 @@ py_get_values <- function(data) {
   data$values
 }
 
-
 #' Check and return a problem if the object is not the expected type
 #'
 #' This function is useful for any py_check_*() functions to validate
@@ -98,11 +97,13 @@ py_return_if_not_type <- function(object, expected_type, problem_type) {
     if (is_py_object(object)) {
       pygradethis::get_friendly_class(object)
     } else {
-      # when possible we convert the student's object which goes through
+      # when possible, we convert the student's object which goes through
       # `pygradethis::py_to_r` where we already set the appropriate class name
       # dispatched via the S4 generic for the particular type (see py_friendly_class.R)
       class(object)
     }
+
+  # if there is a difference of type return a problem
   if (!identical(object_type, expected_type)) {
     return(problem(
         type = problem_type,
