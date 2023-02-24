@@ -1,6 +1,6 @@
 test_that("py_to_r() translates DataFrames", {
   # NOTE: to be safe, we isolate reticulate calls to a fresh R process
-  py_tbl_df <- callr::r_safe(function() {
+  py_tbl_df <- with_py_clear_env({
     library(reticulate)
     # setup Python libraries
     reticulate::py_run_string('import pandas as pd; import numpy as np')
@@ -15,7 +15,7 @@ test_that("py_to_r() translates DataFrames", {
 })
 
 test_that("py_to_r() translates Series", {
-  py_series <- callr::r_safe(function() {
+  py_series <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     pygradethis::py_to_r(reticulate::py_eval(
@@ -28,7 +28,7 @@ test_that("py_to_r() translates Series", {
 })
 
 test_that("py_to_r() translates DataFrames w/ a MultiIndex", {
-  py_multi_index <- callr::r_safe(function() {
+  py_multi_index <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     py_multi_df <- reticulate::py_run_string(
@@ -50,7 +50,7 @@ test_that("py_to_r() translates DataFrames w/ a MultiIndex", {
 })
 
 test_that("py_to_tbl() translates DataFrame to tibble without groups", {
-  py_tbl_df <- callr::r_safe(function() {
+  py_tbl_df <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     pygradethis::py_to_tbl(reticulate::py_eval(
@@ -70,7 +70,7 @@ test_that("py_to_tbl() translates DataFrame to tibble without groups", {
 })
 
 testthat::test_that("py_to_tbl() translates DataFrame to tibble with single group", {
-  py_tbl_df <- callr::r_safe(function() {
+  py_tbl_df <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     py_df <- reticulate::py_eval(
@@ -89,7 +89,7 @@ testthat::test_that("py_to_tbl() translates DataFrame to tibble with single grou
 })
 
 testthat::test_that("py_to_tbl() translates DataFrame to tibble with multiple groups", {
-  py_tbl_df <- callr::r_safe(function() {
+  py_tbl_df <- with_py_clear_env({
     library(reticulate)
     reticulate::py_run_string('import pandas as pd; import numpy as np')
     py_df <- reticulate::py_eval('(

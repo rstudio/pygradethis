@@ -81,6 +81,41 @@ py_get_values <- function(data) {
   data$values
 }
 
+#' Check and return a problem if the object is not the expected type
+#'
+#' This function is useful for any py_check_*() functions to validate
+#' the object before moving on to grading.
+#'
+#' @param object any Python or R object.
+#' @param expected_type A `character` for the class name (e.g. 'DataFrame')
+#' @param problem_type A `character` for the problem to generate (e.g. 'wrong_index')
+#'
+#' @return a `NULL` if no problem, else a `pygradethis::problem`
+#' @noRd
+py_return_if_not_type <- function(object, expected_type, problem_type) {
+  object_type <-
+    if (is_py_object(object)) {
+      pygradethis::get_friendly_class(object)
+    } else {
+      # when possible, we convert the student's object which goes through
+      # `pygradethis::py_to_r` where we already set the appropriate class name
+      # dispatched via the S4 generic for the particular type (see py_friendly_class.R)
+      class(object)
+    }
+
+  # if there is a difference of type return a problem
+  if (!identical(object_type, expected_type)) {
+    return(problem(
+        type = problem_type,
+        message = glue::glue(
+          "I expected a `{expected_type}` but the object was a `{object_type}`."
+        )
+    ))
+  }
+
+  NULL
+}
+
 #' Checks that the Index of two DataFrame/Series are the same.
 #'
 #' Extracts the values out of the Index to do the check.
@@ -121,6 +156,11 @@ py_check_index <- function(
 
   left_vals <- NULL
   right_vals <- NULL
+
+  # return if the object is not a DataFrame
+  return_if_problem(
+    py_return_if_not_type(object, "DataFrame", "wrong_index")
+  )
 
   # validate input types / catch any errors to get values
   return_if_internal_problem({
@@ -220,6 +260,11 @@ py_check_columns <- function(
 
   obj_vals <- NULL
   exp_vals <- NULL
+
+  # return if the object is not a DataFrame
+  return_if_problem(
+    py_return_if_not_type(object, "DataFrame", "wrong_columns")
+  )
 
   # validate input types / catch any errors to get values
   return_if_internal_problem({
@@ -325,6 +370,11 @@ py_check_values <- function(
 
   obj_vals <- NULL
   exp_vals <- NULL
+
+  # return if the object is not a DataFrame
+  return_if_problem(
+    py_return_if_not_type(object, "DataFrame", "wrong_values")
+  )
 
   # validate input types
   return_if_internal_problem({
@@ -445,6 +495,11 @@ py_check_series <- function(
 ) {
   object <- get_python_result(object, env)
   expected <- get_python_solution(expected, env)
+
+  # return if the object is not a Series
+  return_if_problem(
+    py_return_if_not_type(object, "Series", "wrong_series")
+  )
 
   # validate input types
   return_if_internal_problem({
