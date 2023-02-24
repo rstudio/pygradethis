@@ -242,7 +242,7 @@ flatten_py_dataframe <- function(data) {
       data <- data$reset_index()
       # convert to tibble
       tbl <- tibble::as_tibble(reticulate::py_to_r(data))
-      tbl <- dplyr::group_by(tbl, dplyr::across(group_vars))
+      tbl <- dplyr::group_by(tbl, dplyr::across(tidyselect::all_of(group_vars)))
       class(tbl) <- append(c("py_grouped_df", "py_tbl_df"), class(tbl))
       attr(tbl, "pandas.index") <- NULL
       return(tbl)
