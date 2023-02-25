@@ -4,7 +4,7 @@ from pygradecode.find_functions import (
   find_functions, uses_function, 
   find_lambdas, uses_lambda
 )
-from pygradecode.xml_classes import GradeCodeFound
+from pygradecode.grade_code_found import GradeCodeFound
 
 def test_find_functions_simple():
   # function calls that are not nested

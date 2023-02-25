@@ -1,14 +1,16 @@
-from .ast_to_xml import xml
-from .xml_classes import GradeCodeFound
-from .find_utils import uses
+from copy import copy
 
-def find_functions(code: str, match: str = "") -> GradeCodeFound:
+from .ast_to_xml import xml
+from .grade_code_found import GradeCodeFound
+from .find_utils import uses, flatten_list
+
+def find_functions(code: str | GradeCodeFound, match: str = "") -> GradeCodeFound:
   """Find function calls in the code.
 
   Parameters
   ----------
-  code : str
-      the source code
+  code : str | GradeCodeFound
+      a string for the source code, or a GradeCodeFound for chaining queries
   match : str, optional
       a particular function name, by default None
 
@@ -46,24 +48,27 @@ def find_functions(code: str, match: str = "") -> GradeCodeFound:
   ── Result 2 ──
   sum([1,2,3])
   """
-  if not isinstance(code, str):
-    return GradeCodeFound()
-
-  xml_tree = xml(code)
-  xpath = "//Call/func/Name"
-  query_result = []
+  if not isinstance(code, str) and not isinstance(code, GradeCodeFound):
+    raise Exception("`code` should be a `str` or `GradeCodeFound`")
   
-  if match != "":
-    xpath = f'//Call//func/Name/id[.="{match}"]'
+  gcf = code if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
+  xml_tree = xml(gcf.code) if isinstance(code, GradeCodeFound) else xml(code)
+
+  request_type = 'functions'
+  request = match
+  result = []
+
+  if request != "":
+    xpath = f'//Call//func/Name/id[.="{request}"]'
     id_nodes = xml_tree.xpath(xpath)
     if len(id_nodes) > 0:
       # grab the parent of the id element in order to view the source text
       # since id is not an ast.AST
-      query_result  = [get_call_from_id(n) for n in id_nodes]
+      result  = [get_call_from_id(n) for n in id_nodes]
   else:
-    query_result = xml_tree.xpath(xpath)
+    result = xml_tree.xpath("//Call/func")
 
-  return GradeCodeFound(code, query_result)
+  return gcf.push(request_type=request_type, request=request, result=result)
 
 def uses_function(code: str, match: str = "") -> bool:
   """Check if the code uses functions.
@@ -90,13 +95,13 @@ def uses_function(code: str, match: str = "") -> bool:
   """
   return uses(find_functions, code, match)
 
-def find_lambdas(code: str) -> GradeCodeFound:
+def find_lambdas(code: str | GradeCodeFound) -> GradeCodeFound:
   """Check if there are lambdas in the code.
 
   Parameters
   ----------
-  code : str
-      the source code
+  code : str | GradeCodeFound
+      a string for the source code, or a GradeCodeFound for chaining queries
 
   Returns
   -------
@@ -118,13 +123,21 @@ def find_lambdas(code: str) -> GradeCodeFound:
   ── Result 1 ──
   add_two = lambda x: x + 2
   """
-  if not isinstance(code, str):
-    return GradeCodeFound()
+  if not isinstance(code, str) and not isinstance(code, GradeCodeFound):
+    raise Exception("`code` should be a `str` or `GradeCodeFound`")
+  
+  gcf = code if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
+  xml_tree = xml(gcf.code) if isinstance(code, GradeCodeFound) else xml(code)
 
-  xml_tree = xml(code)
-  query_result = xml_tree.xpath("//Lambda")
+  request_type = 'lambda'
+  result = []
 
-  return GradeCodeFound(code, query_result)
+  if gcf.has_previous_request():
+    result = flatten_list([r.xpath(".//Lambda") for r in gcf.last_result])
+  else:
+    result = xml_tree.xpath("//Lambda")
+
+  return gcf.push(request_type=request_type, request='', result=result)
 
 def uses_lambda(code: str) -> bool:
   """Find lambdas within code.

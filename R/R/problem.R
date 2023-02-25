@@ -83,17 +83,12 @@ problem_grade.pygradethis_internal_problem <- function(
 }
 
 #' @export
-problem_message.pygradethis_problem <- function(problem, ...) {
-  problem$message
-}
-
-#' @export
 problem_message.wrong_index_problem <- function(problem, ...) {
   # if there are values for both actual and expected give some
   # more feedback on what the difference is
   extra <- NULL
   if (!is.null(problem$actual) && !is.null(problem$expected)) {
-    extra <- tblcheck::tblcheck_message(
+    extra <- tblcheck::problem_message(
       tblcheck::vec_check(problem$actual, problem$expected, env = env)
     )
   }
@@ -104,20 +99,27 @@ problem_message.wrong_index_problem <- function(problem, ...) {
 #' @export
 problem_message.wrong_columns_problem <- function(problem, ...) {
   # check if we have a difference of types
-  class(problem$actual) <- get_friendly_class(problem$actual)
-  class(problem$expected) <- get_friendly_class(problem$expected)
+  extra <- NULL
 
   # if there's a class problem return feedback for that
-  class_problem <- tblcheck::tbl_check_class(problem$actual, problem$expected, env = env)
+  class_problem <- tblcheck::tbl_check_class(
+    problem$actual,
+    problem$expected,
+    env = env
+  )
   if (tblcheck::is_tblcheck_problem(class_problem)) {
-    return(
-      glue::glue("{problem$message} {tblcheck::problem_message(class_problem)}")
+    extra <- tblcheck::problem_message(class_problem)
+  } else {
+    # otherwise, just provide the incorrect values feedback
+    values_problem <- tblcheck::vec_check(
+      problem$actual,
+      problem$expected,
+      env = env
     )
+    extra <- tblcheck::problem_message(values_problem)
   }
 
-  # otherwise, just provide the incorrect values feedback
-  values_problem <- tblcheck::vec_check(problem$actual, problem$expected, env = env)
-  glue::glue("{problem$message} {tblcheck::problem_message(values_problem)}")
+  glue::glue("{problem$message} {extra}", .null = "")
 }
 
 #' @export
@@ -126,29 +128,31 @@ problem_message.wrong_values_problem <- function(problem, ...) {
   # more feedback on what the difference is
   extra <- NULL
   if (!is.null(problem$actual) && !is.null(problem$expected)) {
-    extra <- tblcheck::tblcheck_message(
+    extra <- tblcheck::problem_message(
       tblcheck::vec_check(problem$actual, problem$expected, env = env)
     )
   }
   glue::glue("{problem$message} {extra}", .null = "")
-}
-
-#' @export
-problem_message.wrong_series_problem <- function(problem, ...) {
-  problem$message
 }
 
 #' @export
 problem_message.wrong_series_problem <- function(problem, ...) {
   extra <- NULL
   if (!is.null(problem$actual) && !is.null(problem$expected)) {
-    extra <- tblcheck::tblcheck_message(
+    extra <- tblcheck::problem_message(
       tblcheck::vec_check(problem$actual, problem$expected, env = env)
     )
   }
   glue::glue("{problem$message} {extra}", .null = "")
 }
 
+#' Generic problem with the result
+#' @export
+problem_message.pygradethis_problem <- function(problem, ...) {
+  problem$message
+}
+
+#' Generic problem with the code
 #' @export
 problem_message.pygradecode_problem <- function(problem, ...) {
   problem$message

@@ -7,8 +7,7 @@ from lxml.etree import _Element as Element
 from .ast_to_xml import xml
 from .find_functions import get_call_from_id
 from .find_utils import uses
-from .xml_utils import get_node_source
-from .xml_classes import GradeCodeFound
+from .grade_code_found import GradeCodeFound
 
 @dataclass
 class Arg:

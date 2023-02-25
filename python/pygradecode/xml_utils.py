@@ -1,5 +1,5 @@
 import textwrap
-from typing import Union
+from typing import Optional
 
 from lxml import etree
 from lxml.etree import _Element as Element
@@ -32,7 +32,7 @@ def get_source_lines(
 
 def get_source(
   code: str, node: Element, xpath: str = ""
-) -> Union[list[str], str]:
+) -> list[str] | str:
   """Return the source code for a particular XPath query or a target XML element.
 
   Parameters
@@ -67,7 +67,10 @@ def get_source(
   
   return code
 
-def get_node_source(code: str, node: Element) -> str:
+def get_node_source(code: str, node: Optional[Element]) -> str:
+  if node is None:
+    return ''
+  
   target_code = get_source_lines(code.splitlines(), node)
 
   try:
