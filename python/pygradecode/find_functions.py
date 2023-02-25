@@ -68,7 +68,7 @@ def find_functions(code: str | GradeCodeFound, match: str = "") -> GradeCodeFoun
   else:
     result = xml_tree.xpath("//Call/func")
 
-  return gcf.push(request_type=request_type, request=request, result=result)
+  return gcf.push(request_type=request_type, request=request, results=result)
 
 def uses_function(code: str, match: str = "") -> bool:
   """Check if the code uses functions.
@@ -105,12 +105,13 @@ def find_lambdas(code: str | GradeCodeFound) -> GradeCodeFound:
 
   Returns
   -------
-  list[Element]
-      list of XML elements corresponding to lambdas
+  GradeCodeFound
+      a GradeCoundFound object that holds the list of previous results
+      and the current query results if any
 
   Examples
   --------
-  >>> code = "add_two = lambda x: x + 1\nadd_two(1)"
+  >>> code = r'print(1, "2", sep=", ", end=foo(x = ["\n"]))'
   >>> find_lambdas(code)
   ── pygradecode found ──
 
@@ -137,7 +138,7 @@ def find_lambdas(code: str | GradeCodeFound) -> GradeCodeFound:
   else:
     result = xml_tree.xpath("//Lambda")
 
-  return gcf.push(request_type=request_type, request='', result=result)
+  return gcf.push(request_type=request_type, request='', results=result)
 
 def uses_lambda(code: str) -> bool:
   """Find lambdas within code.

@@ -123,4 +123,4 @@ def find_operators(code: str | GradeCodeFound, match: str = "") -> GradeCodeFoun
   else:
     result = xml_tree.xpath("//op/*")
 
-  return gcf.push(request_type=request_type, request=request, result=result)
+  return gcf.push(request_type=request_type, request=request, results=result)

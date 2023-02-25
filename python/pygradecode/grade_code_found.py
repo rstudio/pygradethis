@@ -24,11 +24,11 @@ class GradeCodeFound:
       self, 
       request_type: str, 
       request: str, 
-      result: list[Element]
+      results: list[Element]
     ) -> 'GradeCodeFound':
     self.types.append(request_type)
     self.requests.append(request)
-    self.results.append(result)
+    self.results.append(results)
     return copy(self)
   
   def has_previous_request(self) -> bool:
@@ -75,5 +75,6 @@ class GradeCodeFound:
     # result
     output = [intro_str, request_str, num_results_str]
     for i, element_source in enumerate(self.get_result_source(last_result)):
-      output.append(f"── Result {i + 1} ──\n{element_source}\n")
+      # TODO we need to better handle unicode escaping, this is buggy currently
+      output.append(f"── Result {i + 1} ──\n{element_source.decode('raw_unicode_escape')}\n")
     return "\n".join(output)
