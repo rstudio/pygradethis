@@ -1,6 +1,6 @@
 
 from copy import copy
-from typing import Optional
+from typing import Tuple, Optional
 
 from .xml_utils import get_node_source
 from lxml.etree import _Element as Element
@@ -12,7 +12,7 @@ class GradeCodeFound:
   # requests hold the specific requests (e.g. 'sum' for find_functions())
   requests: list[str]
   # results hold the list of XML element results for each request
-  results: list[Element]
+  results: list[list[Element]]
 
   def __init__(self, code: str = "") -> None:
     self.code = code
@@ -20,13 +20,18 @@ class GradeCodeFound:
     self.requests = []
     self.results = []
 
-  def push(self, request_type: str, request: str, result: str):
+  def push(
+      self, 
+      request_type: str, 
+      request: str, 
+      result: list[Element]
+    ) -> 'GradeCodeFound':
     self.types.append(request_type)
     self.requests.append(request)
     self.results.append(result)
     return copy(self)
   
-  def has_previous_request(self):
+  def has_previous_request(self) -> bool:
     return len(self.requests) > 0
   
   @property
@@ -36,7 +41,7 @@ class GradeCodeFound:
     else:
       return []
   
-  def get_last_state(self):
+  def get_last_state(self) -> Optional[Tuple[str, str, list[Element]]]:
     if self.has_previous_request():
       return (
         self.types[-1],
@@ -45,7 +50,7 @@ class GradeCodeFound:
       )
     return None
 
-  def get_result_source(self, last_result):
+  def get_result_source(self, last_result: list[Element]) -> list[str]:
     return [get_node_source(self.code, node=tree) for tree in last_result]
 
   def __repr__(self):

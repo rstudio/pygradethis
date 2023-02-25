@@ -1,3 +1,4 @@
+from copy import copy
 from lxml.etree import _Element as Element
 
 from .ast_to_xml import xml
@@ -32,7 +33,7 @@ OPERATORS = {
 # could get confused for the Add/Sub
 UNARY_OPS = {'~': 'Invert', 'not': 'Not', '+': 'UAdd', '-': 'USub'}
 
-def get_operator(op: str) -> str:
+def get_operator(op: str) -> list[str]:
   # check if op is valid
   if op not in OPERATORS and op not in UNARY_OPS:
     raise Exception(f"{op} is not a valid operator in Python!")
@@ -41,7 +42,7 @@ def get_operator(op: str) -> str:
   # so we will try to combine the valid ones in a list
   return [o for o in [OPERATORS.get(op), UNARY_OPS.get(op)] if o is not None]
 
-def find_operators(code: str, match: str = "") -> GradeCodeFound:
+def find_operators(code: str | GradeCodeFound, match: str = "") -> GradeCodeFound:
   """Find operators in the code.
 
   NOTE: currently, the output is not super helpful because we're
@@ -68,6 +69,10 @@ def find_operators(code: str, match: str = "") -> GradeCodeFound:
   ── pygradecode found ──
   -1 + 2 * 3 // 4
 
+  ── Request ──
+  operators 
+  Found 4 results.
+
   ── Result 1 ──
   -1
 
@@ -79,42 +84,43 @@ def find_operators(code: str, match: str = "") -> GradeCodeFound:
 
   ── Result 4 ──
   2 * 3 // 4
-  >>> result = find_operators(code) # store output
-  >>> result.elementss              # to view elements
-[<Element USub at 0x10352b280>, <Element Add at 0x10352b440>,
- <Element Mult at 0x10352b5c0>, <Element FloorDiv at 0x10352b380>]
   >>> find_operators(code, "-")
   ── pygradecode found ──
   -1 + 2 * 3 // 4
 
-  Found 1 result
+  ── Request ──
+  operators -
+  Found 1 result.
 
   ── Result 1 ──
   -1
-  >>> x = find_operators(code, "-") # store output
-  >>> x.elements                    # to view elements
-  [<Element USub at 0x10352afc0>]
   >>> find_operators(code, "//")
   ── pygradecode found ──
   -1 + 2 * 3 // 4
 
-  Found 1 result
+  ── Request ──
+  operators //
+  Found 1 result.
 
   ── Result 1 ──
   2 * 3 // 4
   """
-  if not isinstance(code, str):
-    return GradeCodeFound()
+  if not isinstance(code, str) and not isinstance(code, GradeCodeFound):
+    raise Exception("`code` should be a `str` or `GradeCodeFound`")
+  
+  gcf = code if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
+  xml_tree = xml(gcf.code) if isinstance(code, GradeCodeFound) else xml(code)
 
-  xml_tree = xml(code)
-  query_result: list[Element] = []
+  request_type = 'operators'
+  request = match
+  result = []
   
   if match != "":
     matched_ops = get_operator(match)
     # construct query to grab the specific matched operators
     xpath = "|".join(f"//op/{mo}" for mo in matched_ops)
-    query_result = xml_tree.xpath(xpath)
+    result = xml_tree.xpath(xpath)
   else:
-    query_result = xml_tree.xpath("//op/*")
+    result = xml_tree.xpath("//op/*")
 
-  return GradeCodeFound(code, query_result)
+  return gcf.push(request_type=request_type, request=request, result=result)

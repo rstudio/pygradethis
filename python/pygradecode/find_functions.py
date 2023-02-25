@@ -1,16 +1,15 @@
 from copy import copy
-from typing import Union
 
 from .ast_to_xml import xml
 from .grade_code_found import GradeCodeFound
 from .find_utils import uses, flatten_list
 
-def find_functions(code: Union[str, GradeCodeFound], match: str = "") -> GradeCodeFound:
+def find_functions(code: str | GradeCodeFound, match: str = "") -> GradeCodeFound:
   """Find function calls in the code.
 
   Parameters
   ----------
-  code : Union[str, GradeCodeFound]
+  code : str | GradeCodeFound
       a string for the source code, or a GradeCodeFound for chaining queries
   match : str, optional
       a particular function name, by default None
@@ -52,7 +51,7 @@ def find_functions(code: Union[str, GradeCodeFound], match: str = "") -> GradeCo
   if not isinstance(code, str) and not isinstance(code, GradeCodeFound):
     raise Exception("`code` should be a `str` or `GradeCodeFound`")
   
-  gcf = copy(code) if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
+  gcf = code if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
   xml_tree = xml(gcf.code) if isinstance(code, GradeCodeFound) else xml(code)
 
   request_type = 'functions'
@@ -96,12 +95,12 @@ def uses_function(code: str, match: str = "") -> bool:
   """
   return uses(find_functions, code, match)
 
-def find_lambdas(code: str) -> GradeCodeFound:
+def find_lambdas(code: str | GradeCodeFound) -> GradeCodeFound:
   """Check if there are lambdas in the code.
 
   Parameters
   ----------
-  code : Union[str, GradeCodeFound]
+  code : str | GradeCodeFound
       a string for the source code, or a GradeCodeFound for chaining queries
 
   Returns
@@ -127,7 +126,7 @@ def find_lambdas(code: str) -> GradeCodeFound:
   if not isinstance(code, str) and not isinstance(code, GradeCodeFound):
     raise Exception("`code` should be a `str` or `GradeCodeFound`")
   
-  gcf = copy(code) if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
+  gcf = code if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
   xml_tree = xml(gcf.code) if isinstance(code, GradeCodeFound) else xml(code)
 
   request_type = 'lambda'

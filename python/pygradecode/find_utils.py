@@ -1,8 +1,10 @@
 import itertools
+from typing import Optional
+
 from lxml.etree import _Element as Element
 
-def get_ancestor_node(node: Element) -> Element:
-  if hasattr(node, "attrib") and len(node.attrib) > 0:
+def get_ancestor_node(node: Optional[Element]) -> Optional[Element]:
+  if node is None or (hasattr(node, "attrib") and len(node.attrib) > 0):
     return node
 
   return get_ancestor_node(node.getparent())
@@ -11,5 +13,5 @@ def get_ancestor_node(node: Element) -> Element:
 def uses(function, *args, **kwargs):
   return len(function(*args, **kwargs).elements) > 0
 
-def flatten_list(alist: list) -> list:
+def flatten_list(alist: list | list[list]) -> list:
   return list(itertools.chain(*alist))

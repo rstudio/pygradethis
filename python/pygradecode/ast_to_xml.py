@@ -1,5 +1,5 @@
 import ast
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from lxml.etree import _Element as Element
 from lxml.etree import Element as element
@@ -7,7 +7,19 @@ from lxml.etree import SubElement
 
 ATTRS = ("lineno", "col_offset", "end_lineno", "end_col_offset")
 
-def ast_node_attrs(ast_node: ast.AST):
+def ast_node_attrs(ast_node: ast.AST) -> Dict[str, Any]:
+  """Given an AST node, return all of its attributes
+
+  Parameters
+  ----------
+  ast_node : ast.AST
+      The AST node
+
+  Returns
+  -------
+  Dict
+      A dictionary for the attribute name : value
+  """
   attrs = {}
   for key in ATTRS:
     try:
@@ -17,6 +29,20 @@ def ast_node_attrs(ast_node: ast.AST):
   return attrs
 
 def visit_node(ast_node: ast.AST, parent_xml_node: Optional[Element] = None) -> Element:
+  """Given an AST node, traverse the tree while creating an XML Element tree.
+
+  Parameters
+  ----------
+  ast_node : ast.AST
+      The root node
+  parent_xml_node : Optional[Element], optional
+      The parent node, by default None
+
+  Returns
+  -------
+  Element
+      The root Element
+  """
   xml_node_name = ast_node.__class__.__name__
 
   if parent_xml_node is None:
