@@ -76,5 +76,8 @@ class GradeCodeFound:
     output = [intro_str, request_str, num_results_str]
     for i, element_source in enumerate(self.get_result_source(last_result)):
       # TODO we need to better handle unicode escaping, this is buggy currently
-      output.append(f"── Result {i + 1} ──\n{element_source.decode('raw_unicode_escape')}\n")
+      if isinstance(element_source, bytes):
+        element_source = element_source.decode('raw_unicode_escape')
+
+      output.append(f"── Result {i + 1} ──\n{element_source}\n")
     return "\n".join(output)

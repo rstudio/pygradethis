@@ -21,7 +21,7 @@ def find_functions(code: str | GradeCodeFound, match: str = "") -> GradeCodeFoun
   
   Examples
   --------
-  >>> code = 'sum([1,2,3])\nsum([1,2,3])\nlen([1,2,3])'
+  >>> code = 'sum([1,2])\nsum([1,2,3])\nlen([1,2,3])'
   >>> find_functions(code)
   ── pygradecode found ──
   sum([1,2])
@@ -66,7 +66,7 @@ def find_functions(code: str | GradeCodeFound, match: str = "") -> GradeCodeFoun
       # since id is not an ast.AST
       result  = [get_call_from_id(n) for n in id_nodes]
   else:
-    result = xml_tree.xpath("//Call/func")
+    result = xml_tree.xpath("//Call")
 
   return gcf.push(request_type=request_type, request=request, results=result)
 

@@ -1,7 +1,8 @@
+import ast
 import textwrap
 from typing import Optional
 
-from lxml import etree
+from lxml import etree as ET
 from lxml.etree import _Element as Element
 
 from .ast_to_xml import xml
@@ -24,7 +25,7 @@ def get_source_lines(
     code = "\n".join(src_lines[start_lineno:end_lineno])
     if dedent:
       code = textwrap.dedent(code)
-  except (AttributeError, KeyError):
+  except (AttributeError, KeyError, ValueError):
     # if unsuccessful, we will return the entire code itself
     pass
 
@@ -77,19 +78,13 @@ def get_node_source(code: str, node: Optional[Element]) -> str:
     node_with_location = get_ancestor_node(node)
     start_col = int(node_with_location.attrib['col_offset'])
     end_col = int(node_with_location.attrib['end_col_offset'])
-  except Exception:
+  except (Exception, ValueError):
     return code
-
-  unescaped = (
-    target_code[start_col:end_col]
-      .encode('raw_unicode_escape')
-      # .decode('unicode_escape')
-  )
     
-  return unescaped
+  return target_code[start_col:end_col].encode('raw_unicode_escape')
 
 ### XML Print methods
 
 def prettify(xml_tree: Element) -> None:
   # Note: tostring() returns bytes, so we decode() it
-  print(etree.tostring(xml_tree, pretty_print=True).decode())
+  print(ET.tostring(xml_tree, pretty_print=True).decode())
