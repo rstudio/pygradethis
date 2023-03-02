@@ -1,6 +1,3 @@
-from copy import copy
-from lxml.etree import _Element as Element
-
 from .ast_to_xml import xml
 from .find_utils import uses
 from .grade_code_found import GradeCodeFound
@@ -109,7 +106,7 @@ def find_operators(code: str | GradeCodeFound, match: str = "") -> GradeCodeFoun
     raise Exception("`code` should be a `str` or `GradeCodeFound`")
   
   gcf = code if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
-  xml_tree = xml(gcf.code) if isinstance(code, GradeCodeFound) else xml(code)
+  xml_tree = xml(gcf.source) if isinstance(code, GradeCodeFound) else xml(code)
 
   request_type = 'operators'
   request = match

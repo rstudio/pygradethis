@@ -1,22 +1,21 @@
 import itertools
+from copy import copy
 from dataclasses import dataclass
-from typing import Union, Optional, AnyStr
+from typing import Optional, AnyStr
 
-from lxml import etree as ET
-from lxml.etree import _Element as Element
-
-from .ast_to_xml import xml, expr_xml_element, expr_xml, literal, xml_strip_location
-from .xml_utils import get_node_source 
-from .find_functions import get_call_from_id
 from .find_utils import uses
-from .grade_code_found import GradeCodeFound
+from .grade_code_found import GradeCodeFound, get_node_source
+from .ast_to_xml import xml
+from .xml_utils import (
+  compare_xml_nodes, literal, expr_xml_node
+)
 
 @dataclass
 class Arg:
   """A dataclass to represent a function's argument or keyword argument"""
   name: Optional[str] = ''
   code: AnyStr = None
-  xml_string: Optional[str] = ''
+  xml_node: AnyStr = None
 
 @dataclass
 class ArgList:
@@ -43,8 +42,8 @@ def args(*args: AnyStr, **kwargs: AnyStr) -> ArgList:
       # - if the argument was meant to be a `str` we double quote `"` it
       # - anything else we just wrap into a normal string
       Arg(
-        code = arg.code if isinstance(arg, literal) else arg,
-        xml_string = '' if isinstance(arg, literal) else expr_xml(arg)
+        code = arg.source if isinstance(arg, literal) else arg,
+        xml_node = expr_xml_node(arg)
       )
       for arg in positional
     ])
@@ -58,8 +57,8 @@ def args(*args: AnyStr, **kwargs: AnyStr) -> ArgList:
       # are quoted if it's meant to be a `str`
       Arg(
         name = kwarg[0],
-        code = kwarg[1].code if isinstance(kwarg[1], literal) else kwarg[1],
-        xml_string = '' if isinstance(kwarg[1], literal) else expr_xml(kwarg[1])
+        code = kwarg[1].source if isinstance(kwarg[1], literal) else kwarg[1],
+        xml_node = expr_xml_node(kwarg[1])
       )
       for kwarg in all_kwargs
     )
@@ -115,7 +114,7 @@ def find_arguments(
     raise Exception("`code` should be a `str` or `GradeCodeFound`")
   
   gcf = code if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
-  xml_tree = xml(gcf.code) if isinstance(code, GradeCodeFound) else xml(code)
+  xml_tree = xml(gcf.source) if isinstance(code, GradeCodeFound) else xml(code)
 
   request_type = 'arguments'
   # TODO create a __str__ representation for ArgList
@@ -123,7 +122,6 @@ def find_arguments(
   results = []
 
   # Note: we have to encode the code to escape it properly
-  xml_tree = xml(code)
   match_args = match.args
 
   # if there are no arguments to look for in particular, look for
@@ -146,14 +144,14 @@ def find_arguments(
     all_arg_kwarg_nodes = list(itertools.chain(*all_arg_kwarg_nodes))
 
     # extract the positional args
-    all_positional_xml_elements = xml_tree.xpath("//args/*")
+    all_positional_xml_nodes = xml_tree.xpath("//args/*")
     # construct Arg() for positional arguments
     code_args_list = [
       Arg(
-        code = get_node_source(code, node).decode('unicode_escape'),
-        xml_string = ET.tostring(xml_strip_location(node)).decode()
+        code = get_node_source(code, node).decode(),
+        xml_node = copy(node)
       )
-      for node in all_positional_xml_elements
+      for node in all_positional_xml_nodes
     ]
 
     # extract the keyword args
@@ -162,7 +160,7 @@ def find_arguments(
 
     # get the textual form for them
     kwargs_values_strings = [
-      get_node_source(code, kw).decode('unicode_escape')
+      get_node_source(code, kw).decode()
       for kw in kwarg_values
     ]
 
@@ -172,25 +170,24 @@ def find_arguments(
     code_kwargs_list = [
       Arg(
         name = k,
-        code = get_node_source(code, expr_xml_element(v)).decode('unicode_escape'),
-        xml_string = expr_xml(v)
+        code = v,
+        xml_node = expr_xml_node(v)
       ) 
       for k, v in kwargs_pairs
     ]
 
     # combine the args with the kwargs
     all_code_args = code_args_list + code_kwargs_list
-    # we then combine args/kwargs with the respective Element(s)
-    args_spec = zip(all_code_args, all_arg_kwarg_nodes)
-
+      
     # check that each match Arg is in code's [Arg]
     results = []
     for match_arg in match_args:
-      for argument, element in args_spec:
-        # if match Arg is the same as the Arg in the code
-        # add it to the result as XML element
-        if match_arg.xml_string == argument.xml_string:
-          results.append(element)
+      # for argument, element in args_spec:
+      for argument in all_code_args:
+        # if match Arg Element is the same as the code Arg Element
+        # add the code Arg Element as a result
+        if compare_xml_nodes(match_arg.xml_node, argument.xml_node):
+          results.append(argument.xml_node)
 
   # TODO make the chaining work well
   return gcf.push(request_type=request_type, request=request, results=results)

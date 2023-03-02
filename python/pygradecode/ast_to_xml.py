@@ -1,10 +1,9 @@
-from dataclasses import dataclass
 import ast
+import textwrap
 from typing import Optional, Dict, Any
 
 from lxml import etree as ET
 from lxml.etree import _Element as Element
-from lxml.etree import Element as element
 from lxml.etree import SubElement
 
 ATTRS = ("lineno", "col_offset", "end_lineno", "end_col_offset")
@@ -96,60 +95,28 @@ def xml(code: str) -> Element:
   ast_tree = ast.parse(code)
   return visit_node(ast_tree)
 
-@dataclass
-class literal:
-  code: str
 
-def xml_strip_location(node):
-  all_nodes = [node]
-  all_nodes.extend(list(node.iterdescendants()))
-  for n in all_nodes:
-    if n.attrib:
-      n.set('lineno', '')
-      n.set('end_lineno', '')
-      n.set('col_offset', '')
-      n.set('end_col_offset', '')
+# Get source text ----
+
+def get_source_lines(
+  src_lines: list[str],
+  node: Element,
+  dedent: bool = True
+) -> str:
+  code = "\n".join(src_lines)
+
+  # attempt to extract source code lines relevant to the target node
+  try:
+    # extract ranges
+    start_lineno = int(node.attrib["lineno"]) - 1
+    end_lineno = int(node.attrib["end_lineno"])
     
-  return node
+    # turn the relevant lines it into one string
+    code = "\n".join(src_lines[start_lineno:end_lineno])
+    if dedent:
+      code = textwrap.dedent(code)
+  except (AttributeError, KeyError, ValueError):
+    # if unsuccessful, we will return the entire code itself
+    pass
 
-def expr_xml_element(code) -> str:
-
-  if not isinstance(code, str) and code == '':
-    raise Exception(f"`expr_xml()` requires a valid Python expression string")
-
-  code = code.replace(" ", "")
-
-  try:
-    xml_tree = xml(ast.parse(code))
-  except SyntaxError:
-    raise Exception(f"`expr_xml()` requires a valid Python expression string")
-  
-  expression =  xml_tree.xpath(".//*")
-
-  if len(expression) > 0:
-    node = xml_strip_location(expression)
-
-    return node
-       
-  return None
-
-def expr_xml(code) -> str:
-
-  if not isinstance(code, str) and code == '':
-    raise Exception(f"`expr_xml()` requires a valid Python expression string")
-
-  code = code.replace(" ", "")
-
-  try:
-    xml_tree = xml(ast.parse(code))
-  except SyntaxError:
-    raise Exception(f"`expr_xml()` requires a valid Python expression string")
-  
-  expression =  xml_tree.xpath("//Expr/value/*[1]")
-
-  if len(expression) > 0:
-    node = xml_strip_location(expression.pop())
-
-    return ET.tostring(node).decode()
-       
   return code

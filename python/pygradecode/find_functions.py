@@ -1,5 +1,3 @@
-from copy import copy
-
 from .ast_to_xml import xml
 from .grade_code_found import GradeCodeFound
 from .find_utils import uses, flatten_list
@@ -52,7 +50,7 @@ def find_functions(code: str | GradeCodeFound, match: str = "") -> GradeCodeFoun
     raise Exception("`code` should be a `str` or `GradeCodeFound`")
   
   gcf = code if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
-  xml_tree = xml(gcf.code) if isinstance(code, GradeCodeFound) else xml(code)
+  xml_tree = xml(gcf.source) if isinstance(code, GradeCodeFound) else xml(code)
 
   request_type = 'functions'
   request = match
@@ -128,7 +126,7 @@ def find_lambdas(code: str | GradeCodeFound) -> GradeCodeFound:
     raise Exception("`code` should be a `str` or `GradeCodeFound`")
   
   gcf = code if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
-  xml_tree = xml(gcf.code) if isinstance(code, GradeCodeFound) else xml(code)
+  xml_tree = xml(gcf.source) if isinstance(code, GradeCodeFound) else xml(code)
 
   request_type = 'lambda'
   result = []
