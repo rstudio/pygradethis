@@ -3,7 +3,9 @@ from copy import copy
 from dataclasses import dataclass
 from typing import Optional, AnyStr
 
-from .find_utils import uses
+from lxml.etree import _Element as Element
+
+from .find_utils import uses, flatten_list
 from .grade_code_found import GradeCodeFound, get_node_source
 from .ast_to_xml import xml
 from .xml_utils import (
@@ -12,10 +14,20 @@ from .xml_utils import (
 
 @dataclass
 class Arg:
-  """A dataclass to represent a function's argument or keyword argument"""
+  """A dataclass to represent a function's positional argument"""
   name: Optional[str] = ''
   code: AnyStr = None
   xml_node: AnyStr = None
+
+@dataclass
+class KWArg:
+  """A dataclass to represent a function's keyword argument"""
+  name: Optional[str] = ''
+  code: AnyStr = None
+  value_xml_node: AnyStr = None
+  # this field is so we can refer to originating keyword XML Element
+  # when it comes to match and store keyword arguments for `find_arguments()`
+  keyword_xml_node: AnyStr = None
 
 @dataclass
 class ArgList:
@@ -55,15 +67,59 @@ def args(*args: AnyStr, **kwargs: AnyStr) -> ArgList:
     all_args.extend(
       # similar logic to positional arguments here, where kwargs value strings
       # are quoted if it's meant to be a `str`
-      Arg(
+      KWArg(
         name = kwarg[0],
         code = kwarg[1].source if isinstance(kwarg[1], literal) else kwarg[1],
-        xml_node = expr_xml_node(kwarg[1])
+        value_xml_node = expr_xml_node(kwarg[1])
       )
       for kwarg in all_kwargs
     )
 
   return ArgList(all_args)
+
+def make_kwargs(code: str, kwarg_xml_nodes: list[Element]) -> list[KWArg]:
+  """Return KWArg(s) based on <keyword> XML Element(s)
+
+  Parameters
+  ----------
+  code : str
+      the source code text
+  kwarg_xml_nodes : list[Element]
+      list of XML Elements representing keyword
+
+  Returns
+  -------
+  list[KWArg]
+      a list of KWArgs representing those keywords
+  """
+  code_kwargs_list = []
+  for kwarg_node in kwarg_xml_nodes:
+    # keyword argument name
+    kwarg_names = [
+      x.text for x in kwarg_node.xpath("./arg")
+    ]
+
+    # get the textual form for values
+    kwarg_values = [v for v in kwarg_node.xpath("./value/*")]
+    kwargs_values_strings = [
+      get_node_source(code, kw).decode()
+      for kw in kwarg_values
+    ]
+
+    # combine them into pairs
+    kwargs_pairs = list(zip(kwarg_names, kwargs_values_strings))
+
+    # construct the list of Arg(s) from the keyword pairs
+    code_kwargs_list.append([
+      KWArg(
+        name = k,
+        code = v,
+        value_xml_node = expr_xml_node(v),
+        keyword_xml_node = kwarg_node
+      )
+      for k, v in kwargs_pairs
+    ])
+  return flatten_list(code_kwargs_list)
 
 def find_arguments(
   code: str | GradeCodeFound,
@@ -129,7 +185,7 @@ def find_arguments(
   if match_args is None:
     results = [
       x_tree.xpath("./args/*|./keywords/*")
-      for x_tree in xml_tree.xpath("//Call")
+      for x_tree in xml_tree.xpath(".//Call")
     ]
     results = list(itertools.chain(*results))
   else:
@@ -137,60 +193,85 @@ def find_arguments(
     # could be any ast node so there is no way to have one query
     # satisfy all types of nodes. So, instead we look at the
     # <keyword> and its <value> node source text to reconstruct them.
-    all_arg_kwarg_nodes = [
-      x_tree.xpath("./args/*|./keywords/*")
-      for x_tree in xml_tree.xpath("//Call")
-    ]
-    all_arg_kwarg_nodes = list(itertools.chain(*all_arg_kwarg_nodes))
-
+    # TODO if a gcf was passed when there was a previous request
+    # we need to iterate through gcf.results to repeat this process
+    # so we can make all of the Arg/KWArg 
+    all_call_xml_nodes = xml_tree.xpath(".//Call")
+    
     # extract the positional args
-    all_positional_xml_nodes = xml_tree.xpath("//args/*")
+    all_arg_xml_nodes = flatten_list([
+      call.xpath("./args/*")
+      for call in all_call_xml_nodes
+    ])
+    # extract the kwargs args
+    all_kwarg_xml_nodes = flatten_list([
+      call.xpath("./keywords/*")
+      for call in all_call_xml_nodes
+    ])
+
     # construct Arg() for positional arguments
     code_args_list = [
       Arg(
-        code = get_node_source(code, node).decode(),
-        xml_node = copy(node)
+        code = get_node_source(code, arg).decode(),
+        xml_node = copy(arg)
       )
-      for node in all_positional_xml_nodes
+      for arg in all_arg_xml_nodes
     ]
 
     # extract the keyword args
-    kwarg_names = [x.text for x in xml_tree.xpath("//keyword/arg")]
-    kwarg_values = [v for v in xml_tree.xpath("//keyword/value/*")]
-
-    # get the textual form for them
-    kwargs_values_strings = [
-      get_node_source(code, kw).decode()
-      for kw in kwarg_values
-    ]
-
-    # combine them into pairs
-    kwargs_pairs = list(zip(kwarg_names, kwargs_values_strings))
-    # construct the list of Arg(s) from the keyword pairs
-    code_kwargs_list = [
-      Arg(
-        name = k,
-        code = v,
-        xml_node = expr_xml_node(v)
-      ) 
-      for k, v in kwargs_pairs
-    ]
-
+    code_kwargs_list = make_kwargs(code, all_kwarg_xml_nodes)
     # combine the args with the kwargs
     all_code_args = code_args_list + code_kwargs_list
       
     # check that each match Arg is in code's [Arg]
-    results = []
-    for match_arg in match_args:
-      # for argument, element in args_spec:
-      for argument in all_code_args:
-        # if match Arg Element is the same as the code Arg Element
-        # add the code Arg Element as a result
-        if compare_xml_nodes(match_arg.xml_node, argument.xml_node):
-          results.append(argument.xml_node)
+    results = get_matched_arguments(match_args, all_code_args)
 
   # TODO make the chaining work well
   return gcf.push(request_type=request_type, request=request, results=results)
+
+def get_matched_arguments(
+  match_args: list[Arg | KWArg],
+  all_code_args: list[Arg | KWArg]
+ ) -> list[Element]:
+  """Return all code XML elements that match given the list of match and code arguments.
+
+  Parameters
+  ----------
+  match_args : list[Arg  |  KWArg]
+      a list with Arg and KWArgs representing positional and keyword arguments
+      to match against
+  all_code_args : list[Arg  |  KWArg]
+      a list with Arg and KWArgs representing positional and keyword arguments
+      of the code
+
+  Returns
+  -------
+  list[Element]
+      a list of XML Element(s)
+  """
+  results = []
+  for match_arg in match_args:
+    # for argument, element in args_spec:
+    for argument in all_code_args:
+      # if match Arg Element is the same as the code Arg Element
+      # add the code Arg Element as a result
+      if type(match_arg) != type(argument):
+        continue
+      elif isinstance(match_arg, KWArg) and isinstance(argument, KWArg):
+        # if we're comparing keyword arguments 
+        # check value nodes match
+        value_nodes_match = compare_xml_nodes(
+          match_arg.value_xml_node,
+          argument.value_xml_node
+        )
+        # check the kwarg name too
+        arg_names_match = match_arg.name == argument.name
+
+        if value_nodes_match and arg_names_match:
+          results.append(argument.keyword_xml_node)
+      elif compare_xml_nodes(match_arg.xml_node, argument.xml_node):
+        results.append(argument.xml_node)
+  return results
 
 def uses_argument(code: str, match: str = "") -> bool:
   """Check if the code has arguments.
