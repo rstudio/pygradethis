@@ -11,7 +11,7 @@ def get_ancestor_node(node: Optional[Element]) -> Optional[Element]:
 
 # general `uses()` function to check if `find_*()` finds results based on queries
 def uses(function, *args, **kwargs):
-  return len(function(*args, **kwargs).elements) > 0
+  return len(function(*args, **kwargs).last_result) > 0
 
 def flatten_list(alist: list | list[list]) -> list:
   return list(itertools.chain(*alist))

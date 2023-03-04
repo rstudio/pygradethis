@@ -227,7 +227,7 @@ def find_arguments(
     results = get_matched_arguments(match_args, all_code_args)
 
   # TODO make the chaining work well
-  return gcf.push(request_type=request_type, request=request, results=results)
+  return gcf.push(request_type=request_type, request=request, result=results)
 
 def get_matched_arguments(
   match_args: list[Arg | KWArg],

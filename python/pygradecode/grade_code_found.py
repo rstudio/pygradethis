@@ -1,5 +1,6 @@
 
 from copy import copy
+from collections import namedtuple
 from typing import Tuple, Optional
 
 from lxml.etree import _Element as Element
@@ -7,49 +8,43 @@ from lxml.etree import _Element as Element
 from .ast_to_xml import xml, get_source_lines
 from .find_utils import get_ancestor_node
 
+# `type` hold the types of requests (e.g. 'function' for find_functions())
+# `request` hold the specific requests (e.g. 'sum' for find_functions())
+# `result` holds the list of XML element results for each request
+QueryResult = namedtuple("QueryResult", ['type', 'request', 'result'])
+
 class GradeCodeFound:
   source: str
-  # types hold the types of requests (e.g. 'function' for find_functions())
-  types: list[str]
-  # requests hold the specific requests (e.g. 'sum' for find_functions())
-  requests: list[str]
-  # results hold the list of XML element results for each request
-  results: list[list[Element]]
+  results: list[QueryResult]
 
-  def __init__(self, code: str = "") -> None:
+  def __init__(self, code: str = "", results: Optional[QueryResult] = None) -> None:
     self.source = code
-    self.types = []
-    self.requests = []
-    self.results = []
+    self.results = results if results is not None else []
 
   def push(
       self, 
       request_type: str, 
       request: str, 
-      results: list[Element]
+      result: list[Element]
     ) -> 'GradeCodeFound':
-    self.types.append(request_type)
-    self.requests.append(request)
-    self.results.append(results)
+    self.results.append(
+      QueryResult(type=request_type, request=request, result=result)
+    )
     return copy(self)
   
   def has_previous_request(self) -> bool:
-    return len(self.requests) > 0
+    return len(self.results) > 0
   
   @property
   def last_result(self):
     if self.has_previous_request():
-      return self.results[-1]
+      return self.results[-1].result
     else:
       return []
   
-  def get_last_state(self) -> Optional[Tuple[str, str, list[Element]]]:
+  def get_last_state(self) -> QueryResult:
     if self.has_previous_request():
-      return (
-        self.types[-1],
-        self.requests[-1],
-        self.results[-1]
-      )
+      return self.results[-1]
     return None
 
   def get_result_source(self, last_result: list[Element]) -> list[str]:
@@ -59,9 +54,7 @@ class GradeCodeFound:
     last_state = self.get_last_state()
 
     if last_state is not None:
-      last_type = last_state[0]
-      last_request = last_state[1]
-      last_result = last_state[2]
+      last_type, last_request, last_result = last_state
     else:
       return "No request has been made yet on the code"
 

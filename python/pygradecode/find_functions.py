@@ -66,7 +66,7 @@ def find_functions(code: str | GradeCodeFound, match: str = "") -> GradeCodeFoun
   else:
     result = xml_tree.xpath("//Call")
 
-  return gcf.push(request_type=request_type, request=request, results=result)
+  return gcf.push(request_type=request_type, request=request, result=result)
 
 def uses_function(code: str, match: str = "") -> bool:
   """Check if the code uses functions.
@@ -128,7 +128,7 @@ def find_lambdas(code: str | GradeCodeFound) -> GradeCodeFound:
   gcf = code if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
   xml_tree = xml(gcf.source) if isinstance(code, GradeCodeFound) else xml(code)
 
-  request_type = 'lambda'
+  request_type = 'lambdas'
   result = []
 
   if gcf.has_previous_request():
@@ -136,7 +136,7 @@ def find_lambdas(code: str | GradeCodeFound) -> GradeCodeFound:
   else:
     result = xml_tree.xpath("//Lambda")
 
-  return gcf.push(request_type=request_type, request='', results=result)
+  return gcf.push(request_type=request_type, request='', result=result)
 
 def uses_lambda(code: str) -> bool:
   """Find lambdas within code.
