@@ -4,9 +4,10 @@ from .grade_code_found import GradeCodeFound
 
 # operator symbol to ast node name
 OPERATORS = {
-  # boolops
+  # unary ops
+  '~': 'Invert', 'not': 'Not',
+  # infix operators
   'and': 'And', 'or': 'Or',
-  # operators
   '+': 'Add',
   '-': 'Sub',
   '*': 'Mult',
@@ -20,7 +21,7 @@ OPERATORS = {
   '^': 'BitXor',
   '&': 'BitAnd',
   '//': 'FloorDiv',
-  # cmpops
+  # cmp ops
   '==': 'Eq', '!=': 'NotEq', '<': 'Lt', '<=': 'LtE', '>': 'Gt', '>=': 'GtE',
   'is': 'Is', 'is not': 'IsNot', 'in': 'In', 'not in': 'NotIn'
 }
@@ -28,7 +29,7 @@ OPERATORS = {
 # unaryops
 # NOTE: we separate these because +/- are unary operators that
 # could get confused for the Add/Sub
-UNARY_OPS = {'~': 'Invert', 'not': 'Not', '+': 'UAdd', '-': 'USub'}
+UNARY_OPS = {'+': 'UAdd', '-': 'USub'}
 
 def get_operator(op: str) -> list[str]:
   # check if op is valid

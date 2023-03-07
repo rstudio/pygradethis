@@ -40,6 +40,26 @@ get_last_value <- inform_python_pygradethis_not_found
 find_functions <- inform_python_pygradethis_not_found
 
 .onLoad <- function(libname, pkgname) {
+  gradethis::gradethis_setup(
+    # `fail.encourage` lets `gradethis` generate a random
+    # encouraging message when students give wrong answers.
+    fail.encourage = TRUE,
+    # `pass.praise` lets `gradethis` generate a random 
+    # positive message when students give correct answers.
+    pass.praise = TRUE,
+  )
+
+  # set default messages
+  # NOTE: this is a bit hacky solution for now for default messages
+  # there's probably a better way to not flood options()
+  # for e.g. using some kinda method dispatch via S3 or maybe `problem_message()`?
+  options(
+    'find_functions.fail_if_not_found' = "I could not find any `function` call in the code.",
+    'find_functions.fail_if_found' = "I did not expect to find a `function` call.",
+    'find_lambdas.fail_if_not_found' = "I could not find any `lambda` in the code.",
+    'find_lambdas.fail_if_found' = "I did not expect to find a `lambda` in the code."
+  )
+
   # import `pygradethis` and the exercise checking function
   if (reticulate::py_available(initialize = TRUE)) {
     tryCatch({

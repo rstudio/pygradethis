@@ -22,11 +22,11 @@ class GradeCodeFound:
     self.results = results if results is not None else []
 
   def push(
-      self, 
-      request_type: str, 
-      request: str, 
-      result: list[Element]
-    ) -> 'GradeCodeFound':
+    self, 
+    request_type: str, 
+    request: str, 
+    result: list[Element]
+  ) -> 'GradeCodeFound':
     self.results.append(
       QueryResult(type=request_type, request=request, result=result)
     )
