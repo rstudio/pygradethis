@@ -15,7 +15,7 @@
 #' @examples
 #' \dontrun{
 #' .user_code = '2 + 2'
-#' # but you can signal a failing grade by following it with `py_fail_if_not_found()`
+#' # you can signal a failing grade by following a `py_find_*`() with `py_fail_if_not_found()`
 #' # this example has no custom message for the fail(), where it will pick the default
 #' # value in options() for the type of request (e.g. `find_lambas.fail_if_found`)
 #' py_find_lambdas() %>%
