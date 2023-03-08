@@ -282,12 +282,9 @@ get_py_envir <- function(envir) {
 # small helper function to determine if an object is a
 # Python object or not
 is_py_object <- function(obj) {
-  tryCatch({
-    reticulate::py_to_r(obj)
-    TRUE
-  }, error = function(e) {
-    FALSE
-  })
+  # when `reticulate` cannot convert a Python object
+  # the type is an `environment`
+  identical(typeof(obj), "environment")
 }
 
 # identical() S3 generic + methods ----
