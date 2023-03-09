@@ -25,10 +25,10 @@ if the last result was successful, we signal a `gradethis::fail()`
 # an example that contains two lambdas, but we're only focused on the
 # one inside of `round()` so we attempt to find_lambdas() after finding all
 # function calls with `find_functions('round')`
-.user_code = 'lambda z: z + 2.5\nround((lambda x: x + 0.5)(2))'
+.user_code = 'round((lambda x: x + 0.5)(2))'
 
 py_find_functions(match = 'round') \%>\%
   py_find_lambdas() \%>\%
-  py_fail_if_not_found("Heyyy, you were supposed to use a lamba!")
+  py_fail_if_found()
 }
 }

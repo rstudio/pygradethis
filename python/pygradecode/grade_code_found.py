@@ -122,7 +122,11 @@ def get_node_source(code: str | GradeCodeFound, node: Optional[Element]) -> str:
   if isinstance(code, GradeCodeFound):
     code = code.source
   
-  target_code = get_source_lines(code.splitlines(), node)
+  target_code = get_source_lines(
+    src_lines = code.splitlines(),
+    node = node,
+    dedent = False # we want to preserve the whitespace
+  )
 
   try:
     node_with_location = get_ancestor_node(node)
