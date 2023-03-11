@@ -182,7 +182,7 @@ def find_arguments(
 
   # if there are no arguments to look for in particular, look for
   # all of the arguments in code
-  if match_args is None:
+  if len(match_args) == 0:
     results = [
       x_tree.xpath("./args/*|./keywords/*")
       for x_tree in xml_tree.xpath(".//Call")

@@ -57,14 +57,14 @@ def find_functions(code: str | GradeCodeFound, match: str = "") -> GradeCodeFoun
   result = []
 
   if request != "":
-    xpath = f'//Call//func/Name/id[.="{request}"]'
+    xpath = f'.//Call//func/Name/id[.="{request}"]'
     id_nodes = xml_tree.xpath(xpath)
     if len(id_nodes) > 0:
       # grab the parent of the id element in order to view the source text
       # since id is not an ast.AST
       result  = [get_call_from_id(n) for n in id_nodes]
   else:
-    result = xml_tree.xpath("//Call")
+    result = xml_tree.xpath(".//Call")
 
   return gcf.push(request_type=request_type, request=request, result=result)
 
