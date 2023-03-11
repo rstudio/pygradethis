@@ -32,7 +32,10 @@ class KWArg:
 @dataclass
 class ArgList:
   """A dataclass to represent a function's argument or keyword argument"""
-  args: Optional[Arg] = None
+  args: list[Arg]
+
+  def __init__(self, args: list[Arg] = None):
+    self.args = [] if args is None else args
 
 def args(*args: AnyStr, **kwargs: AnyStr) -> ArgList:
   """Returns a list of Arg objects for positional (unnamed) argument values 
@@ -123,7 +126,8 @@ def make_kwargs(code: str, kwarg_xml_nodes: list[Element]) -> list[KWArg]:
 
 def find_arguments(
   code: str | GradeCodeFound,
-  match: ArgList = ArgList()
+  match: ArgList = ArgList(),
+  recurse: bool = False
 ) -> GradeCodeFound:
   """Find arguments of function calls in the code.
 
@@ -133,6 +137,9 @@ def find_arguments(
       a string for the source code, or a GradeCodeFound for chaining queries
   match : ArgList
       an ArgList representing the arguments to match against
+  recurse : bool
+      a flag that requests whether or not to look for arguments
+      within function call arguments for a previous 'function' request, by default False
 
   Returns
   -------
@@ -180,12 +187,26 @@ def find_arguments(
   # Note: we have to encode the code to escape it properly
   match_args = match.args
 
+  # get previous function calls in results if any, otherwise get all function calls
+  all_call_xml_nodes = []
+  if gcf.has_previous_request():
+    for node in gcf.last_result:
+      if recurse:
+        all_call_xml_nodes.append(node.xpath('.//Call'))
+      else:
+        all_call_xml_nodes.append(node)
+  else:
+    all_call_xml_nodes = xml_tree.xpath(".//Call")
+  
+  if recurse:
+    all_call_xml_nodes = list(itertools.chain(*all_call_xml_nodes))
+
   # if there are no arguments to look for in particular, look for
   # all of the arguments in code
   if len(match_args) == 0:
     results = [
-      x_tree.xpath("./args/*|./keywords/*")
-      for x_tree in xml_tree.xpath(".//Call")
+      node.xpath("./args/*|./keywords/*")
+      for node in all_call_xml_nodes
     ]
     results = list(itertools.chain(*results))
   else:
@@ -195,9 +216,8 @@ def find_arguments(
     # <keyword> and its <value> node source text to reconstruct them.
     # TODO if a gcf was passed when there was a previous request
     # we need to iterate through gcf.results to repeat this process
-    # so we can make all of the Arg/KWArg 
-    all_call_xml_nodes = xml_tree.xpath(".//Call")
-    
+    # so we can make all of the Arg/KWArg
+
     # extract the positional args
     all_arg_xml_nodes = flatten_list([
       call.xpath("./args/*")
