@@ -1,5 +1,5 @@
 
-from copy import copy
+from copy import deepcopy
 from collections import namedtuple
 from typing import Tuple, Optional
 
@@ -30,7 +30,7 @@ class GradeCodeFound:
     self.results.append(
       QueryResult(type=request_type, request=request, result=result)
     )
-    return copy(self)
+    return self
   
   def has_previous_request(self) -> bool:
     return len(self.results) > 0
@@ -132,7 +132,8 @@ def get_node_source(code: str | GradeCodeFound, node: Optional[Element]) -> str:
     node_with_location = get_ancestor_node(node)
     start_col = int(node_with_location.attrib['col_offset'])
     end_col = int(node_with_location.attrib['end_col_offset'])
+    return target_code[start_col:end_col].encode('raw_unicode_escape')
   except (Exception, ValueError):
-    return code
+    pass
     
-  return target_code[start_col:end_col].encode('raw_unicode_escape')
+  return code

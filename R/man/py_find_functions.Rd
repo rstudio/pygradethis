@@ -19,8 +19,7 @@ py_find_functions(
 }
 \value{
 A Python list[Element]
-See `help('pygradecode.find_arguments.find_arguments')` in Python for more details
 }
 \description{
-Wrapper for `pygradecode.find_functions.find_functions()`
+See `help('pygradecode.find_arguments.find_arguments')` in Python for more details
 }

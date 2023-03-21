@@ -13,8 +13,7 @@ py_find_lambdas(code = .user_code, env = parent.frame())
 }
 \value{
 A Python list[Element]
-See `help('pygradecode.find_arguments.find_lambads')` in Python for more details
 }
 \description{
-Wrapper for `pygradecode.find_functions.find_lambdas()`
+See `help('pygradecode.find_arguments.find_lambdas')` in Python for more details
 }

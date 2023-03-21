@@ -49,7 +49,7 @@ def find_functions(code: str | GradeCodeFound, match: str = "") -> GradeCodeFoun
   if not isinstance(code, str) and not isinstance(code, GradeCodeFound):
     raise Exception("`code` should be a `str` or `GradeCodeFound`")
   
-  gcf = code if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
+  gcf = deepcopy(code) if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
   xml_tree = xml(gcf.source) if isinstance(code, GradeCodeFound) else xml(code)
 
   request_type = 'functions'
@@ -62,7 +62,7 @@ def find_functions(code: str | GradeCodeFound, match: str = "") -> GradeCodeFoun
     if len(id_nodes) > 0:
       # grab the parent of the id element in order to view the source text
       # since id is not an ast.AST
-      result  = [get_call_from_id(n) for n in id_nodes]
+      result  = [get_ancestor_call(n) for n in id_nodes]
   else:
     result = xml_tree.xpath(".//Call")
 
@@ -163,10 +163,10 @@ def uses_lambda(code: str) -> bool:
   return uses(find_lambdas, code)
 
 # helper function to get the function <Call> given the <id> of function
-def get_call_from_id(node):
+def get_ancestor_call(node):
   # return current node if it is a Call
   if node.tag == 'Call':
     return node
   
   # recurse on parent
-  return get_call_from_id(node.getparent())
+  return get_ancestor_call(node.getparent())

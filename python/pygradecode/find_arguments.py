@@ -1,5 +1,5 @@
 import itertools
-from copy import copy
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Optional, AnyStr
 
@@ -127,7 +127,7 @@ def make_kwargs(code: str, kwarg_xml_nodes: list[Element]) -> list[KWArg]:
 def find_arguments(
   code: str | GradeCodeFound,
   match: ArgList = ArgList(),
-  recurse: bool = False
+  recurse: bool = True
 ) -> GradeCodeFound:
   """Find arguments of function calls in the code.
 
@@ -145,7 +145,7 @@ def find_arguments(
   -------
   GradeCodeFound
       a GradeCoundFound object that holds the list of previous results
-      and the current query results if any
+      and the current query results if any, by default True
   
   Examples
   --------
@@ -176,7 +176,7 @@ def find_arguments(
   if not isinstance(code, str) and not isinstance(code, GradeCodeFound):
     raise Exception("`code` should be a `str` or `GradeCodeFound`")
   
-  gcf = code if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
+  gcf = deepcopy(code) if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
   xml_tree = xml(gcf.source) if isinstance(code, GradeCodeFound) else xml(code)
 
   request_type = 'arguments'
@@ -192,14 +192,12 @@ def find_arguments(
   if gcf.has_previous_request():
     for node in gcf.last_result:
       if recurse:
-        all_call_xml_nodes.append(node.xpath('.//Call'))
+        all_call_xml_nodes.append(node.xpath('//Call'))
       else:
         all_call_xml_nodes.append(node)
-  else:
-    all_call_xml_nodes = xml_tree.xpath(".//Call")
-  
-  if recurse:
     all_call_xml_nodes = list(itertools.chain(*all_call_xml_nodes))
+  else:
+    all_call_xml_nodes = xml_tree.xpath("//Call")
 
   # if there are no arguments to look for in particular, look for
   # all of the arguments in code
@@ -233,7 +231,7 @@ def find_arguments(
     code_args_list = [
       Arg(
         code = get_node_source(code, arg).decode(),
-        xml_node = copy(arg)
+        xml_node = deepcopy(arg)
       )
       for arg in all_arg_xml_nodes
     ]
