@@ -8,16 +8,19 @@ from pygradecode.grade_code_found import GradeCodeFound
 
 def test_find_functions_simple():
   # function calls that are not nested
-  code = 'sum([1,2,3])\nsum([4,5,6])\nlen([1,2,3])'
+  code = 'sum([1, 2, 3])\npow(2, 2)\nlen((1,2))'
   found = find_functions(code)
   
   state = found.get_last_state()
   last_result = state.result
 
   assert isinstance(found, GradeCodeFound)
+  assert state.type == 'functions'
+  
+  # check results
   assert len(last_result) == 3
   assert all(isinstance(e, Element) for e in last_result)
-  assert state.type == 'functions'
+  assert all(e.tag == 'Call' for e in last_result)
 
 def test_find_functions_nested():
   # nested function calls
@@ -28,9 +31,12 @@ def test_find_functions_nested():
   last_result = state.result
 
   assert isinstance(found, GradeCodeFound)
+  assert state.type == 'functions'
+  
+  # check results
   assert len(last_result) == 2
   assert all(isinstance(e, Element) for e in last_result)
-  assert state.type == 'functions'
+  assert all(e.tag == 'Call' for e in last_result)
 
 def test_uses_function():
   code = 'sum([1,2,3])'
@@ -63,9 +69,12 @@ def test_find_lambdas():
   last_result = found.last_result
 
   assert isinstance(found, GradeCodeFound)
+  assert state.type == 'lambdas'
+  
+  # check result
   assert len(last_result) == 3
   assert all(isinstance(e, Element) for e in last_result)
-  assert state.type == 'lambdas'
+  assert all(e.tag == 'Lambda' for e in last_result)
 
 def test_uses_lambda():
   code = 'sum([1,2,3])'

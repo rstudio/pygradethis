@@ -63,7 +63,7 @@ def expr_xml_node(code: str) -> Element:
   if isinstance(code, literal):
     code = f"'{code.source}'"
   else:
-    code = code.replace(" ", "").encode('unicode_escape').decode()
+    code = code.replace(" ", "").encode('raw_unicode_escape').decode()
 
   try:
     xml_tree = xml(code)

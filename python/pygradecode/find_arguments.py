@@ -105,7 +105,7 @@ def make_kwargs(code: str, kwarg_xml_nodes: list[Element]) -> list[KWArg]:
     # get the textual form for values
     kwarg_values = [v for v in kwarg_node.xpath("./value/*")]
     kwargs_values_strings = [
-      get_node_source(code, kw).decode()
+      get_node_source(code, kw)
       for kw in kwarg_values
     ]
 
@@ -230,7 +230,7 @@ def find_arguments(
     # construct Arg() for positional arguments
     code_args_list = [
       Arg(
-        code = get_node_source(code, arg).decode(),
+        code = get_node_source(code, arg),
         xml_node = deepcopy(arg)
       )
       for arg in all_arg_xml_nodes
@@ -284,11 +284,10 @@ def get_matched_arguments(
         )
         # check the kwarg name too
         arg_names_match = match_arg.name == argument.name
-
-        if value_nodes_match and arg_names_match:
-          results.append(argument.keyword_xml_node)
+        if arg_names_match and value_nodes_match:
+          results.append(argument)
       elif compare_xml_nodes(match_arg.xml_node, argument.xml_node):
-        results.append(argument.xml_node)
+        results.append(argument)
   return results
 
 def uses_argument(code: str, match: str = "") -> bool:

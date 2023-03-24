@@ -36,7 +36,7 @@ class GradeCodeFound:
     return len(self.results) > 0
   
   @property
-  def last_result(self):
+  def last_result(self) -> list[Element]:
     if self.has_previous_request():
       return self.results[-1].result
     else:
@@ -76,7 +76,6 @@ class GradeCodeFound:
 
       output.append(f"── Result {i + 1} ──\n{element_source}\n")
     return "\n".join(output)
-
 
 def get_source(
   code: str, node: Element, xpath: str = ""
@@ -132,7 +131,7 @@ def get_node_source(code: str | GradeCodeFound, node: Optional[Element]) -> str:
     node_with_location = get_ancestor_node(node)
     start_col = int(node_with_location.attrib['col_offset'])
     end_col = int(node_with_location.attrib['end_col_offset'])
-    return target_code[start_col:end_col].encode('raw_unicode_escape')
+    return target_code[start_col:end_col].encode('raw_unicode_escape').decode()
   except (Exception, ValueError):
     pass
     
