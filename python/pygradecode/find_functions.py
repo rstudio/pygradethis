@@ -1,3 +1,4 @@
+from copy import deepcopy
 from .ast_to_xml import xml
 from .grade_code_found import GradeCodeFound
 from .find_utils import uses, flatten_list
