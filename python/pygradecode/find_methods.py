@@ -1,13 +1,12 @@
 from copy import deepcopy
-from typing import Optional, AnyStr
 
 from lxml.etree import _Element as Element
 
 from .ast_to_xml import xml
 from .grade_code_found import GradeCodeFound
-from .find_utils import uses
+from .find_utils import uses, flatten_list
 
-def find_method_calls(code: str | GradeCodeFound, match: str = "") -> GradeCodeFound:
+def find_methods(code: str | GradeCodeFound, match: str = "") -> GradeCodeFound:
   """Find method calls in the code.
 
   Parameters
@@ -32,7 +31,17 @@ def find_method_calls(code: str | GradeCodeFound, match: str = "") -> GradeCodeF
   request = match
   result = []
 
-  # TODO: implement logic of finding all method calls
+  if match == "":
+    attrs = get_attributes(xml_tree)
+    result.extend(
+      flatten_list(
+        a.xpath("../..") # go up to the grandparent node (parent would just be <value>)
+        for a in attrs
+      )
+    )
+  else:
+    # TODO: implement logic of finding specific method calls
+    ...
 
   return gcf.push(request_type=request_type, request=request, result=result)
 
