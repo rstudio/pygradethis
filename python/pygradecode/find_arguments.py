@@ -285,9 +285,9 @@ def get_matched_arguments(
         # check the kwarg name too
         arg_names_match = match_arg.name == argument.name
         if arg_names_match and value_nodes_match:
-          results.append(argument)
+          results.append(argument.value_xml_node)
       elif compare_xml_nodes(match_arg.xml_node, argument.xml_node):
-        results.append(argument)
+        results.append(argument.xml_node)
   return results
 
 def uses_argument(code: str, match: str = "") -> bool:

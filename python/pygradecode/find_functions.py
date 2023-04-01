@@ -58,7 +58,7 @@ def find_functions(code: str | GradeCodeFound, match: str = "") -> GradeCodeFoun
   result = []
 
   if request != "":
-    xpath = f'.//Call//func/Name/id[.="{request}"]'
+    xpath = f'.//Call//func/Name/id[.="{request}"]|.//attr[text()="{request}"]/ancestor::Call'
     id_nodes = xml_tree.xpath(xpath)
     if len(id_nodes) > 0:
       # grab the parent of the id element in order to view the source text

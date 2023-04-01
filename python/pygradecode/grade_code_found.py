@@ -1,12 +1,11 @@
-
-from copy import deepcopy
 from collections import namedtuple
-from typing import Tuple, Optional
-
+from typing import Optional
 from lxml.etree import _Element as Element
+from rich.console import Console
 
-from .ast_to_xml import xml, get_source_lines
+from .ast_to_xml import get_source_lines
 from .find_utils import get_ancestor_node
+from .highlight_text import format_text, my_print
 
 # `type` hold the types of requests (e.g. 'function' for find_functions())
 # `request` hold the specific requests (e.g. 'sum' for find_functions())
@@ -47,80 +46,42 @@ class GradeCodeFound:
       return self.results[-1]
     return None
 
-  def get_result_source(self, last_result: list[Element]) -> list[str]:
-    return [get_node_source(self.source, node=tree) for tree in last_result]
-
   def __repr__(self):
-    last_state = self.get_last_state()
+    my_print(self)
+    return ""
 
-    if last_state is not None:
-      last_type, last_request, last_result = last_state
-    else:
-      return "No request has been made yet on the code"
+@my_print.register
+def _(arg: GradeCodeFound, console: Console = Console(color_system='standard')):
+  last_state = arg.get_last_state()
 
-    # code
-    intro_str = f"── pygradecode found ──\n{self.source.strip()}\n"
+  if last_state is None:
+    return
 
-    # type of request and specific request (if any)
-    request_str = f"── Request ──\n{last_type} {last_request}"
-    num_results_str = (
-      f"Found {len(last_result)} {'results' if len(last_result) > 1 else 'result'}.\n"
-    )
+  last_type, last_request, last_result = last_state
 
-    # result
-    output = [intro_str, request_str, num_results_str]
-    for i, element_source in enumerate(self.get_result_source(last_result)):
-      # TODO we need to better handle unicode escaping, this is buggy currently
-      if isinstance(element_source, bytes):
-        element_source = element_source.decode('raw_unicode_escape')
+  # code
+  console.print(f"── pygradecode found ──\n{arg.source.strip()}\n")
 
-      output.append(f"── Result {i + 1} ──\n{element_source}\n")
-    return "\n".join(output)
+  # type of request and specific request (if any)
+  console.print(f"── Request ──\n{last_type} {last_request}")
 
-def get_source(
-  code: str, node: Element, xpath: str = ""
-) -> list[str] | str:
-  """Return the source code for a particular XPath query or a target XML element.
+  console.print(
+    f"Found {len(last_result)} {'results' if len(last_result) > 1 else 'result'}.\n"
+  )
 
-  Parameters
-  ----------
-  code : str
-      the source code
-  xpath : str, optional
-      an XPath query, by default None
-  node : Element, optional
-      a target XML element, by default None
-
-  Returns
-  -------
-  list[str] | str
-      Return a list of source code if there are multiple instances for an 
-      XPath query or, return a single piece of source code for a given target XML 
-      element node.
-  """
-  xml_tree = xml(code)
-
-  src_lines = code.splitlines()
-
-  if node is not None:
-    return get_source_lines(src_lines, node)
-
-  if xpath != "":
-    sources = []
-    for node in xml_tree.xpath(xpath):
-      code = get_source_lines(src_lines, node)
-      sources.append(code)
-    return sources
-  
-  return code
+  # result
+  for i, element in enumerate(last_result):
+    console.print(f"── Result {i + 1} ──")
+    formatted = format_text(arg.source, element)
+    console.print(formatted.text, end="\n\n")
 
 def get_node_source(code: str | GradeCodeFound, node: Optional[Element]) -> str:
   if node is None:
     return ''
-  
+
   if isinstance(code, GradeCodeFound):
     code = code.source
-  
+
   target_code = get_source_lines(
     src_lines = code.splitlines(),
     node = node,
@@ -134,5 +95,3 @@ def get_node_source(code: str | GradeCodeFound, node: Optional[Element]) -> str:
     return target_code[start_col:end_col].encode('raw_unicode_escape').decode()
   except (Exception, ValueError):
     pass
-    
-  return code

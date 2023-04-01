@@ -41,8 +41,7 @@ def test_find_arguments_match_simple():
 
   # check results
   assert len(last_result) == 1
-  assert all(isinstance(e, Arg) for e in last_result)
-  assert last_result[0].xml_node.tag == 'Constant'
+  assert last_result[0].tag == 'Constant'
 
 def test_find_arguments_match_complex():
   code = 'sum([1, round(2.5), 3])'
@@ -57,9 +56,8 @@ def test_find_arguments_match_complex():
 
   # check results
   assert len(last_result) == 1
-  assert isinstance(last_result[0], Arg)
-  assert last_result[0].xml_node.tag == 'List'
-  assert isinstance(last_result[0].xml_node, Element)
+  assert isinstance(last_result[0], Element)
+  assert last_result[0].tag == 'List'
 
 def test_find_arguments_match_keyword_string():
   code = 'print("Hello", "World!", sep=", ")'
@@ -74,9 +72,8 @@ def test_find_arguments_match_keyword_string():
 
   # check results
   assert len(last_result) == 1
-  assert isinstance(last_result[0], KWArg)
-  assert last_result[0].keyword_xml_node.tag == 'keyword'
-  assert isinstance(last_result[0].keyword_xml_node, Element)
+  assert isinstance(last_result[0], Element)
+  assert last_result[0].tag == 'Constant'
 
 def test_find_arguments_match_keyword_constant():
   code = 'pow(38, -1, mod=97)'
@@ -91,6 +88,5 @@ def test_find_arguments_match_keyword_constant():
 
   # check results
   assert len(last_result) == 1
-  assert isinstance(last_result[0], KWArg)
-  assert last_result[0].keyword_xml_node.tag == 'keyword'
-  assert isinstance(last_result[0].keyword_xml_node, Element)
+  assert isinstance(last_result[0], Element)
+  assert last_result[0].tag == 'Constant'
