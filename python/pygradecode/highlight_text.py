@@ -3,27 +3,28 @@
 import builtins
 from dataclasses import dataclass
 from functools import singledispatch
+
+from lxml.etree import _Element as Element
 from rich.console import Console
 
+# pgc_print() is a generic print() method
 @singledispatch
-def my_print(arg):
+def pgc_print(arg):
   builtins.print(arg)
 
 @dataclass
 class FormattedText:
   text: str
 
-@my_print.register
+@pgc_print.register
 def _(arg: FormattedText, console: Console = Console(color_system='standard')):
   console.print(arg.text)
 
 # Override the default print() with my_print
-print = my_print
+print = pgc_print
 
-def format_text(
-  code: str, target_node,
-  console: Console = Console(color_system='standard')
-) -> str:
+def format_text(code: str, target_node: Element) -> FormattedText:
+
   location = target_node.attrib
   end_line = int(location['end_lineno']) - 1
 

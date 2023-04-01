@@ -5,7 +5,7 @@ from rich.console import Console
 
 from .ast_to_xml import get_source_lines
 from .find_utils import get_ancestor_node
-from .highlight_text import format_text, my_print
+from .highlight_text import format_text, pgc_print
 
 # `type` hold the types of requests (e.g. 'function' for find_functions())
 # `request` hold the specific requests (e.g. 'sum' for find_functions())
@@ -47,10 +47,10 @@ class GradeCodeFound:
     return None
 
   def __repr__(self):
-    my_print(self)
+    pgc_print(self)
     return ""
 
-@my_print.register
+@pgc_print.register
 def _(arg: GradeCodeFound, console: Console = Console(color_system='standard')):
   last_state = arg.get_last_state()
 
