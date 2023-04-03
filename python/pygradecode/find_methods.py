@@ -45,6 +45,30 @@ def find_methods(code: str | GradeCodeFound, match: str = "") -> GradeCodeFound:
 
   return gcf.push(request_type=request_type, request=request, result=result)
 
+def get_method_chains(code: str) -> list[Element]:
+  """Get method chains in the code.
+
+  Note: This function will return the top-level chains, so it will not
+  return chains that are inside other expressions.
+
+  Parameters
+  ----------
+  node : Element
+      root node
+
+  Returns
+  -------
+  list[Element]
+      either a list of Element(s) or empty list if no Attribute was found
+  """
+  xml_tree = xml(code)
+
+  return [
+    a
+    # if an Attribute is followed by another Attribute, we have a chain
+    for a in xml_tree.xpath(".//Attribute") if a.xpath("(.//Attribute)[1]")
+  ]
+
 def get_attributes(node: Element, attrs: list = None) -> list[Element]:
   """Given a starting root Element node, return all Attribute(s)
 
