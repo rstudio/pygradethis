@@ -64,7 +64,7 @@ def args(*args: AnyStr, **kwargs: AnyStr) -> ArgList:
     ])
 
   # then, add the keyword arguments
-  if len(kwargs) != 0:
+  if len(kwargs) > 0:
     all_kwargs = list(kwargs.items())
     # this is extracting the name = value
     all_args.extend(
