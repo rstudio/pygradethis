@@ -22,12 +22,17 @@ Encoding: UTF-8
 LazyData: true
 Imports:
   reticulate,
-  learnr,
   dplyr,
   tibble,
   glue,
+  learnr,
+  waldo,
   gradethis (>= 0.2.9.9000),
   tblcheck
+Remotes:
+  rstudio/learnr,
+  rstudio/gradethis,
+  rstudio/tblcheck
 Config/reticulate:
   list(
     packages = list(

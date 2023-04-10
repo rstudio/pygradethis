@@ -45,7 +45,7 @@ exercise_checker <- function(
     }
   )
   # redirect table grading to tblcheck for now if solution object is a DataFrame
-  if (!is.null(.solution) && class(.solution) %in% "pandas.core.frame.DataFrame") {
+  if (!is.null(.solution) && any(class(.solution) %in% "pandas.core.frame.DataFrame")) {
     # auto convert the result and solution to a tibble before the tblcheck grading
     # (we can also choose to not convert here and let user do conversions)
     .result <- py_to_tbl(last_value)
@@ -91,8 +91,8 @@ exercise_checker <- function(
 
 #' A shim around the `gradethis::py_gradethis_exercise_checker` for grading Python exercises.
 #'
-#' To enable exercise checking in your learnr tutorial through R code (i.e. an R -check chunk), 
-#' you can set `tutorial_options(exercise.checker = pygradethis::py_gradethis_exercise_checker)` 
+#' To enable exercise checking in your learnr tutorial through R code (i.e. an R -check chunk),
+#' you can set `tutorial_options(exercise.checker = pygradethis::py_gradethis_exercise_checker)`
 #' in the setup chunk of your tutorial. Or, set the `exercise.checker` for an individual Python chunk.
 #'
 #' @param label Label for exercise chunk
@@ -109,7 +109,7 @@ exercise_checker <- function(
 #' @param last_value The last value from evaluating the exercise.
 #' @param ... Extra arguments supplied by learnr
 #'
-#' @return The `gradethis::graded()` list which contains several fields indicating the 
+#' @return The `gradethis::graded()` list which contains several fields indicating the
 #' result of the check.
 #' @export
 py_gradethis_exercise_checker <- function(
