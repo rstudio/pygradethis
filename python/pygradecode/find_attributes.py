@@ -1,3 +1,5 @@
+"""Module to find attributes, method calls, properties in Python code."""
+
 from copy import deepcopy
 
 from lxml.etree import _Element as Element
@@ -25,8 +27,9 @@ def find_attributes(code: str | GradeCodeFound) -> GradeCodeFound:
 
   Returns
   -------
-  list[Element]
-      list of XML elements corresponding to method calls
+  GradeCodeFound
+      a GradeCoundFound object that holds the list of previous results
+      and the current query results if any
   """
   if not isinstance(code, str) and not isinstance(code, GradeCodeFound):
     raise Exception("`code` should be a `str` or `GradeCodeFound`")
@@ -50,7 +53,37 @@ def find_attributes(code: str | GradeCodeFound) -> GradeCodeFound:
 
   return gcf.push(request_type=request_type, request=request, result=result)
 
-def find_properties(code: str | GradeCodeFound, match: str = "") -> list[Element]:
+def uses_attributes(code: str) -> bool:
+  """Check if the code uses attributes.
+
+  Parameters
+  ----------
+  code : str
+      the source code
+
+  Returns
+  -------
+  bool
+      True if found, False otherwise
+
+  Examples
+  --------
+  >>> code = 'df.shape'
+  >>> uses_attributes(code)
+  True
+  >>> code = 'df.head()'
+  >>> uses_attributes(code)
+  True
+  >>> code = 'df.loc[:,'foo']'
+  >>> uses_attributes(code)
+  True
+  >>> code = 'sum([1, 2, 3])'
+  >>> uses_properties(code)
+  False
+  """
+  return uses(find_attributes, code)
+
+def find_properties(code: str | GradeCodeFound, match: str = "") -> GradeCodeFound:
   """Find property access in the code.
 
   For example, one could access a field like `df.shape`
@@ -64,8 +97,9 @@ def find_properties(code: str | GradeCodeFound, match: str = "") -> list[Element
 
   Returns
   -------
-  list[Element]
-      either a list of Element(s) or empty list if no Attribute was found
+  GradeCodeFound
+      a GradeCoundFound object that holds the list of previous results
+      and the current query results if any
   """
   if not isinstance(code, str) and not isinstance(code, GradeCodeFound):
     raise Exception("`code` should be a `str` or `GradeCodeFound`")
@@ -80,6 +114,7 @@ def find_properties(code: str | GradeCodeFound, match: str = "") -> list[Element
   if match == "":
     xpath_query = ".//Expr/*/Attribute/../.." 
   else:
+    # TODO support a list of matches
     xpath_query = f".//attr[text()='{match}']/ancestor::Expr"
   
   props = xml_tree.xpath(xpath_query)
@@ -87,27 +122,93 @@ def find_properties(code: str | GradeCodeFound, match: str = "") -> list[Element
 
   return gcf.push(request_type=request_type, request=request, result=result)
 
-# TODO: implement find_method_chains()
-def get_method_chains(code: str) -> list[Element]:
-  """Get method chains in the code.
+def uses_properties(code: str, match: str = "") -> bool:
+  """Check if the code uses properties.
 
-  Note: This function will return the top-level chains, so it will not
+  Parameters
+  ----------
+  code : str
+      the source code
+  match : str, optional
+      the property name(s), by default None
+
+  Returns
+  -------
+  bool
+      True if found, False otherwise
+
+  Examples
+  --------
+  >>> code = 'df.shape'
+  >>> uses_properties(code)
+  True
+  >>> code = 'df.head()'
+  >>> uses_properties(code)
+  False
+  >>> code = 'df.empty'
+  >>> uses_properties(code, 'empty')
+  True
+  >>> uses_properties(code, 'shape')
+  False
+  """
+  return uses(find_properties, code, match)
+
+def find_method_chains(code: str | GradeCodeFound) -> GradeCodeFound:
+  """Find method chains in the code.
+
+  Note: This function will search for the top-level chains, so it will not
   return chains that are inside other expressions.
 
   Parameters
   ----------
-  node : Element
-      root node
+  code : str | GradeCodeFound
+      a string for the source code, or a GradeCodeFound for chaining queries
 
   Returns
   -------
-  list[Element]
-      either a list of Element(s) or empty list if no Attribute was found
+  GradeCodeFound
+      a GradeCoundFound object that holds the list of previous results
+      and the current query results if any
   """
-  xml_tree = xml(code)
+  if not isinstance(code, str) and not isinstance(code, GradeCodeFound):
+    raise Exception("`code` should be a `str` or `GradeCodeFound`")
+  
+  gcf = deepcopy(code) if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
+  xml_tree = xml(gcf.source) if isinstance(code, GradeCodeFound) else xml(code)
 
-  return [
+  request_type = 'property'
+  request = ''
+
+  result = [
     a
     # if an Attribute is followed by another Attribute, we have a chain
     for a in xml_tree.xpath(".//Attribute") if a.xpath("(.//Attribute)[1]")
   ]
+
+  return gcf.push(request_type=request_type, request=request, result=result)
+
+def uses_method_chains(code: str) -> bool:
+  """Check if the code uses method chains.
+
+  Parameters
+  ----------
+  code : str
+      the source code
+  match : str, optional
+      function name(s), by default None
+
+  Returns
+  -------
+  bool
+      True if found, False otherwise
+
+  Examples
+  --------
+  >>> code = 'df.head().tail()'
+  >>> uses_function(code)
+  True
+  >>> code = 'df.head()'
+  >>> uses_function(code)
+  False
+  """
+  return uses(find_method_chains, code)

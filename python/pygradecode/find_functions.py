@@ -57,6 +57,7 @@ def find_functions(code: str | GradeCodeFound, match: str = "") -> GradeCodeFoun
   request = match
   result = []
 
+  # TODO support a list of matches
   if request != "":
     xpath = f'.//Call//func/Name/id[.="{request}"]|.//attr[text()="{request}"]/ancestor::Call'
     id_nodes = xml_tree.xpath(xpath)
