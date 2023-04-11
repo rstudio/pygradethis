@@ -40,11 +40,11 @@ chunk which also contains a Python main module environment.}
 \item{...}{Extra arguments supplied by learnr}
 }
 \value{
-The `gradethis::graded()` list which contains several fields indicating the 
+The `gradethis::graded()` list which contains several fields indicating the
 result of the check.
 }
 \description{
-To enable exercise checking in your learnr tutorial through R code (i.e. an R -check chunk), 
-you can set `tutorial_options(exercise.checker = pygradethis::py_gradethis_exercise_checker)` 
+To enable exercise checking in your learnr tutorial through R code (i.e. an R -check chunk),
+you can set `tutorial_options(exercise.checker = pygradethis::py_gradethis_exercise_checker)`
 in the setup chunk of your tutorial. Or, set the `exercise.checker` for an individual Python chunk.
 }
