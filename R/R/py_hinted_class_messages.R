@@ -4,6 +4,7 @@ NULL
 setOldClass("py_tbl_df")
 setOldClass("py_grouped_df")
 #' @rdname hinted_class_message
+#' @inherit tblcheck::hinted_class_message
 setMethod("hinted_class_message", signature("py_tbl_df", "py_grouped_df"),
   function(object, expected) {
     paste(

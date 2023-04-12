@@ -23,12 +23,17 @@ LazyData: true
 Imports:
   reticulate,
   dplyr,
+  tidyselect,
   tibble,
   glue,
   learnr,
   waldo,
   gradethis (>= 0.2.9.9000),
-  tblcheck
+  tblcheck,
+  methods,
+  knitr,
+  rlang,
+  withr
 Remotes:
   rstudio/learnr,
   rstudio/gradethis,

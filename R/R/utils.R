@@ -195,11 +195,11 @@ py_to_r <- function(obj) {
 #' @return A list()
 index_to_list <- function(obj) {
   # if MultiIndex don't unlist
-  if (pygradethis:::is_MultiIndex(obj)) {
+  if (is_MultiIndex(obj)) {
     return(reticulate::py$builtins$list(obj))
   }
   # if CategoricalIndex, need to unpack the categories first
-  if (pygradethis:::is_CategoricalIndex(obj)) {
+  if (is_CategoricalIndex(obj)) {
     return(reticulate::py$builtins$list(obj$categories))
   }
   # unpack values
@@ -290,6 +290,8 @@ is_py_object <- function(obj) {
 # identical() S3 generic + methods ----
 
 #' @export
+#' @inherit base::identical
+#' @param ... the rest of the `base::identical` params
 identical <- function(x, y, ...) UseMethod("identical", x)
 
 #' @export

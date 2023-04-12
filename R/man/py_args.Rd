@@ -6,8 +6,11 @@
 \usage{
 py_args(...)
 }
+\arguments{
+\item{...}{Any number of (un)named arguments}
+}
 \description{
-In Python, the args() function takes positional (*args) 
+In Python, the args() function takes positional (*args)
 and keyword (**kwargs). Similarly, `py_args()` can also take
 arbitrary number of positional and named arguments.
 }

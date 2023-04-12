@@ -6,6 +6,13 @@
 \usage{
 py_find_arguments(code = .user_code, match = py_args(), env = parent.frame())
 }
+\arguments{
+\item{code}{The user code character}
+
+\item{match}{A `py_args()` to specify arguments and keyword arguments}
+
+\item{env}{The grading environment}
+}
 \description{
 Wrapper for `pygradecode.find_arguments.find_arguments()`
 }

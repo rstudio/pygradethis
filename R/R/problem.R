@@ -14,8 +14,8 @@ NULL
 #'   `length(actual)`. Be careful not to include large amounts of data.
 #' @param ... Additional elements to be included in the `problem` object.
 #'
-#' @keywords internal
 #' @export
+#' @keywords internal
 problem <- function(
   type, expected = NULL, actual = NULL, correct = FALSE, ...
 ) {
@@ -62,6 +62,7 @@ return_if_internal_problem <- function(expr, ..., env = parent.frame()) {
 }
 
 #' @export
+#' @keywords internal
 problem_grade.pygradethis_internal_problem <- function(
   problem, max_diffs = 3, env = parent.frame(), ...
 ) {
@@ -83,13 +84,14 @@ problem_grade.pygradethis_internal_problem <- function(
 }
 
 #' @export
+#' @keywords internal
 problem_message.wrong_index_problem <- function(problem, ...) {
   # if there are values for both actual and expected give some
   # more feedback on what the difference is
   extra <- NULL
   if (!is.null(problem$actual) && !is.null(problem$expected)) {
     extra <- tblcheck::problem_message(
-      tblcheck::vec_check(problem$actual, problem$expected, env = env)
+      tblcheck::vec_check(problem$actual, problem$expected)
     )
   }
 
@@ -97,6 +99,7 @@ problem_message.wrong_index_problem <- function(problem, ...) {
 }
 
 #' @export
+#' @keywords internal
 problem_message.wrong_columns_problem <- function(problem, ...) {
   # check if we have a difference of types
   extra <- NULL
@@ -104,8 +107,7 @@ problem_message.wrong_columns_problem <- function(problem, ...) {
   # if there's a class problem return feedback for that
   class_problem <- tblcheck::tbl_check_class(
     problem$actual,
-    problem$expected,
-    env = env
+    problem$expected
   )
   if (tblcheck::is_tblcheck_problem(class_problem)) {
     extra <- tblcheck::problem_message(class_problem)
@@ -113,8 +115,7 @@ problem_message.wrong_columns_problem <- function(problem, ...) {
     # otherwise, just provide the incorrect values feedback
     values_problem <- tblcheck::vec_check(
       problem$actual,
-      problem$expected,
-      env = env
+      problem$expected
     )
     extra <- tblcheck::problem_message(values_problem)
   }
@@ -123,24 +124,26 @@ problem_message.wrong_columns_problem <- function(problem, ...) {
 }
 
 #' @export
+#' @keywords internal
 problem_message.wrong_values_problem <- function(problem, ...) {
   # if there are values for both actual and expected give some
   # more feedback on what the difference is
   extra <- NULL
   if (!is.null(problem$actual) && !is.null(problem$expected)) {
     extra <- tblcheck::problem_message(
-      tblcheck::vec_check(problem$actual, problem$expected, env = env)
+      tblcheck::vec_check(problem$actual, problem$expected)
     )
   }
   glue::glue("{problem$message} {extra}", .null = "")
 }
 
 #' @export
+#' @keywords internal
 problem_message.wrong_series_problem <- function(problem, ...) {
   extra <- NULL
   if (!is.null(problem$actual) && !is.null(problem$expected)) {
     extra <- tblcheck::problem_message(
-      tblcheck::vec_check(problem$actual, problem$expected, env = env)
+      tblcheck::vec_check(problem$actual, problem$expected)
     )
   }
   glue::glue("{problem$message} {extra}", .null = "")
@@ -148,17 +151,20 @@ problem_message.wrong_series_problem <- function(problem, ...) {
 
 #' Generic problem with the result
 #' @export
+#' @keywords internal
 problem_message.pygradethis_problem <- function(problem, ...) {
   problem$message
 }
 
 #' Generic problem with the code
 #' @export
+#' @keywords internal
 problem_message.pygradecode_problem <- function(problem, ...) {
   problem$message
 }
 
 #' @export
+#' @keywords internal
 problem_grade.pygradethis_problem <- function(
     problem, max_diffs = 3, env = parent.frame(), ...
 ) {
@@ -175,6 +181,7 @@ problem_grade.pygradethis_problem <- function(
 }
 
 #' @export
+#' @keywords internal
 problem_grade.pygradecode_problem <- function(
     problem, max_diffs = 3, env = parent.frame(), ...
 ) {

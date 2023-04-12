@@ -1,7 +1,9 @@
+#' @import methods
 #' @importFrom tblcheck friendly_class
 NULL
 
 #' @rdname friendly_class
+#' @inherit tblcheck::friendly_class
 setMethod("friendly_class", signature("ANY"), function(object) {
   class <- get_friendly_class(object)
   class_str <- knitr::combine_words(md_code(class))

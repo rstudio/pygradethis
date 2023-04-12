@@ -12,3 +12,4 @@ the `pygradethis_exercise_checker` Python function
 \description{
 The `exercise.checker` pygradethis_exercise_checker to use in learnr
 }
+\keyword{internal}

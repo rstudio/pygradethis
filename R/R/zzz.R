@@ -1,5 +1,6 @@
 # pygradethis ----
 
+#' @noRd
 inform_python_pygradethis_not_found <- function(..., throw = stop) {
   throw(
     "Python or the Python pygradethis package were not found when {pygradethis} was loaded. ",
@@ -12,18 +13,20 @@ inform_python_pygradethis_not_found <- function(..., throw = stop) {
 #'
 #' @return the `pygradethis` Python module
 #' @export
-pygradethis <- NULL
+pygradethis <- inform_python_pygradethis_not_found
 
 #' The `exercise.checker` pygradethis_exercise_checker to use in learnr
 #'
 #' @return the `pygradethis_exercise_checker` Python function
 #' @export
+#' @keywords internal
 pygradethis_exercise_checker <- inform_python_pygradethis_not_found
 
 #' Get the last value of Python source code
 #'
 #' @return the value
 #' @export
+#' @keywords internal
 get_last_value <- inform_python_pygradethis_not_found
 
 # pygradecode ----
@@ -32,7 +35,7 @@ get_last_value <- inform_python_pygradethis_not_found
 #'
 #' @return the `pygradecode` Python module
 #' @export
-pygradecode <- NULL
+pygradecode <- inform_python_pygradethis_not_found
 
 #' The `pygradecode.find_functions` module containing functions to
 #' check for function calls.
@@ -47,9 +50,6 @@ find_functions_mod <- inform_python_pygradethis_not_found
 #' @return the Python module pygradecode.find_arguments
 #' @export
 find_arguments_mod <- inform_python_pygradethis_not_found
-
-#' @export
-literal <- inform_python_pygradethis_not_found
 
 # Import Python functionality ----
 
@@ -88,12 +88,11 @@ literal <- inform_python_pygradethis_not_found
       # pygradecode ----
       find_functions_mod <<- pygradecode$find_functions
       find_arguments_mod <<- pygradecode$find_arguments
-      literal <<- find_arguments_mod$literal
 
       # we use builtins a lot so we import that module automatically
       reticulate::py_run_string('import builtins', convert = FALSE)
     }, error = function(err) {
-      message(
+      packageStartupMessage(
         "An error occurred while trying to connect {pygradethis} in R to the Python companion package:\n",
         conditionMessage(err)
       )
