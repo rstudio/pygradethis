@@ -59,14 +59,27 @@ def find_functions(code: str | GradeCodeFound, match: str = "") -> GradeCodeFoun
 
   # TODO support a list of matches
   if request != "":
-    xpath = f'.//Call//func/Name/id[.="{request}"]|.//attr[text()="{request}"]/ancestor::Call'
-    id_nodes = xml_tree.xpath(xpath)
-    if len(id_nodes) > 0:
-      # grab the parent of the id element in order to view the source text
-      # since id is not an ast.AST
-      result  = [get_ancestor_call(n) for n in id_nodes]
+    xpath_query = f'.//Call//func/Name/id[.="{request}"]|.//attr[text()="{request}"]/ancestor::Call'
+    if gcf.has_previous_request():
+      for node in gcf.last_result:  
+        id_nodes = node.xpath(xpath_query)
+        if len(id_nodes) > 0:
+          # grab the parent of the id element in order to view the source text
+          # since id is not an ast.AST
+          result.extend(flatten_list([get_ancestor_call(n) for n in id_nodes]))
+    else:
+      id_nodes = xml_tree.xpath(xpath_query)
+      if len(id_nodes) > 0:
+        # grab the parent of the id element in order to view the source text
+        # since id is not an ast.AST
+        result  = [get_ancestor_call(n) for n in id_nodes]
   else:
-    result = xml_tree.xpath(".//Call")
+    xpath_query = f'.//Call|.//attr/ancestor::Call'
+    if gcf.has_previous_request():
+      for node in gcf.last_result:  
+        result.extend(node.xpath(xpath_query))
+    else:
+      result = xml_tree.xpath(xpath_query)
 
   return gcf.push(request_type=request_type, request=request, result=result)
 

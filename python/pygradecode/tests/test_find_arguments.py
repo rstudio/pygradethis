@@ -1,5 +1,8 @@
+from textwrap import dedent
 from lxml.etree import _Element as Element
 
+from pygradecode.grade_code_found import QueryResult
+from pygradecode.find_functions import find_functions
 from pygradecode.find_arguments import (
   find_arguments, args, Arg, KWArg
 )
@@ -58,6 +61,43 @@ def test_find_arguments_match_complex():
   assert len(last_result) == 1
   assert isinstance(last_result[0], Element)
   assert last_result[0].tag == 'List'
+
+def test_find_functions_arguments():
+  # nested function calls
+  user_code = dedent("""
+    sum([1, round(2.5), 3])
+    print("Hello", "World!", 2.5, sep=", ")
+  """).strip()
+
+  found = find_arguments(
+    find_functions(user_code, match = 'print'), 
+    match = args("2.5")
+  )
+  state = found.get_last_state()
+  results = found.results
+
+  assert isinstance(found, GradeCodeFound)
+  assert state.type == 'arguments'
+  
+  assert len(results) == 2
+  assert all(isinstance(r, QueryResult) for r in results)
+  
+  # first request 
+  first_found = results[0]
+  assert first_found.type == 'functions'
+  assert first_found.request == 'print'
+  assert len(first_found.result) == 1
+  assert isinstance(first_found.result[0], Element)
+  assert first_found.result[0].tag == 'Call'
+
+  # second request 
+  second_found = results[1]
+  last_result = found.last_result
+
+  assert second_found.type == 'arguments'
+  assert len(second_found.result) == 1
+  assert isinstance(last_result[0], Element)
+  assert last_result[0].tag == 'Constant'
 
 def test_find_arguments_match_keyword_string():
   code = 'print("Hello", "World!", sep=", ")'

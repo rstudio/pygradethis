@@ -37,13 +37,19 @@ def find_attributes(code: str | GradeCodeFound) -> GradeCodeFound:
   gcf = deepcopy(code) if isinstance(code, GradeCodeFound) else GradeCodeFound(code)
   xml_tree = xml(gcf.source) if isinstance(code, GradeCodeFound) else xml(code)
 
-  request_type = 'methods'
+  request_type = 'attributes'
   request = ''
   result = []
 
-  attrs = xml_tree.xpath(".//Attribute")
+  xpath_query = ".//Attribute"
 
-  if len(attrs) > 0:
+  attrs = []
+  if gcf.has_previous_request():
+    for node in gcf.last_result:  
+      attrs.extend(node.xpath(xpath_query))
+    result.extend(attrs)
+  else:
+    attrs = xml_tree.xpath(xpath_query)
     result.extend(
       flatten_list(
         a.xpath("../..") # go up to the grandparent node (to go above <value> or <func>)
@@ -113,12 +119,21 @@ def find_properties(code: str | GradeCodeFound, match: str = "") -> GradeCodeFou
 
   if match == "":
     xpath_query = ".//Expr/*/Attribute/../.." 
+    # TODO we have duplication of this logic to handle previous requests if it exists
+    # let's refactor it out into a function if possible
+    if gcf.has_previous_request():
+      for node in gcf.last_result:  
+        result.extend(flatten_list(node.xpath(xpath_query)))
+    else:
+      result.extend(xml_tree.xpath(xpath_query))
   else:
     # TODO support a list of matches
     xpath_query = f".//attr[text()='{match}']/ancestor::Expr"
-  
-  props = xml_tree.xpath(xpath_query)
-  result.extend(props)
+    if gcf.has_previous_request():
+      for node in gcf.last_result:  
+        result.extend(flatten_list(node.xpath(xpath_query)))
+    else:
+      result.extend(xml_tree.xpath(xpath_query))
 
   return gcf.push(request_type=request_type, request=request, result=result)
 

@@ -19,6 +19,7 @@ def test_find_attributes_simple():
   found = find_attributes(code_with_attrs)
   results = found.last_result
 
+  assert isinstance(found, GradeCodeFound)
   assert len(results) == 3
   assert all(isinstance(e, Element) for e in results)
 
@@ -41,6 +42,7 @@ def test_find_attributes_complex():
   found = find_attributes(code_with_attrs)
   results = found.last_result
 
+  assert isinstance(found, GradeCodeFound)
   assert len(results) == 4
   assert all(isinstance(e, Element) for e in results)
 
@@ -66,6 +68,7 @@ def test_find_properties():
   found = find_properties(code_with_props)
   results = found.last_result
 
+  assert isinstance(found, GradeCodeFound)
   assert len(results) == 2
   assert all(isinstance(e, Element) for e in results)
 
@@ -97,12 +100,14 @@ def test_find_properties_match():
   found = find_properties(code_with_props, match="empty")
   results = found.last_result
 
+  assert isinstance(found, GradeCodeFound)
   assert len(results) == 1
   assert results[0].tag == 'Expr'
 
   found = find_properties(code_with_props, match="shape")
   results = found.last_result
 
+  assert isinstance(found, GradeCodeFound)
   assert len(results) == 1
   assert results[0].tag == 'Expr'
 
@@ -150,6 +155,7 @@ def test_find_method_chains_simple():
   found = find_method_chains(chained_code)
   results = found.last_result
   
+  assert isinstance(found, GradeCodeFound)
   assert len(results) == 1
   assert all(isinstance(e, Element) for e in results)
   assert all(e.tag == 'Attribute' for e in results)
@@ -163,6 +169,8 @@ def test_find_method_chains_simple():
 
   found = find_method_chains(non_chained_code)
   results = found.last_result
+
+  assert isinstance(found, GradeCodeFound)
   assert len(results) == 0
 
 def test_find_method_chains_complex():
@@ -179,6 +187,7 @@ def test_find_method_chains_complex():
   found = find_method_chains(two_chains)
   results = found.last_result
   
+  assert isinstance(found, GradeCodeFound)
   assert len(results) == 2
   assert all(isinstance(e, Element) for e in results)
   assert all(e.tag == 'Attribute' for e in results)

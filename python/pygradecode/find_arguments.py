@@ -19,6 +19,12 @@ class Arg:
   code: AnyStr = None
   xml_node: AnyStr = None
 
+  def __str__(self) -> str:
+    if self.name != '':
+      return f"positional argument: {self.name} = {self.code}"
+    else:
+      return f"positional argument: {self.code}"
+
 @dataclass
 class KWArg:
   """A dataclass to represent a function's keyword argument"""
@@ -28,6 +34,9 @@ class KWArg:
   # this field is so we can refer to originating keyword XML Element
   # when it comes to match and store keyword arguments for `find_arguments()`
   keyword_xml_node: AnyStr = None
+  
+  def __str__(self) -> str:
+    return f"keyword argument: {self.name} = {self.code}"
 
 @dataclass
 class ArgList:
