@@ -57,9 +57,9 @@ def xml_strip_location(node: Element) -> Element:
   return node
 
 def expr_xml_node(arg_code: str) -> Element:
-  if not isinstance(arg_code, str) and arg_code == '':
+  if (not isinstance(arg_code, str) and not isinstance(arg_code, literal)) or arg_code == '':
     raise Exception(
-      f"`arg_code` for `py_args()` needs to be a string but was {type(str)}"
+      f"`arg_code` for `py_args()` needs to be a string but was {type(arg_code)}"
     )
 
   if isinstance(arg_code, literal):
