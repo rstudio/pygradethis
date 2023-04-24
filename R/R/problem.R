@@ -28,6 +28,7 @@ problem <- function(
   )
 }
 
+#' @export
 is_pygradethis_problem <- function(x, type = NULL) {
   inherits(x, "pygradethis_problem") &&
   (is.null(type) || inherits(x, paste0(type, "_problem")))

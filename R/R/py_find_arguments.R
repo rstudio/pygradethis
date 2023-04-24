@@ -1,4 +1,25 @@
 
+#' Wrapper for `pygradecode.find_arguments.find_arguments()`
+#'
+#' @param code The user code character
+#' @param match A `py_args()` to specify arguments and keyword arguments
+#' @param env The grading environment
+#'
+#' @export
+py_find_arguments <- function(code = .user_code, match = py_args(), env = parent.frame()) {
+  code <- get_placeholder(code, env)
+  
+  found <- pygradethis:::catch_internal_problem({
+    find_arguments_mod$find_arguments(code, match)
+  })
+
+  if (is_pygradethis_problem(found)) {
+    return(tblcheck::problem_grade(found))
+  }
+
+  found
+}
+
 #' Wrapper for `pygradecode.find_arguments.args()`
 #'
 #' In Python, the args() function takes positional (*args)
@@ -10,17 +31,6 @@
 #' @param ... Any number of (un)named arguments
 py_args <- function(...) {
   find_arguments_mod$args(...)
-}
-
-#' Wrapper for `pygradecode.find_arguments.find_arguments()`
-#'
-#' @param code The user code character
-#' @param match A `py_args()` to specify arguments and keyword arguments
-#' @param env The grading environment
-#'
-#' @export
-py_find_arguments <- function(code = .user_code, match = py_args(), env = parent.frame()) {
-  find_arguments_mod$find_arguments(code, match)
 }
 
 #' A Python class used to represent a literal string

@@ -56,19 +56,23 @@ def xml_strip_location(node: Element) -> Element:
     
   return node
 
-def expr_xml_node(code: str) -> Element:
-  if not isinstance(code, str) and code == '':
-    raise Exception(f"`code` is not a valid Python expression string")
+def expr_xml_node(arg_code: str) -> Element:
+  if not isinstance(arg_code, str) and arg_code == '':
+    raise Exception(
+      f"`arg_code` for `py_args()` needs to be a string but was {type(str)}"
+    )
 
-  if isinstance(code, literal):
-    code = f"'{code.source}'"
+  if isinstance(arg_code, literal):
+    arg_code = f"'{arg_code.source}'"
   else:
-    code = code.replace(" ", "").encode('raw_unicode_escape').decode()
+    arg_code = arg_code.replace(" ", "").encode('raw_unicode_escape').decode()
 
   try:
-    xml_tree = xml(code)
+    xml_tree = xml(arg_code)
   except SyntaxError:
-    raise Exception(f"`code` requires a valid Python expression string")
+    raise Exception(
+      f"The matching argument value for `py_args()` is not a valid Python expression string"
+    )
   
   nodes = xml_tree.xpath('.//Expr/value/*[1]')
   

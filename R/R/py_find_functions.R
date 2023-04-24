@@ -1,3 +1,4 @@
+
 #' Wrapper for `pygradecode.find_functions.find_functions()`
 #'
 #' See `help('pygradecode.find_arguments.find_arguments')` in Python for more details
@@ -8,8 +9,22 @@
 #'
 #' @return A Python list[Element]
 #' @export
-py_find_functions <- function(code = .user_code, match = character(1), env = parent.frame()) {
-  find_functions_mod$find_functions(code, match)
+py_find_functions <- function(
+  code = .user_code,
+  match = character(1),
+  env = parent.frame()
+) {
+  code <- get_placeholder(code, env)
+
+  found <- pygradethis:::catch_internal_problem({
+    find_functions_mod$find_functions(code, match)
+  })
+
+  if (is_pygradethis_problem(found)) {
+    return(tblcheck::problem_grade(found))
+  }
+
+  found
 }
 
 #' Wrapper for `pygradecode.find_functions.find_lambdas()`
@@ -22,5 +37,15 @@ py_find_functions <- function(code = .user_code, match = character(1), env = par
 #' @return A Python list[Element]
 #' @export
 py_find_lambdas <- function(code = .user_code, env = parent.frame()) {
-  find_functions_mod$find_lambdas(code)
+  code <- get_placeholder(code, env)
+
+  found <- pygradethis:::catch_internal_problem({
+    find_functions_mod$find_lambdas(code)
+  })
+
+  if (is_pygradethis_problem(found)) {
+    return(tblcheck::problem_grade(found))
+  }
+
+  found
 }
