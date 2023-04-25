@@ -136,7 +136,7 @@ py_gradethis_exercise_checker <- function(
 
         # if there are problems, it's an internal pygradethis problem and
         # we return early with the appropriate message
-        if (pygradethis:::is_pygradethis_problem(py_solution)) {
+        if (is_pygradethis_problem(py_solution)) {
           return(tblcheck::problem_grade(py_solution))
         }
 

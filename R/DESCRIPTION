@@ -1,6 +1,6 @@
 Package: pygradethis
 Title: Python exercise checker for learnr tutorials
-Version: 0.2.2
+Version: 0.3.0
 Authors@R: 
     c(person(given = "Nischal",
              family = "Shrestha",
@@ -23,12 +23,17 @@ LazyData: true
 Imports:
   reticulate,
   dplyr,
+  tidyselect,
   tibble,
   glue,
   learnr,
   waldo,
   gradethis (>= 0.2.9.9000),
-  tblcheck
+  tblcheck,
+  methods,
+  knitr,
+  rlang,
+  withr
 Remotes:
   rstudio/learnr,
   rstudio/gradethis,

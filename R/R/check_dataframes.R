@@ -34,7 +34,7 @@ get_python_solution <- function(expected = .solution, env = parent.frame()) {
 #' \dontrun{
 #' reticulate::py_run_string('import pandas as pd; import numpy as np')
 #' .result <- reticulate::py_eval("pd.DataFrame({'a':[1,2,3]})")
-#' pygradethis::py_get_index(.result) 
+#' pygradethis::py_get_index(.result)
 #'
 #' # RangeIndex(start=0, stop=3, step=1)
 #' }
@@ -466,7 +466,7 @@ py_grade_values <- function(
 #' # [1] "The Series do not match the expected Series."
 #' #
 #' # attr(,"class")
-#' # [1] "wrong_series_problem" "pygradethis_problem"  "gradethis_problem" 
+#' # [1] "wrong_series_problem" "pygradethis_problem"  "gradethis_problem"
 #'
 #' # Series w/ Index
 #' .result = reticulate::py_eval("pd.Series(data={'a': 1, 'b': 2, 'd': 3})", F)
@@ -488,7 +488,7 @@ py_grade_values <- function(
 #' # [1] "The Series do not match the expected Series."
 #' #
 #' # attr(,"class")
-#' # [1] "wrong_series_problem" "pygradethis_problem"  "gradethis_problem" 
+#' # [1] "wrong_series_problem" "pygradethis_problem"  "gradethis_problem"
 #' }
 py_check_series <- function(
   object = .result, expected = .solution, env = parent.frame()
@@ -503,8 +503,8 @@ py_check_series <- function(
 
   # validate input types
   return_if_internal_problem({
-    # NOTE: to not break things much, we're using `stop()` instead of `checkmate::assert` 
-    # we can use checkmate but changing is_Series() to throw an error when it's False 
+    # NOTE: to not break things much, we're using `stop()` instead of `checkmate::assert`
+    # we can use checkmate but changing is_Series() to throw an error when it's False
     # will break old grading code
     if (!pygradethis::is_Series(expected)) {
       stop("The expected object must be of type `Series`")
@@ -526,7 +526,7 @@ py_check_series <- function(
       expected = expected
     ))
   }
-  
+
   NULL
 }
 
@@ -578,6 +578,7 @@ py_grade_series <- function(
 #'
 #' @param object A DataFrame to be compared to `expected`.
 #' @param expected The expected DataFrame.
+#' @param env The environment used for grading.
 #'
 #' @return A NULL if equal, otherwise a `gradethis_graded` or `problem` object
 #' @export

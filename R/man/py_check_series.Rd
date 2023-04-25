@@ -42,7 +42,7 @@ pygradethis::py_check_series()
 # [1] "The Series do not match the expected Series."
 #
 # attr(,"class")
-# [1] "wrong_series_problem" "pygradethis_problem"  "gradethis_problem" 
+# [1] "wrong_series_problem" "pygradethis_problem"  "gradethis_problem"
 
 # Series w/ Index
 .result = reticulate::py_eval("pd.Series(data={'a': 1, 'b': 2, 'd': 3})", F)
@@ -64,6 +64,6 @@ pygradethis::py_check_series()
 # [1] "The Series do not match the expected Series."
 #
 # attr(,"class")
-# [1] "wrong_series_problem" "pygradethis_problem"  "gradethis_problem" 
+# [1] "wrong_series_problem" "pygradethis_problem"  "gradethis_problem"
 }
 }
