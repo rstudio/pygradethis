@@ -1,3 +1,10 @@
+# pygradethis 0.3.0
+
+* Added code checking support via `pygradecode` Python package through find functions and friends
+* Added find functions `py_find_functions()`, `py_find_lambdas()`, and `py_find_arguments()`
+* Added helper functions `py_literal()`, `py_args()`
+* Added `py_fail_if_not_found()` and `py_fail_if_found()` to facilitate grading find functions
+
 # pygradethis 0.2.2
 
 * Added object type validation for `check_*()` functions

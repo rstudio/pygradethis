@@ -1,6 +1,6 @@
 Package: pygradethis
 Title: Python exercise checker for learnr tutorials
-Version: 0.2.2
+Version: 0.3.0
 Authors@R: 
     c(person(given = "Nischal",
              family = "Shrestha",
