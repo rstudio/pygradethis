@@ -128,7 +128,7 @@ py_gradethis_exercise_checker <- function(
       python = function(code, envir) {
         # run solution code to return final object, while checking for
         # problems with the code
-        py_solution <- pygradethis:::catch_internal_problem({
+        result <- pygradethis:::catch_internal_problem({
           envir_prep_py <- get0(".__py__", envir = envir, ifnotfound = NULL)
           solution_code <- paste0(as.character(solution_code), collapse = "\n")
           pygradethis::get_last_value(solution_code, envir_prep_py)
@@ -136,12 +136,19 @@ py_gradethis_exercise_checker <- function(
 
         # if there are problems, it's an internal pygradethis problem and
         # we return early with the appropriate message
-        if (is_pygradethis_problem(py_solution)) {
-          return(tblcheck::problem_grade(py_solution))
+        if (is_pygradethis_problem(result)) {
+          return(tblcheck::problem_grade(result))
         }
 
-        # keep around raw Python solution object in case it's needed
+        # extract the Python envir (dict)
+        py_envir_solution <- result[[0]]
+        # extract last value
+        py_solution <- result[[1]]
+        
+        # keep around raw Python solution object and envir in case it's needed
         assign(".py_solution", py_solution, envir = envir)
+        assign(".py_envir_solution", py_envir_solution, envir = envir)
+        
         # but return the converted solution object
         pygradethis::py_to_r(py_solution)
       }

@@ -2,7 +2,7 @@
 Module with useful functions.
 """
 
-from typing import Any
+from typing import Union, List, Tuple
 import ast
 
 class NotSet:
@@ -44,7 +44,7 @@ def parse_code(input: str | list[str]) -> str:
         else:
             raise SyntaxError("Problem parsing your code!")
 
-def get_last_value(script: str, envir: dict) -> Any:
+def get_last_value(script: str, envir: dict) -> Tuple:
     """Evaluate Python code and return the value of the last line of code.
 
     Parameters
@@ -56,8 +56,9 @@ def get_last_value(script: str, envir: dict) -> Any:
 
     Returns
     -------
-    Any
-        A Python object, or None if the last line is not an expression
+    Tuple
+        The Python envir which contains all objects created in execution of envir,
+        and a last value which is a Python object, or `NotSet` if the last line is not an expression.
 
     Examples
     --------
@@ -75,4 +76,5 @@ def get_last_value(script: str, envir: dict) -> Any:
       else:
         exec(compile(ast.Module(body=[s], type_ignores=[]), filename="<ast>", mode="exec"), envir)
         last_value = NONE
-    return last_value
+    
+    return envir, last_value
