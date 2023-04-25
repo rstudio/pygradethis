@@ -14,12 +14,12 @@ class NotSet:
 
 NONE = NotSet()
 
-def parse_code(input: Union[str, List[str]]) -> str:
+def parse_code(input: str | list[str]) -> str:
     """Tries to parse code represented as string or list of strings
 
     Parameters
     ----------
-    input : Union[str, List[str]]
+    input : str | list[str]
         either a str or a list of str
 
     Returns

@@ -14,6 +14,8 @@ py_check_dataframe(
 \item{object}{A DataFrame to be compared to `expected`.}
 
 \item{expected}{The expected DataFrame.}
+
+\item{env}{The environment used for grading.}
 }
 \value{
 A NULL if equal, otherwise a `gradethis_graded` or `problem` object

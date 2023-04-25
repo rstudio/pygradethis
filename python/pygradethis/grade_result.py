@@ -2,7 +2,7 @@
 This module is used to check python code output.
 """
 
-from typing import Any, Union, List
+from typing import Any, List
 
 from .conditions import Graded
 from .result_checker import test_conditions
@@ -13,7 +13,7 @@ from .result_checker import test_conditions
 def grade_result(
     *conditions: List[Graded], 
     user_result: Any = None
-  ) -> Union[dict, str]:
+  ) -> dict | str:
   """This function checks the user's code output against the list of conditions.
 
   Parameters
