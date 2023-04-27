@@ -9,8 +9,7 @@ setMethod("hinted_class_message", signature("py_tbl_df", "py_grouped_df"),
   function(object, expected) {
     paste(
       "I was only expecting 1 value for each grouping in the table," ,
-      "but you have multiple values per grouping.",
-      "Maybe you are missing a `.groupby()` call?"
+      "but you have multiple values per grouping."
     )
   }
 )

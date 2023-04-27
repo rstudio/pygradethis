@@ -521,7 +521,7 @@ py_check_series <- function(
   if (!identical(object, expected)) {
     return(problem(
       type = "wrong_series",
-      message = "The Series do not match the expected Series.",
+      message = "The Series does not match the expected Series.",
       actual = object,
       expected = expected
     ))
