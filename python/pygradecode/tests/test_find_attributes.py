@@ -72,8 +72,8 @@ def test_find_properties():
   assert len(results) == 2
   assert all(isinstance(e, Element) for e in results)
 
-  assert results[0].tag == 'Expr'
-  assert results[1].tag == 'Expr'
+  assert results[0].tag == 'Attribute'
+  assert results[1].tag == 'Attribute'
   
   code_without_props = dedent(
     """
@@ -94,6 +94,7 @@ def test_find_properties_match():
     df.empty
     df.loc[:,'foo']
     df.shape
+    df.shape()
     """
   ).strip()
 
@@ -102,14 +103,14 @@ def test_find_properties_match():
 
   assert isinstance(found, GradeCodeFound)
   assert len(results) == 1
-  assert results[0].tag == 'Expr'
+  assert results[0].tag == 'Attribute'
 
   found = find_properties(code_with_props, match="shape")
   results = found.last_result
 
   assert isinstance(found, GradeCodeFound)
   assert len(results) == 1
-  assert results[0].tag == 'Expr'
+  assert results[0].tag == 'Attribute'
 
 def test_uses_properties():
   props = dedent(

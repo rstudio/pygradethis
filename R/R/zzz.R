@@ -51,6 +51,13 @@ find_functions_mod <- inform_python_pygradethis_not_found
 #' @export
 find_arguments_mod <- inform_python_pygradethis_not_found
 
+#' The Python module `pygradecode.find_attributes` containing functions
+#' to check for attributes, properties, and method chains.
+#'
+#' @return the Python module pygradecode.find_attributes
+#' @export
+find_attributes_mod <- inform_python_pygradethis_not_found
+
 # Import Python functionality ----
 
 .onLoad <- function(libname, pkgname) {
@@ -88,6 +95,7 @@ find_arguments_mod <- inform_python_pygradethis_not_found
       # pygradecode ----
       find_functions_mod <<- pygradecode$find_functions
       find_arguments_mod <<- pygradecode$find_arguments
+      find_attributes_mod <<- pygradecode$find_attributes
 
       # we use builtins a lot so we import that module automatically
       reticulate::py_run_string('import builtins', convert = FALSE)

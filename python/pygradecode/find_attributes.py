@@ -118,7 +118,7 @@ def find_properties(code: str | GradeCodeFound, match: str = "") -> GradeCodeFou
   result = []
 
   if match == "":
-    xpath_query = ".//Expr/*/Attribute/../.." 
+    xpath_query = ".//Expr/*/Attribute" 
     # TODO we have duplication of this logic to handle previous requests if it exists
     # let's refactor it out into a function if possible
     if gcf.has_previous_request():
@@ -128,7 +128,7 @@ def find_properties(code: str | GradeCodeFound, match: str = "") -> GradeCodeFou
       result.extend(xml_tree.xpath(xpath_query))
   else:
     # TODO support a list of matches
-    xpath_query = f".//attr[text()='{match}']/ancestor::Expr"
+    xpath_query = f".//Expr/*/Attribute//attr[text()='{match}']/.." 
     if gcf.has_previous_request():
       for node in gcf.last_result:  
         result.extend(flatten_list(node.xpath(xpath_query)))
