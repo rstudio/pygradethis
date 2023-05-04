@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{index_to_list}
 \alias{index_to_list}
-\title{Helper funtion to unpack an Index and return the values}
+\title{Helper function to unpack an Index and return the values}
 \usage{
 index_to_list(obj)
 }
@@ -13,5 +13,5 @@ index_to_list(obj)
 A list()
 }
 \description{
-Helper funtion to unpack an Index and return the values
+Helper function to unpack an Index and return the values
 }

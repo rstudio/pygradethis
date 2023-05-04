@@ -41,6 +41,24 @@ evaluate_exercise_feedback <- function(ex, envir = NULL, evaluate_global_setup =
 
 # Type checking helpers ----
 
+#' Checks if the Python object is a "__reticulate_placeholder__".
+#' 
+#' This happens in a Python learnr exercise when a user code does not return 
+#' anything or returns None.
+#'
+#' @param obj Python object.
+#'
+#' @return TRUE if so, FALSE otherwise
+#' @export
+is_placeholder <- function(obj) {
+  converted <- reticulate::py_to_r(obj)
+  if (!is_py_object(converted) && identical(converted, "__reticulate_placeholder__")) {
+    return(TRUE)
+  }
+
+  FALSE
+}
+
 #' Checks if the Python object is a pandas.DataFrame
 #'
 #' @param obj Python object.
@@ -139,7 +157,11 @@ is_function <- function(obj) {
 #' @return character
 #' @export
 get_friendly_class <- function(obj) {
-  reticulate::py$builtins$type(obj)$`__name__`
+  obj_type <- reticulate::py$builtins$type(obj)$`__name__`
+  if (obj_type %in% c('NotSet','NoneType') ) {
+    return('None')
+  }
+  obj_type
 }
 
 get_py_type <- function(obj) {
@@ -175,9 +197,18 @@ py_to_r <- function(obj) {
       } else if (is_set(obj)) {
         py_obj <- reticulate::py$builtins$list(obj)
         class(py_obj) <- get_py_type(obj)
+      } else if (is_placeholder(obj)) {
+        py_obj <- reticulate::py_to_r(obj)
+        class(py_obj) <- c("py_NotSet", "pygradethis")
       } else {
         py_obj <- reticulate::py_to_r(obj)
-        class(py_obj) <- get_py_type(obj)
+        # NOTE: if we were able to use reticulate to convert the object
+        # then set the class to the Python type, otherwise avoid
+        # class() on an unconvertible Python object makes it an R environment 
+        # causing issues in the grading feedback
+        if (!is_py_object(py_obj)) {
+          class(py_obj) <- get_py_type(obj)
+        }
       }
       return(py_obj)
     }, error = function(e) {
@@ -188,7 +219,7 @@ py_to_r <- function(obj) {
   )
 }
 
-#' Helper funtion to unpack an Index and return the values
+#' Helper function to unpack an Index and return the values
 #'
 #' @param obj A type of Index
 #'
