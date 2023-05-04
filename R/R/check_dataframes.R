@@ -108,7 +108,7 @@ py_return_if_not_type <- function(object, expected_type, problem_type) {
     return(problem(
         type = problem_type,
         message = glue::glue(
-          "I expected a `{expected_type}` but the object was a `{object_type}`."
+          "I expected a `{expected_type}` but the object type was `{object_type}`."
         )
     ))
   }
@@ -521,7 +521,7 @@ py_check_series <- function(
   if (!identical(object, expected)) {
     return(problem(
       type = "wrong_series",
-      message = "The Series do not match the expected Series.",
+      message = "The Series does not match the expected Series.",
       actual = object,
       expected = expected
     ))
