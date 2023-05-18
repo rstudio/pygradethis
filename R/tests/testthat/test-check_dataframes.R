@@ -695,10 +695,8 @@ test_that("py_grade_dataframe() handles incorrect types", {
     )
     pygradethis::py_grade_dataframe(.result, .solution)
   })
-
   testthat::expect_true(inherits(grade_dataframe_bad_exp_type, "gradethis_graded"))
   testthat::expect_false(grade_dataframe_bad_exp_type$correct)
-
   testthat::expect_match(
     grade_dataframe_bad_exp_type$message,
     "I expected a DataFrame, but your code returned a `None`. Did you forget to return something?"
