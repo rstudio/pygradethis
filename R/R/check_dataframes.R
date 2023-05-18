@@ -105,10 +105,14 @@ py_return_if_not_type <- function(object, expected_type, problem_type) {
 
   # if there is a difference of type return a problem
   if (!identical(object_type, expected_type)) {
+    extra <- NULL
+    if (identical(object_type, "None")) {
+      extra <- "Did you forget to return something?"
+    }
     return(problem(
         type = problem_type,
         message = glue::glue(
-          "I expected a `{expected_type}` but the object type was `{object_type}`."
+          "I expected a {expected_type}, but your code returned a `{object_type}`. {extra}", .null = ""
         )
     ))
   }
@@ -376,7 +380,7 @@ py_check_values <- function(
     py_return_if_not_type(object, "DataFrame", "wrong_values")
   )
 
-  # validate input types
+  # validate expected input types
   return_if_internal_problem({
     if (!pygradethis::is_DataFrame(expected)) {
       stop("The expected object must be of type `DataFrame`")
@@ -501,7 +505,7 @@ py_check_series <- function(
     py_return_if_not_type(object, "Series", "wrong_series")
   )
 
-  # validate input types
+  # validate expected input type
   return_if_internal_problem({
     # NOTE: to not break things much, we're using `stop()` instead of `checkmate::assert`
     # we can use checkmate but changing is_Series() to throw an error when it's False
@@ -588,7 +592,7 @@ py_check_dataframe <- function(
   object <- get_python_result(object, env)
   expected <- get_python_solution(expected, env)
 
-  # validate input types
+  # validate expected input types
   return_if_internal_problem({
     if (!pygradethis::is_DataFrame(expected)) {
       stop("The expected object must be of type `DataFrame`")

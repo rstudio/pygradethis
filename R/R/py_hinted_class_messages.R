@@ -24,3 +24,12 @@ setMethod("hinted_class_message", signature("py_grouped_df", "py_tbl_df"),
     )
   }
 )
+
+#' @rdname hinted_class_message
+setMethod("hinted_class_message", signature("py_NotSet", "ANY"),
+  function(object, expected) {
+    glue::glue(
+      "I expected {friendly_class(expected)}, but your code returned a `None`. Did you forget to return something?"
+    )
+  }
+)

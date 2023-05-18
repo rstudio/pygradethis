@@ -3,11 +3,14 @@
 \name{hinted_class_message,py_tbl_df,py_grouped_df-method}
 \alias{hinted_class_message,py_tbl_df,py_grouped_df-method}
 \alias{hinted_class_message,py_grouped_df,py_tbl_df-method}
+\alias{hinted_class_message,py_NotSet,ANY-method}
 \title{Generate a hint for how to convert one object type to another}
 \usage{
 \S4method{hinted_class_message}{py_tbl_df,py_grouped_df}(object, expected)
 
 \S4method{hinted_class_message}{py_grouped_df,py_tbl_df}(object, expected)
+
+\S4method{hinted_class_message}{py_NotSet,ANY}(object, expected)
 }
 \arguments{
 \item{object}{An object to be compared to \code{expected}}

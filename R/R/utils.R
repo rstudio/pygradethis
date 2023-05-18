@@ -42,7 +42,7 @@ evaluate_exercise_feedback <- function(ex, envir = NULL, evaluate_global_setup =
 # Type checking helpers ----
 
 #' Checks if the Python object is a "__reticulate_placeholder__".
-#' 
+#'
 #' This happens in a Python learnr exercise when a user code does not return 
 #' anything or returns None.
 #'
@@ -149,6 +149,16 @@ is_function <- function(obj) {
   identical(get_friendly_class(obj), 'function')
 }
 
+#' Checks if the Python object is a None
+#'
+#' @param obj Python object.
+#'
+#' @return TRUE if so, FALSE otherwise
+#' @export
+is_None <- function(obj) {
+  identical(get_friendly_class(obj), 'None')
+}
+
 #' Get a friendly single string representation of a Python
 #' object's class
 #'
@@ -158,7 +168,7 @@ is_function <- function(obj) {
 #' @export
 get_friendly_class <- function(obj) {
   obj_type <- reticulate::py$builtins$type(obj)$`__name__`
-  if (obj_type %in% c('NotSet','NoneType') ) {
+  if (obj_type %in% c('NotSet','NoneType')) {
     return('None')
   }
   obj_type
@@ -200,11 +210,14 @@ py_to_r <- function(obj) {
       } else if (is_placeholder(obj)) {
         py_obj <- reticulate::py_to_r(obj)
         class(py_obj) <- c("py_NotSet", "pygradethis")
+      } else if (is_None(obj)) {
+        py_obj <- "None"
+        class(py_obj) <- c("py_NotSet", "pygradethis")
       } else {
         py_obj <- reticulate::py_to_r(obj)
         # NOTE: if we were able to use reticulate to convert the object
         # then set the class to the Python type, otherwise avoid
-        # class() on an unconvertible Python object makes it an R environment 
+        # class() on an unconvertible Python object makes it an R environment
         # causing issues in the grading feedback
         if (!is_py_object(py_obj)) {
           class(py_obj) <- get_py_type(obj)

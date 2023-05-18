@@ -4,7 +4,6 @@
 \alias{friendly_class,ANY-method}
 \alias{friendly_class,py_tbl_df-method}
 \alias{friendly_class,py_grouped_df-method}
-\alias{friendly_class,py_NotSet-method}
 \alias{friendly_class,py_int-method}
 \alias{friendly_class,py_float-method}
 \alias{friendly_class,py_complex-method}
@@ -20,8 +19,6 @@
 \S4method{friendly_class}{py_tbl_df}(object)
 
 \S4method{friendly_class}{py_grouped_df}(object)
-
-\S4method{friendly_class}{py_NotSet}(object)
 
 \S4method{friendly_class}{py_int}(object)
 

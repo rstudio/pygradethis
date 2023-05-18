@@ -28,13 +28,6 @@ setMethod("friendly_class", signature("py_grouped_df"), function(object) {
 	"a DataFrame with row labels (i.e. index)"
 })
 
-setOldClass(c("py_NotSet", "pygradethis"))
-#' @rdname friendly_class
-setMethod("friendly_class", signature("py_NotSet"), function(object) {
-  if (!setequal(class(object), c("py_NotSet", "pygradethis"))) return(callNextMethod())
-  "`None`"
-})
-
 setOldClass(c("py_int", "pygradethis"))
 #' @rdname friendly_class
 setMethod("friendly_class", signature("py_int"), function(object) {
