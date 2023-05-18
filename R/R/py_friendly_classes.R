@@ -16,7 +16,7 @@ setMethod("friendly_class", signature("py_tbl_df"), function(object) {
 	if (!setequal(class(object), c("py_tbl_df", "tbl_df", "tbl", "data.frame"))) {
 		return(callNextMethod())
 	}
-	"a DataFrame"
+	"a `DataFrame`"
 })
 
 setOldClass(c("py_grouped_df", "py_tbl_df", "grouped_df", "tbl_df", "tbl", "data.frame"))
@@ -25,14 +25,7 @@ setMethod("friendly_class", signature("py_grouped_df"), function(object) {
 	if (!setequal(class(object), c("py_grouped_df", "py_tbl_df", "grouped_df", "tbl_df", "tbl", "data.frame"))) {
 		return(callNextMethod())
 	}
-	"a DataFrame with row labels (i.e. index)"
-})
-
-setOldClass(c("py_NotSet", "pygradethis"))
-#' @rdname friendly_class
-setMethod("friendly_class", signature("py_NotSet"), function(object) {
-  if (!setequal(class(object), c("py_NotSet", "pygradethis"))) return(callNextMethod())
-  "`None`"
+	"a `DataFrame` with row labels (i.e. index)"
 })
 
 setOldClass(c("py_int", "pygradethis"))

@@ -507,7 +507,7 @@ test_that("py_grade_index() handles incorrect types", {
   })
   testthat::expect_match(
     grade_index_bad_obj_type$message,
-    "I expected a `DataFrame` but the object type was `str`."
+    "I expected a `DataFrame`, but your code returned a `str`."
   )
   testthat::expect_true(inherits(grade_index_bad_obj_type, "gradethis_graded"))
   testthat::expect_false(grade_index_bad_obj_type$correct)
@@ -532,16 +532,16 @@ test_that("py_grade_index() handles incorrect types", {
     setup_envir <- reticulate::py_run_string("import pandas as pd; import numpy as np", convert=FALSE)
     .result <- get_last_value("df = pd.DataFrame({'a':[1, 2, 3]})", setup_envir)[[1]]
     .solution <- reticulate::py_eval(
-      "pd.Series([1, 2, 3])",
+      "pd.DataFrame({'a':[1, 2, 3]})",
       convert = FALSE
     )
-    pygradethis::py_grade_series(.result, .solution)
+    pygradethis::py_grade_index(.result, .solution)
   })
   testthat::expect_true(inherits(grade_index_bad_exp_type, "gradethis_graded"))
   testthat::expect_false(grade_index_bad_exp_type$correct)
   testthat::expect_match(
     grade_index_bad_exp_type$message,
-    "I expected a `Series` but the object type was `None`"
+    "I expected a `DataFrame`, but your code returned a `None`. Did you forget to return something?"
   )
 })
 
@@ -560,7 +560,7 @@ test_that("py_grade_values() handles incorrect types", {
   })
   testthat::expect_match(
     grade_values_bad_obj_type$message,
-    "I expected a `DataFrame` but the object type was `str`."
+    "I expected a `DataFrame`, but your code returned a `str`."
   )
   testthat::expect_true(inherits(grade_values_bad_obj_type, "gradethis_graded"))
   testthat::expect_false(grade_values_bad_obj_type$correct)
@@ -579,6 +579,23 @@ test_that("py_grade_values() handles incorrect types", {
   })
   testthat::expect_true(inherits(grade_values_bad_exp_type, "gradethis_graded"))
   testthat::expect_equal(grade_values_bad_exp_type$correct, logical())
+
+  # None return case
+  grade_values_bad_exp_type <- with_py_clear_env({
+    setup_envir <- reticulate::py_run_string("import pandas as pd; import numpy as np", convert=FALSE)
+    .result <- get_last_value("df = pd.DataFrame({'a':[1, 2, 3]})", setup_envir)[[1]]
+    .solution <- reticulate::py_eval(
+      "pd.DataFrame({'a':[1, 2, 3]})",
+      convert = FALSE
+    )
+    pygradethis::py_grade_values(.result, .solution)
+  })
+  testthat::expect_true(inherits(grade_values_bad_exp_type, "gradethis_graded"))
+  testthat::expect_false(grade_values_bad_exp_type$correct)
+  testthat::expect_match(
+    grade_values_bad_exp_type$message,
+    "I expected a `DataFrame`, but your code returned a `None`. Did you forget to return something?"
+  )
 })
 
 test_that("py_grade_series() handles incorrect types", {
@@ -595,8 +612,8 @@ test_that("py_grade_series() handles incorrect types", {
     pygradethis::py_grade_series(.result, .solution)
   })
   testthat::expect_match(
-    grade_series_bad_obj_type$message, 
-    "I expected a `Series` but the object type was `str`."
+    grade_series_bad_obj_type$message,
+    "I expected a `Series`, but your code returned a `str`."
   )
   testthat::expect_true(inherits(grade_series_bad_obj_type, "gradethis_graded"))
   testthat::expect_false(grade_series_bad_obj_type$correct)
@@ -619,7 +636,7 @@ test_that("py_grade_series() handles incorrect types", {
   # None return case
   grade_series_bad_exp_type <- with_py_clear_env({
     setup_envir <- reticulate::py_run_string("import pandas as pd; import numpy as np", convert=FALSE)
-    .result <- get_last_value("df = pd.DataFrame({'a':[1, 2, 3]})", setup_envir)[[1]]
+    .result <- get_last_value("s = pd.Series([1, 2, 3])", setup_envir)[[1]]
     .solution <- reticulate::py_eval(
       "pd.Series([1, 2, 3])",
       convert = FALSE
@@ -630,7 +647,7 @@ test_that("py_grade_series() handles incorrect types", {
   testthat::expect_false(grade_series_bad_exp_type$correct)
   testthat::expect_match(
     grade_series_bad_exp_type$message,
-    "I expected a `Series` but the object type was `None`"
+    "I expected a `Series`, but your code returned a `None`. Did you forget to return something?"
   )
 })
 
@@ -681,7 +698,7 @@ test_that("py_grade_dataframe() handles incorrect types", {
   testthat::expect_true(inherits(grade_dataframe_bad_exp_type, "gradethis_graded"))
   testthat::expect_false(grade_dataframe_bad_exp_type$correct)
   testthat::expect_match(
-    grade_dataframe_bad_exp_type$message, 
-    "I expected a `DataFrame` but the object type was `None`"
+    grade_dataframe_bad_exp_type$message,
+    "I expected a `DataFrame`, but your code returned a `None`. Did you forget to return something?"
   )
 })
