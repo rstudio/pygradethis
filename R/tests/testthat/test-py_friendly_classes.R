@@ -1,33 +1,3 @@
-# test_that("friendly_class() for no objects returned", {
-#   # Note: this is emulating what happens when there are no objects being returned
-#   # in an exercise, where learnr will return placeholder string
-#   last_value <- reticulate::py_eval("'__reticulate_placeholder__'", convert=FALSE)
-#   last_value <- pygradethis::py_to_r(last_value)
-#   print(friendly_class(
-#       last_value
-#   ))
-
-#   expect_equal(
-#     friendly_class(
-#       last_value
-#     ),
-#     "`None`. Did you remember to return an object?"
-#   )
-# })
-
-# test_that("friendly_class() None", {
-#   py_envir <- reticulate::py_eval("{}", convert=FALSE)
-#   last_value <- pygradethis::py_to_r(
-#     reticulate::py_eval("None", convert=FALSE)
-#   )
-#   expect_equal(
-#     friendly_class(
-#       last_value
-#     ),
-#     "an object with class `None`"
-#   )
-# })
-
 test_that("friendly_class() int", {
   expect_equal(
     friendly_class(

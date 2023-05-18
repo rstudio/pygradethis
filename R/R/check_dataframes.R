@@ -105,6 +105,10 @@ py_return_if_not_type <- function(object, expected_type, problem_type) {
 
   # if there is a difference of type return a problem
   if (!identical(object_type, expected_type)) {
+    # NOTE: This extra bit is used solely for the case when user returns
+    # nothing when they should return something. We have to handle this
+    # case here because it's easier in some situations where Python objects
+    # can't be directly converted to R to leverage method dispatch via `tblcheck`
     extra <- NULL
     if (identical(object_type, "None")) {
       extra <- "Did you forget to return something?"
