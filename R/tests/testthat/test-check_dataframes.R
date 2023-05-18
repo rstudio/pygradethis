@@ -507,7 +507,7 @@ test_that("py_grade_index() handles incorrect types", {
   })
   testthat::expect_match(
     grade_index_bad_obj_type$message,
-    "I expected a DataFrame, but your code returned a `str`."
+    "I expected a `DataFrame`, but your code returned a `str`."
   )
   testthat::expect_true(inherits(grade_index_bad_obj_type, "gradethis_graded"))
   testthat::expect_false(grade_index_bad_obj_type$correct)
@@ -541,7 +541,7 @@ test_that("py_grade_index() handles incorrect types", {
   testthat::expect_false(grade_index_bad_exp_type$correct)
   testthat::expect_match(
     grade_index_bad_exp_type$message,
-    "I expected a DataFrame, but your code returned a `None`. Did you forget to return something?"
+    "I expected a `DataFrame`, but your code returned a `None`. Did you forget to return something?"
   )
 })
 
@@ -560,7 +560,7 @@ test_that("py_grade_values() handles incorrect types", {
   })
   testthat::expect_match(
     grade_values_bad_obj_type$message,
-    "I expected a DataFrame, but your code returned a `str`."
+    "I expected a `DataFrame`, but your code returned a `str`."
   )
   testthat::expect_true(inherits(grade_values_bad_obj_type, "gradethis_graded"))
   testthat::expect_false(grade_values_bad_obj_type$correct)
@@ -594,7 +594,7 @@ test_that("py_grade_values() handles incorrect types", {
   testthat::expect_false(grade_values_bad_exp_type$correct)
   testthat::expect_match(
     grade_values_bad_exp_type$message,
-    "I expected a DataFrame, but your code returned a `None`. Did you forget to return something?"
+    "I expected a `DataFrame`, but your code returned a `None`. Did you forget to return something?"
   )
 })
 
@@ -613,7 +613,7 @@ test_that("py_grade_series() handles incorrect types", {
   })
   testthat::expect_match(
     grade_series_bad_obj_type$message,
-    "I expected a Series, but your code returned a `str`."
+    "I expected a `Series`, but your code returned a `str`."
   )
   testthat::expect_true(inherits(grade_series_bad_obj_type, "gradethis_graded"))
   testthat::expect_false(grade_series_bad_obj_type$correct)
@@ -647,7 +647,7 @@ test_that("py_grade_series() handles incorrect types", {
   testthat::expect_false(grade_series_bad_exp_type$correct)
   testthat::expect_match(
     grade_series_bad_exp_type$message,
-    "I expected a Series, but your code returned a `None`. Did you forget to return something?"
+    "I expected a `Series`, but your code returned a `None`. Did you forget to return something?"
   )
 })
 
@@ -695,12 +695,10 @@ test_that("py_grade_dataframe() handles incorrect types", {
     )
     pygradethis::py_grade_dataframe(.result, .solution)
   })
-
   testthat::expect_true(inherits(grade_dataframe_bad_exp_type, "gradethis_graded"))
   testthat::expect_false(grade_dataframe_bad_exp_type$correct)
-
   testthat::expect_match(
     grade_dataframe_bad_exp_type$message,
-    "I expected a DataFrame, but your code returned a `None`. Did you forget to return something?"
+    "I expected a `DataFrame`, but your code returned a `None`. Did you forget to return something?"
   )
 })

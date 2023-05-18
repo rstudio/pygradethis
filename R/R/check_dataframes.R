@@ -112,7 +112,7 @@ py_return_if_not_type <- function(object, expected_type, problem_type) {
     return(problem(
         type = problem_type,
         message = glue::glue(
-          "I expected a {expected_type}, but your code returned a `{object_type}`. {extra}", .null = ""
+          "I expected a `{expected_type}`, but your code returned a `{object_type}`. {extra}", .null = ""
         )
     ))
   }
