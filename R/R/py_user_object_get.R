@@ -37,6 +37,24 @@ py_user_object_get <- function(x, py_envir, check_env = parent.frame()) {
   reticulate::py_get_item(.py_envir_result, x, silent = TRUE)
 }
 
+#' Function for fetching a `list` of variable names (`character`) that the
+#' student code introduces.
+#'
+#' The list returned contain variables introduced beyond the ones in the
+#' `.py_envir_prep` environment which is produced by the setup code.
+#'
+#' @param x An object name, given as a quoted `character` string.
+#' @param check_env The `environment` from which to retrieve `.py_envir_result`
+#'
+#' @return a `[character]` vector
+#' @export
+py_user_object_list <- function(check_env = parent.frame()) {
+  .py_envir_prep <- py_resolve_envir(.py_envir_prep, check_env)
+  .py_envir_result <- py_resolve_envir(.py_envir_result, check_env)
+  new_objs <- pygradethis::get_envir_diff(.py_envir_prep, .py_envir_result)
+  reticulate::py_to_r(new_objs)
+}
+
 # Solution objects ----
 
 #' Function for checking if an object was created by solution code

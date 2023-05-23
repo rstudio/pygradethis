@@ -155,6 +155,7 @@ py_gradethis_exercise_checker <- function(
     )
   ))
   # keep around raw Python environment and result in case we need them
+  py_envir_prep <- get0(".__py__", envir = envir_prep, ifnotfound = NULL)
   py_envir_result <- get0(".__py__", envir = envir_result, ifnotfound = NULL)
   py_result <- last_value
   # convert the result and Python environment to R
@@ -170,6 +171,7 @@ py_gradethis_exercise_checker <- function(
     evaluate_result = evaluate_result,
     envir_prep = envir_prep,
     last_value = last_value,
+    py_envir_prep = py_envir_prep,
     py_result = py_result,
     py_envir_result = py_envir_result,
     ...

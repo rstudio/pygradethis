@@ -2,12 +2,14 @@
 % Please edit documentation in R/py_user_object_get.R
 \name{py_resolve_envir}
 \alias{py_resolve_envir}
-\title{Retrieves a Python envir from checking envir such as
-`.py_envir_result` or `.py_envir_solution`}
+\title{Retrieves an envir from checking envir such as
+`.py_envir_result` or `.py_envir_solution`, or one of gradethis
+objects like `.solution`}
 \usage{
 py_resolve_envir(py_envir, check_env)
 }
 \description{
-Retrieves a Python envir from checking envir such as
-`.py_envir_result` or `.py_envir_solution`
+Retrieves an envir from checking envir such as
+`.py_envir_result` or `.py_envir_solution`, or one of gradethis
+objects like `.solution`
 }

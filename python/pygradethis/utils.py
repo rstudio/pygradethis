@@ -78,3 +78,23 @@ def get_last_value(script: str, envir: dict) -> Tuple:
         last_value = NONE
     
     return envir, last_value
+
+def get_envir_diff(x: dict, y: dict) -> list[str]:
+  """Find the difference of variables created in prepped versus student environment
+
+  This is used to find new variables introduced in `.py_envir_result`
+  excluding the `.py_envir_prep` setup environment
+
+  Parameters
+  ----------
+  x : dict
+      the `.py_envir_prep` module
+  y : dict
+      the `.py_envir_result` module
+
+  Returns
+  -------
+  list[str]
+      a list of the variable names created in result environment
+  """
+  return list(set(y.keys()) - set(x.keys()))
