@@ -52,7 +52,12 @@ py_user_object_list <- function(check_env = parent.frame()) {
   .py_envir_prep <- py_resolve_envir(.py_envir_prep, check_env)
   .py_envir_result <- py_resolve_envir(.py_envir_result, check_env)
   new_objs <- pygradethis::get_envir_diff(.py_envir_prep, .py_envir_result)
-  reticulate::py_to_r(new_objs)
+  res <- reticulate::py_to_r(new_objs)
+  # order of variable names are not guaranteed so we sort it for convenience
+  if (length(res)) {
+    return(sort(res))
+  }
+  res
 }
 
 # Solution objects ----

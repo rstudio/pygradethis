@@ -2,7 +2,7 @@
 Module with useful functions.
 """
 
-from typing import Union, List, Tuple
+from typing import Tuple
 import ast
 
 class NotSet:
