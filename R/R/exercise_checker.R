@@ -148,14 +148,29 @@ py_gradethis_exercise_checker <- function(
         # keep around raw Python solution object and envir in case it's needed
         assign(".py_solution", py_solution, envir = envir)
         assign(".py_envir_solution", py_envir_solution, envir = envir)
-        
+
         # but return the converted solution object
         pygradethis::py_to_r(py_solution)
       }
     )
   ))
+
   # keep around raw Python environment and result in case we need them
+
+  # learnr utilities for Python exercises
+  py_utils <- learnr:::py_learnr_utilities()
+
+  # copy the Python envir before student code is evaluated
   py_envir_prep <- get0(".__py__", envir = envir_prep, ifnotfound = NULL)
+  # NOTE: we have to deep copy py_envir_prep because `.__py__` is a pointer object and will
+  # be overwritten when we later evaluate the solution envir which is not evaluated until
+  # checking code needs access to solution environment / objects
+  if (!is.null(py_envir_prep)) {
+    py_envir_prep <- reticulate::py_call(py_utils$deep_copy, py_envir_prep)
+  }
+
+  # there is no need to deep copy the `py_envir_result` because there is no delayed
+  # assignment for running the user code in an exercise
   py_envir_result <- get0(".__py__", envir = envir_result, ifnotfound = NULL)
   py_result <- last_value
   # convert the result and Python environment to R
