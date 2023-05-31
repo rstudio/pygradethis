@@ -31,7 +31,7 @@ get_last_value <- inform_python_pygradethis_not_found
 
 #' Find the difference of variables created in prepped versus student environment
 #' 
-#' This is used to find new variables introduced in `.py_envir_result`
+#' This is used to find new variables introduced in `.py_envir_result` or `.py_envir_solution`
 #' excluding the `.py_envir_prep` setup environment
 #'
 #' @return the list of key strings
