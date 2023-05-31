@@ -9,3 +9,5 @@ from pygradethis import pygradethis_exercise_checker
 from pygradethis import python_grader
 from pygradethis import result_checker
 from pygradethis import utils
+
+__version__ = "0.4.0"

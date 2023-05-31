@@ -1,3 +1,9 @@
+# pygradethis 0.4.0
+
+* Added helper functions to check existence of or retrieve user objects (`py_user_object_list()`, `py_user_object_exists()`, `py_user_object_get()`)
+  or solution objects (`py_solution_object_list()`, `py_solution_object_exists()`, `py_solution_object_get()`)
+* A new `.py_envir_prep` object that is the Python environment before any student code is run
+
 # pygradethis 0.3.0
 
 * Added code checking support via `pygradecode` Python package through find functions and friends
