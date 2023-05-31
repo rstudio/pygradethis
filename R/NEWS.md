@@ -3,6 +3,8 @@
 * Added helper functions to check existence of or retrieve user objects (`py_user_object_list()`, `py_user_object_exists()`, `py_user_object_get()`)
   or solution objects (`py_solution_object_list()`, `py_solution_object_exists()`, `py_solution_object_get()`)
 * A new `.py_envir_prep` object that is the Python environment before any student code is run
+* A `get_envir_diff()` wrapper around Python function of same name that looks at the difference of variables
+  between two dictionaries (Python environments)
 
 # pygradethis 0.3.0
 
