@@ -604,15 +604,15 @@ py_check_dataframe <- function(
   })
 
   if (is_py_object(object)) {
-    object <- pygradethis::py_to_r(object)
+    converted_object <- pygradethis::py_to_r(object)
   }
   if (is_py_object(expected)) {
-    expected <- pygradethis::py_to_r(expected)
+    converted_expected <- pygradethis::py_to_r(expected)
   }
 
   # if result and solution are already converted use tblcheck
-  if (!is_py_object(object) && !is_py_object(expected)) {
-    return(tblcheck::tbl_check(object, expected, env = env))
+  if (!is_py_object(converted_object) && !is_py_object(converted_expected)) {
+    return(tblcheck::tbl_check(converted_object, converted_expected, env = env))
   }
 
   return_if_problem(py_check_index(object, expected))

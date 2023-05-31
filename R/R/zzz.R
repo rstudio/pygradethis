@@ -29,6 +29,16 @@ pygradethis_exercise_checker <- inform_python_pygradethis_not_found
 #' @keywords internal
 get_last_value <- inform_python_pygradethis_not_found
 
+#' Find the difference of variables created in prepped versus student environment
+#' 
+#' This is used to find new variables introduced in `.py_envir_result` or `.py_envir_solution`
+#' excluding the `.py_envir_prep` setup environment
+#'
+#' @return the list of key strings
+#' @export
+#' @keywords internal
+get_envir_diff <- inform_python_pygradethis_not_found
+
 # pygradecode ----
 
 #' The `pygradecode` module that contains code checking functions.
@@ -84,6 +94,7 @@ find_arguments_mod <- inform_python_pygradethis_not_found
       # pygradethis ----
       pygradethis_exercise_checker <<- pygradethis$pygradethis_exercise_checker$pygradethis_exercise_checker
       get_last_value <<- pygradethis$utils$get_last_value
+      get_envir_diff <<- pygradethis$utils$get_envir_diff
 
       # pygradecode ----
       find_functions_mod <<- pygradecode$find_functions
