@@ -6,14 +6,14 @@
 
 A Python package to facilitate checking code output or static code checking
 using AST analysis. It can either be used with R using the [`learnr`](https://rstudio.github.io/learnr/) package, as 
-a mirror of [`gradethis`](https://rstudio-education.github.io/gradethis/index.html) package, or as a standalone package for general Python 
+a mirror of [`gradethis`](https://rstudio-education.github.io/gradethis/index.html) package.
 use in educational settings.
 
 **NOTE: This package is in early development and does not work yet!** Things may change drastically without warning during this early phase.
 
 ## Install pygradethis
 
-The `pygradethis` package is composed of both Python and R packages. An R wrapper packages is required so we can use `pygradethis` with `learnr`. To install the package you will need to install both.
+The `pygradethis` package is composed of both Python and R packages of the same name. An R wrapper package is required so that we can use `pygradethis` with `learnr`, while the Python package is used to perform pure Python operations for checking objects and the code. To install the package you will need to install both.
 
 Go to the respective `./python` and `./R` directory, and install it with:
 
@@ -63,9 +63,9 @@ For result checking, there are several helper functions to grade objects from `p
 
 ### Other Python objects
 
-For any other checks, you have access to a few solution environment objects available to make this possible. The `.result`, `.solution` objects are converted Python objects in R (if possible), and the `.py_result`, `.py_solution` objects are the pure Python objects. 
+For checking other general Python objects, you have access to a couple solution environment objects to reference inside `grade_this()`, similar to the`gradethis` package documented [here](https://pkgs.rstudio.com/gradethis/reference/index.html#exercise-checking-functions). The `.result` and `.solution` objects are converted Python objects in R (if conversion is supported/possible). However, there are `.py_result` and `.py_solution` objects which are pure Python objects.
 
-This allows authors to use R code to check the `.result` and `.solution` objects using functions like `gradethis::pass_if_equal()`. 
+This allows authors to use R code to check the `.result` and `.solution` objects using functions like `gradethis::pass_if_equal()` or even `identical()`
 
 For grading general Python objects, you can directly
 do checks with the pure Python objects `.py_result` / `.py_solution` using `reticulate`. For example, you can check if the student and solution objects are equal:
@@ -85,8 +85,8 @@ gradethis::grade_this({
 
 For most exercises, you will be grading the last expression, but there might be situations where you don't want students to return an object and instead grade an object stored in a variable. In this situation you can make use of two helper functions:
 
-- `py_user_object_get("<variable>")` - Retrieve student object by name
-- `py_user_object_get("<variable>")` - Retrieve solution object by name
+- `py_user_object_get("<variable_name>")` - Retrieve student object by name
+- `py_user_object_get("<variable_name>")` - Retrieve solution object by name
 
 Then, you can proceed to grade them using `reticulate`.
 
@@ -94,8 +94,8 @@ Then, you can proceed to grade them using `reticulate`.
 
 The static code checking is still early development, but there are two main helper functions exposed by the R package that can help cover most of the cases:
 
-- `py_find_functions()` - Check if the code contains functions or certain functions
-- `py_find_arguments()` - Check if the code contains certain function arguments
+- `py_find_functions()` - Check if the code contains function calls
+- `py_find_arguments()` - Check if the code contains function arguments
 
 Each one of these can return all function calls or all arguments in the code, but also provide a `match` argument to target specfic ones. For example, here's how you can check the student code contains a `.pivot()` call, and fail if not found:
 
