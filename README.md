@@ -5,9 +5,8 @@
 [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-blue.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 
 A Python package to facilitate checking code output or static code checking
-using AST analysis. It can either be used with R using the [`learnr`](https://rstudio.github.io/learnr/) package, as 
+using AST analysis. It can be used with R using the [`learnr`](https://rstudio.github.io/learnr/) package, as 
 a mirror of [`gradethis`](https://rstudio-education.github.io/gradethis/index.html) package.
-use in educational settings.
 
 **NOTE: This package is in early development and does not work yet!** Things may change drastically without warning during this early phase.
 
@@ -63,7 +62,7 @@ For result checking, there are several helper functions to grade objects from `p
 
 ### Other Python objects
 
-For checking other general Python objects, you have access to a couple solution environment objects to reference inside `grade_this()`, similar to the`gradethis` package documented [here](https://pkgs.rstudio.com/gradethis/reference/index.html#exercise-checking-functions). The `.result` and `.solution` objects are converted Python objects in R (if conversion is supported/possible). However, there are `.py_result` and `.py_solution` objects which are pure Python objects.
+For checking other general Python objects, you have access to a couple solution environment objects to reference inside `grade_this()`, similar to the `gradethis` package documented [here](https://pkgs.rstudio.com/gradethis/reference/index.html#exercise-checking-functions). The `.result` and `.solution` objects are converted Python objects in R (if conversion is supported/possible). However, there are `.py_result` and `.py_solution` objects which are pure Python objects.
 
 This allows authors to use R code to check the `.result` and `.solution` objects using functions like `gradethis::pass_if_equal()` or even `identical()`
 
@@ -88,7 +87,7 @@ For most exercises, you will be grading the last expression, but there might be 
 - `py_user_object_get("<variable_name>")` - Retrieve student object by name
 - `py_user_object_get("<variable_name>")` - Retrieve solution object by name
 
-Then, you can proceed to grade them using `reticulate`.
+Then, you can proceed to grade them using `reticulate` or attempt to convert them using `reticulate::py_to_r()` and grade using R functions.
 
 ## Code checking
 
