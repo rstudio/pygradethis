@@ -4,150 +4,108 @@
 [![PyPI - License](https://img.shields.io/pypi/l/pygradethis)](LICENSE)
 [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-blue.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 
-
 A Python package to facilitate checking code output or static code checking
-using AST analysis. It can either be used with R using the [`learnr`](https://rstudio.github.io/learnr/) package, as 
-a mirror of [`gradethis`](https://rstudio-education.github.io/gradethis/index.html) package, or as a standalone package for general Python 
-use in educational settings.
+using AST analysis. It can be used with R using the [`learnr`](https://rstudio.github.io/learnr/) package, as 
+a mirror of [`gradethis`](https://rstudio-education.github.io/gradethis/index.html) package.
 
 **NOTE: This package is in early development and does not work yet!** Things may change drastically without warning during this early phase.
 
 ## Install pygradethis
 
+The `pygradethis` package is composed of both Python and R packages of the same name. An R wrapper package is required so that we can use `pygradethis` with `learnr`, while the Python package is used to perform pure Python operations for checking objects and the code. To install the package you will need to install both.
+
+Go to the respective `./python` and `./R` directory, and install it with:
+
 ```
-pip install pygradethis
+make install
 ```
 
 ## Install Dev Dependencies
 
+To install Python development packages:
+
 ```
-pip install -e .[dev]
+make install-dev
 ```
 
 ## Features
 
-- Simple output checking based on pass / fail conditions with feedback
-- Simple static code checking (AST), with feedback on how student's code differs from solution
+- Output checking common objects like DataFrames, Series, and more.
+- Code checking (AST) for checking particular aspects like function calls.
 
-## Output checks
+## How it works
 
-`pygradethis` mimics the cadence to `gradethis::grade_result`. For e.g., we can
-check that the student supplies the `mpg` dataset like so:
+Currently, `pygradethis` provides a custom `exercise.checker` function called [`py_gradethis_exercise_checker`](https://github.com/rstudio/pygradethis/blob/6a3ffb7b114c810398597655eba1027337920788/R/R/exercise_checker.R#L115) to be used in `learnr` tutorials. It wraps the [`gradethis::gradethis_exercise_checker()`](https://pkgs.rstudio.com/gradethis/reference/gradethis_exercise_checker.html), which enables authors to use the same interface as `gradethis::grade_this()` to grade Python exercises inside of a `-check` chunk. Example:
 
-```python
-grade_result(
-  pass_if_equals(mpg, "You also got the mpg dataframe!"),
-  fail_if_equals(None, "")
-)
+```r
+gradethis::grade_this({
+  # code checking
+  py_find_functions(match = "pivot") %>%
+    py_fail_if_not_found(message = "Did you remember to call the `.pivot` function?")
+
+  # result checking
+  py_grade_dataframe()
+
+  pass()
+})
 ```
 
-Internally, these `pass_if_equals(output, message)` or `fail_if_equals(output, message)` will be checked sequentially in
-the order of arguments and return on first condition we match. The `None` here can be used
-if you simply want to execute a condition if none of the other conditions matched.
+## Result checking
 
-If we match a `pass_if_equals` or `fail_if_equals`, we will present a feedback message wrapped in a convenient `dict`:
+### Pandas specific objects
 
-```python
-dict(
-    message = str,
-    correct = True|False,
-    type = "auto|success|info|warning|error|custom",
-    location = "append|prepend|replace"
-)
+For result checking, there are several helper functions to grade objects from `pandas`:
+
+- `py_grade_dataframe()` - Check if the student's DataFrame object matches the solutions
+- `py_grade_series()` - Check if the student's Series object matches the solutions
+- `py_grade_index()` - Check if the student's Index object matches the solutions
+
+### Other Python objects
+
+For checking other general Python objects, you have access to a couple solution environment objects to reference inside `grade_this()`, similar to the `gradethis` package documented [here](https://pkgs.rstudio.com/gradethis/reference/index.html#exercise-checking-functions). The `.result` and `.solution` objects are converted Python objects in R (if conversion is supported/possible). However, there are `.py_result` and `.py_solution` objects which are pure Python objects.
+
+This allows authors to use R code to check the `.result` and `.solution` objects using functions like `gradethis::pass_if_equal()` or even `identical()`
+
+For grading general Python objects, you can directly
+do checks with the pure Python objects `.py_result` / `.py_solution` using `reticulate`. For example, you can check if the student and solution objects are equal:
+
+```r
+gradethis::grade_this({
+  # result checking
+  if (!reticulate::py_to_r(.py_solution$equals(.py_result))) {
+    fail()
+  }
+
+  pass()
+})
 ```
 
-The `message` is the feedback, the `correct` is whether or not the student's solution is correct, `type` is the type of feedback. When 
-used with `learnr` the `location` field here is useful for where the message is situated in the tutorial. However, for those using 
-this package as a standalone the `location` is not an important field and it can be ignored. More on the flags [here](https://rstudio.github.io/learnr/exercises.html#Exercise_Checking).
+### Checking assigned objects
 
-Internally, a random praise/encouragement message will be appended before any custom message supplied. 
+For most exercises, you will be grading the last expression, but there might be situations where you don't want students to return an object and instead grade an object stored in a variable. In this situation you can make use of two helper functions:
 
-```python
-pass_if_equals(x = mpg, message = "You also got the mpg dataframe!")
-```
-Feedback:
-> Bravo! You also got the mpg dataframe!
+- `py_user_object_get("<variable_name>")` - Retrieve student object by name
+- `py_user_object_get("<variable_name>")` - Retrieve solution object by name
 
-```python
-fail_if_equals(x = None, message = "")
-```
-Feedback:
-> Try it again. You get better each time.
+Then, you can proceed to grade them using `reticulate` or attempt to convert them using `reticulate::py_to_r()` and grade using R functions.
 
-## Code checks
+## Code checking
 
-For static code checking, we follow a similar cadence for `gradethis::grade_code`. 
+The static code checking is still early development, but there are two main helper functions exposed by the R package that can help cover most of the cases:
 
-When there is a solution code being supplied, `grade_code(user_code, solution_code)` can be used to check the AST of
-the user and solution code, making sure to standardize function calls and producing a helpful message for the student
-to diagnose their issue.
+- `py_find_functions()` - Check if the code contains function calls
+- `py_find_arguments()` - Check if the code contains function arguments
 
-Example:
+Each one of these can return all function calls or all arguments in the code, but also provide a `match` argument to target specfic ones. For example, here's how you can check the student code contains a `.pivot()` call, and fail if not found:
 
-```python
-grade_code(
-  student_code="2 + sqrt(log(2))", 
-  solution_code="2 + sqrt(log(1))"
-)
-
-```
-Feedback:
-> I expected `log(1)`, but what you wrote was interpreted as `log(2)` in `sqrt(log(2))` at line 1.
-
-Note how the feedback narrows in on the expression in which the problem occurs (`sqrt(log(2))`)
-so that the student can focus on the most relevant outer expression of the problem. In this case, the 
-`log(2)` is the problem and the `2` on the left operand of 
-the addition is not as relevant.
-
-Similarly, here the feedback points out that the 2 within the `log` function is incorrect, similar to the 
-`gradethis` [example](https://rstudio-education.github.io/gradethis/reference/grade_code.html).
-
-### Call Standardization
-`pygradethis` also knows how to take user's function call code and map positional arguments 
-to proper parameter names and set defaults if not supplied. This is so that you don't penalize
-a student's code just because they did not explicitly spell out positional argument names, or
-write the default arguments out.
-
-For e.g. suppose a student is calling the following silly function `foo`:
-
-```python
-def foo(a, b=1): 
-  pass
+```r
+py_find_functions(match = "pivot") %>%
+  py_fail_if_not_found()
 ```
 
-Grading the code with
+You can also target a specific argument with `py_find_arguments` using a `match` argument and a helper function called `py_args()` that accepts a variable number of arguments (`...`), that are either just a `"value"` or a `param="value"`, where the value has to be a Python code string:
 
-```python
-grade_code(
-  student_code="foo(1)", 
-  solution_code="foo(1)"
-)
+```r
+py_find_arguments(match = py_args("4", x = "2", y = "'Hello, World!'")) %>%
+  py_fail_if_not_found()
 ```
-
-In the example above, the `grade_code` doesn't give us a feedback message since they are equivalent expressions.
-
-However, if the student supplies `foo(2)`
-
-```python
-grade_code(
-  student_code="foo(2)", 
-  solution_code="foo(1)"
-)
-```
-
-we get back this feedback:
-> I expected `1`, but what you wrote was interpreted as `2` in `foo(2)` at line 1.
-
-**Note:** Although underneath the hood we do standardize the arguments of both the student and the solution code
-before checking, we don't surface this standardized form to the feedback message. This is certainly possible to
-achieve but in certain cases can hinder learning by revealing too much information. For example, the builtin functions
-like `sum` is normally called without specifying its actual formal parameters (e.g. `sum(1)` versus `sum(iterable=[1], start=0)`. In the future, a `verbose` mode could be made available such that the formal parameters are pointed out.
-
-For call standardizing to work, the function definitions corresponding to function 
-calls must be defined  and 'live' in the environment, whether that is the `globals()`/`locals()`,
-`builtins`, or custom module imports `pandas`. This works if the student/solution source code also 
-includes the definition (like `foo` above) in their own source code or it's included by instructor. 
-
-Currently, common modules like `math` is imported for grading within `check_functions.py`, but more modules 
-will be included to serve data science grading as well, such as `pandas` or `numpy` in the future. 
-We plan to make the code more extensible for the instructor to add them as dependencies.
